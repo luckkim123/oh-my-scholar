@@ -1,0 +1,31 @@
+{
+  "name": "oh-my-scholar",
+  "description": "Multi-agent orchestration harness specialized for academic paper work (LaTeX .tex + .bib, concept notes .md) — treats paper writing like code: spec→outline→draft→inspect→verify→revise with citation-integrity guardrails",
+  "author": { "name": "kimseungmin" },
+  "license": "MIT",
+  "keywords": ["claude-code", "plugin", "paper", "latex", "bibtex", "research", "orchestration", "multi-agent", "citation"],
+  "skills": [
+    "./skills/scholar-research/",
+    "./skills/scholar-ideate/",
+    "./skills/scholar-outline/",
+    "./skills/scholar-draft/",
+    "./skills/scholar-inspect/",
+    "./skills/scholar-verify/",
+    "./skills/scholar-revise/",
+    "./skills/scholar-pilot/"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scholar_verify_emit.py"]
+          }
+        ]
+      }
+    ]
+  }
+}
