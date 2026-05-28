@@ -60,4 +60,4 @@ oms는 **도메인 처리기**(논문 도메인)다. 작업방식 레인(SP/OMC)
 
 ## Status
 
-초판 구현 중. translate / standardize는 v2 후보.
+v0.1.0 — 8 skill + 5 agent + 4 card + citation-safe hook 구현·검증 완료. 구조·hook은 pytest/grep로 검증됨. **runtime end-to-end는 새 세션 로드 후 실측 필요** (compact는 plugin reload 안 함). translate / standardize는 v2 후보. 자세한 내역은 [CHANGELOG](CHANGELOG.md).
