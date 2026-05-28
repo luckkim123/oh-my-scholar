@@ -2,6 +2,19 @@
 
 All notable changes to oh-my-scholar (oms).
 
+## [0.1.1] — 2026-05-28
+
+### Added
+- **STAGE 라우팅 hook** (`scholar_route_emit.py`, UserPromptSubmit): omha가 레인을 잡아준 뒤, 논문 도메인 안에서 매 턴 `STAGE(paper) → <research|…|scholar-pilot> · 근거` 한 줄로 단계를 선언한다. omha의 `ROUTE →`, omd의 `STAGE(docs) →`와 톤 통일(이모지 없이 텍스트 레이블). plugin.json에 UserPromptSubmit 등록.
+- 라우팅 hook 테스트 7건 (`test_scholar_route_emit.py`): contract 명시·8단계 열거·citation 안전 문구·레이블 충돌 없음·stdlib only·fail-open.
+
+### Changed
+- README 라우팅 섹션: "oms는 라우팅 hook을 두지 않는다" → STAGE hook을 둔다로 정정 (레인은 여전히 omha 담당, oms는 STAGE만).
+
+### Verification
+- `pytest tests/` — 14 passed (verify 7 + route 7).
+- **runtime end-to-end 검증 완료**: scholar-verify를 실제 .tex/.bib(결함 5개 심음)에 돌려 5개 전부 적발, citation 자동수정 안 함(사람 확인 목록), inspect/verify 경계 준수 확인. (v0.1.0의 "runtime 미검증" 백로그 해소.)
+
 ## [0.1.0] — 2026-05-28
 
 초판. 논문 작성을 "코드 작성처럼" 다루는 Claude Code plugin 하네스.

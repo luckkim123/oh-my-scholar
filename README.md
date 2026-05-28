@@ -56,7 +56,7 @@
 
 ## 라우팅
 
-oms는 **도메인 처리기**(논문 도메인)다. 작업방식 레인(SP/OMC) 판정은 [`oh-my-heroacademia`](https://github.com/)(omha)가 담당하므로 oms는 UserPromptSubmit 라우팅 hook을 두지 않는다. oms의 hook은 PostToolUse citation 검증 리마인더뿐 (자동 수정 안 함).
+oms는 **도메인 처리기**(논문 도메인)다. 작업방식 레인(SP/OMC) 판정은 [`oh-my-heroacademia`](https://github.com/)(omha)가 담당한다 — oms는 레인을 정하지 않는다. 대신 omha가 레인을 잡아준 뒤, oms의 UserPromptSubmit hook(`scholar_route_emit.py`)이 논문 도메인 안에서 어느 **STAGE**(research/draft/verify…)인지를 매 턴 `STAGE(paper) → …` 한 줄로 선언한다. PostToolUse hook(`scholar_verify_emit.py`)은 .tex/.bib 편집 후 citation 검증 리마인더를 주입한다 (자동 수정 안 함).
 
 ## Status
 
