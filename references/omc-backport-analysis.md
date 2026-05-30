@@ -31,11 +31,15 @@ OMC plugin 은 **이중 구조**다: `skill-bodies/<name>/SKILL.md` 가 전체 �
 
 ---
 
-## §2. 버전 고정 + diff 기준
+## §2. 분석 기준 버전 + diff 기준
 
-- **고정 버전 = OMC 4.14.4.** 확인: 설치 plugin 의 `package.json`,
-  `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` 세 곳 모두 `"version": "4.14.4"`.
-  개별 파일 버전은 없으므로 **버전 고정 단위 = 플러그인 전체 1개**다.
+- **분석 기준 snapshot = OMC 4.14.4.** 이 문서가 backport 원천을 읽을 때 본 OMC 버전이다
+  (당시 plugin 의 `package.json`·`.claude-plugin/plugin.json`·`.claude-plugin/marketplace.json`
+  세 곳 모두 `"version": "4.14.4"`). **이것은 *분석 시점의 스냅샷*이지 런타임 핀이 아니다** —
+  `~/.claude/settings.json` 의 omc marketplace 선언(`repo: Yeachan-Heo/oh-my-claudecode`)에는
+  버전·commit-SHA 가 없어 **OMC 는 항상 marketplace 최신을 자동 추종**한다. oms/omd 어디에도
+  OMC 를 특정 버전으로 묶는 핀은 없다. 따라서 OMC 업그레이드에 별도 작업이 필요 없고,
+  아래 diff 기준은 *backport 채택/제외 결정이 여전히 유효한지* 재검토하기 위한 것일 뿐이다.
 - **diff 기준**: OMC 는 CHANGELOG 가 없다(GitHub commit/release 만). 다음 OMC 업데이트 시,
   위 §1 원천 파일들(`skill-bodies/{deep-interview,plan,ralplan,autopilot,ralph}/SKILL.md`,
   `agents/{analyst,architect,planner,critic}.md`)의 diff 를 직접 보고 oms 갱신 여부를 판단한다.
@@ -81,4 +85,4 @@ OMC plugin 은 **이중 구조**다: `skill-bodies/<name>/SKILL.md` 가 전체 �
 
 ---
 
-**Pinned**: OMC 4.14.4 · **isomorphic sibling**: oh-my-docs `references/omc-backport-analysis.md`(문서 도메인)
+**Analysis snapshot**: OMC 4.14.4 (런타임 핀 아님 — marketplace 최신 자동 추종, §2) · **isomorphic sibling**: oh-my-docs `references/omc-backport-analysis.md`(문서 도메인)
