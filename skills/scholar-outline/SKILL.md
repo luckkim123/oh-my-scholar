@@ -52,7 +52,7 @@ research·ideate 단계의 산출물(연구맵, 개념노트 .md)을 받아 논�
 1. 입력 확인: researcher 연구맵(gap 진술·인용 목록)과 ideate 개념노트(.md) 경로 확인. 없으면 stop → 선행 skill 안내. **모드 판정**: 호출 플래그(`--direct`/`--consensus`/`--review`) 확인. 미지정이면 `--direct`, 단 Deliberate 트리거 해당 시 consensus 1회 제안(`<Modes>`).
 
 ### `--direct` 경로 (기본)
-2. 작성 대상 venue 확인: `references/venues.md`에서 sections·page_limit·required_sections를 확인. venue 미지정이면 사람에게 확인.
+2. 작성 대상 venue 확인: `references/venues.md`에서 sections·page_limit·required_sections를 확인. venue 미지정이면 사람에게 확인. **워드 venue(.docx/.hwpx — 예: 학위논문)** 면 GATE 1 통과 후 scholar-draft(.tex) 대신 **OMD `docs-build`로 핸드오프** (outline + 개념노트 .md 를 OMD 에 넘김). 양식 카드(예: postech-thesis-format.md)는 호출자가 OMD 에 함께 전달.
 3. `Task(subagent_type="oh-my-scholar:scholar-planner", ...)` 단일 위임:
    - 입력: 연구맵, 개념노트 경로, venue 카드(`references/venues.md`) 참조 지시
    - 지시: 섹션 트리(목적·핵심 메시지·word budget·의존 인용 key) + story arc 필요성 사슬 + word budget 합계 page_limit×500 이내 + 인용은 researcher 검증 목록에서만 + 누락 인용은 "researcher 재확인 필요" 표시
