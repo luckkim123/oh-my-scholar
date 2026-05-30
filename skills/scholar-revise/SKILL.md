@@ -32,6 +32,8 @@ description: |
 - **같은 결함 3회 반복 → 멈추고 "fundamental issue" 보고** (무한 루프 차단).
 - 최대 반복(venue max_review_rounds, 기본 5) 초과 시 멈추고 현황 보고.
 - ⚠️ fixable_by_llm=false(실험·그림 누락·기여 범위·미검증 인용)는 루프에 안 넣음 → 사람에게.
+- ⚠️ **PASS 직후 구조-regression 전수 재verify**: 한 회차가 전부 passes:true가 되면, 곧장 종료하지 말고 *이번 수정이 다른 섹션의 전역 정합을 깼는지* 한 번 더 전수 검증한다 — `\ref`↔`\label`·`\cite`↔.bib·본문↔표/그림 수치가 *수정한 섹션 밖에서* 깨졌는지. 한 곳을 고치면 다른 \ref 번호·인용 정합·수치 합이 어긋날 수 있다(국소 수정의 전역 부작용). 깨진 게 있으면 그 항목을 새 결함으로 루프에 되넣는다.
+  - ==기존 score-regression과 별개 축(혼동 방지)==: 아래 Steps 3c의 `score-regression(품질 점수 하락 > venue regression_threshold)`은 **품질 점수 하락** 축(루프를 *멈추는* 가드)이다. 이 신설 조항은 **구조 정합 regression**(참조·인용·수치 전역 정합 깨짐) 축으로 *다른 종류* — 점수가 아니라 기계적 정합이고, 멈추는 게 아니라 깨진 항목을 루프로 되돌린다. 두 축은 독립적으로 검사한다.
 </Execution_Policy>
 
 <Steps>
@@ -40,11 +42,11 @@ description: |
 3. **루프** (각 회차):
    a. 수정: `Task(subagent_type="oh-my-scholar:scholar-drafter", ...)` — fixable=true 항목만, 단일 신중, 큰 수정 전 스냅샷.
    b. 재검증: `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` — fresh 증거 전수.
-   c. 전부 passes:true → 종료. 아니면 같은 결함 반복 여부:
+   c. 전부 passes:true → **구조-regression 전수 재verify**(\ref/\cite/수치 전역 정합이 수정 섹션 밖에서 깨졌는지). 깨진 항목 있으면 새 결함으로 (a)에 되넣음, 없으면 종료. 아니면 같은 결함 반복 여부:
       - 같은 결함 3회째 → 멈추고 "fundamental issue" 보고.
-      - regression(점수 하락 > venue regression_threshold) → 멈추고 보고.
+      - score-regression(품질 점수 하락 > venue regression_threshold) → 멈추고 보고. (구조-regression과 별개 축)
       - 아니면 (a)로.
-4. PASS 또는 stop 조건에서 종료. GATE 2(리뷰 결과 확인 — human) 제시.
+4. PASS(+구조-regression 통과) 또는 stop 조건에서 종료. GATE 2(리뷰 결과 확인 — human) 제시.
 </Steps>
 
 <Output>

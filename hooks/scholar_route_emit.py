@@ -25,13 +25,14 @@ import sys
 CHECKPOINT = (
     "<oms-routing>\n"
     "논문 작업 요청(.tex/.bib 작성·검토·검증, 관련연구 조사, 개념 정리)이면, 행동 전에 한 줄로 판정하라:\n"
-    "- 단계(.md 레이어): research(관련연구·gap) / ideate(개념 .md) / outline(섹션·story arc)\n"
+    "- 단계(.md 레이어): research(관련연구·gap) / deepen(주장 모호성 게이트, 정성) / "
+    "ideate(개념 .md) / outline(섹션·story arc)\n"
     "- 단계(.tex 레이어): draft(초안 생성) / inspect(형성적 비평) / verify(총괄 게이트) / "
     "revise(통과까지 루프), 또는 scholar-pilot(통째).\n"
     "단일 단계면 그 스킬 직접, 브리프→완성이면 scholar-pilot.\n"
     "⚠️ citation 안전: 생성(draft)은 단일·신중, 인용 날조·자동 .bib 수정 금지.\n\n"
     "논문 작업이면, 판정을 응답 맨 앞 omha ROUTE 줄 바로 다음에 이 한 줄로 출력하라(누락 금지):\n"
-    "STAGE(paper) → <research|ideate|outline|draft|inspect|verify|revise|scholar-pilot> · <한 줄 근거>\n"
+    "STAGE(paper) → <research|deepen|ideate|outline|draft|inspect|verify|revise|scholar-pilot> · <한 줄 근거>\n"
     "논문 작업이 아니면 이 블록 전체 무시(STAGE 줄도 출력하지 말 것).\n"
     "</oms-routing>"
 )

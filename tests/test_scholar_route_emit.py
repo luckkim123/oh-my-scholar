@@ -43,9 +43,12 @@ def test_context_states_stage_emit_contract():
 
 
 def test_context_lists_all_stages():
-    """③ 8개 단계가 contract 에 모두 열거돼야 (skill 과 정합)."""
+    """③ 9개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
+
+    deepen 은 scholar-deepen 스킬(research↔ideate 사이 모호성 게이트)이
+    실재하므로 STAGE 카탈로그에 포함돼야 한다 (T14 에서 추가)."""
     out = context_of(run_hook({"prompt": "논문 작업"}))
-    for stage in ("research", "ideate", "outline", "draft",
+    for stage in ("research", "deepen", "ideate", "outline", "draft",
                   "inspect", "verify", "revise", "scholar-pilot"):
         assert stage in out, f"stage '{stage}' missing from contract"
 

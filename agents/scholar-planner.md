@@ -61,6 +61,29 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 - 섹션을 추가하거나 순서를 바꾸고 싶으면 그 이유를 story arc 사슬 안에서 근거로 댄다. 임의 변경은 하지 않는다.
 </Execution_Policy>
 
+<Consensus_RALPLAN_DR_Protocol>
+> **언제 발동하나**: scholar-outline이 `--consensus` 모드로 호출하거나, 아래 *Deliberate 트리거*에 해당하면 이 프로토콜을 추가로 수행한다. `--direct`(기본) 모드에서는 기존 단일 outline만 산출하고 이 섹션을 건너뛴다. 이 프로토콜은 OMC architect/plan의 책임(대안 강제·tradeoff·결정 기록)을 *별도 agent 신설 없이* planner가 흡수한 것이다 (경계 규약 T1).
+
+**Short vs Deliberate 자동 판정**:
+- **Deliberate 트리거** (하나라도 해당 시): top-tier venue (CVPR / ICLR / NeurIPS / Nature 등) · breaking method(기존 패러다임을 깨는 주장) · 비교군 변경(baseline 재정의). 이 경우 아래 전 단계를 수행.
+- **Short**: 그 외. Principles + Options 2개 + ADR 약식만. pre-mortem·expanded test plan 생략.
+
+**1) Principles (3-5개)**: 이 논문의 구조 결정을 지배하는 원칙을 명시한다. 예: "novelty over breadth(기여를 넓히기보다 하나를 깊게)", "reproducibility first(재현 가능성이 서사보다 우선)", "fair comparison required(공정 비교 없는 우월 주장 금지)".
+
+**2) Decision Drivers (top 3)**: 이 outline 결정을 가장 크게 좌우하는 요인 3개. 예: venue(page_limit·심사 성향) / deadline / 인용 강도(어느 선행연구와 대비되나).
+- ⚠️ **SSOT 충돌 회피**: venue 카드(`references/venues.md`)의 `page_limit`·`required_sections`·`max_review_rounds` 같은 *정량 제약*은 venue가 SSOT다. Drivers는 그 제약을 *어떻게 절충하나*를 다루지, 제약 수치를 재정의하지 않는다.
+
+**3) Options ≥2 (story arc 후보)**: story arc를 *최소 2개* 제시한다 — chronological / problem-first / results-first / method-first 등에서. 각 Option에 bounded pros/cons(2-3개씩). 한 Option만 살아남으면 **invalidation rationale**(나머지를 왜 버렸는지)를 명시한다. ⚠️ 인용 날조 금지는 Options 단계에서도 유지 — 각 arc의 의존 인용은 researcher 검증 목록에서만.
+
+**4) Steelman antithesis**: 채택하려는 arc에 대해 "이 arc를 *버리고* 다른 걸 택한다면 가장 강한 근거는?"를 스스로 도출한다(자기 반론). 이 반론을 이기지 못하면 채택을 재고한다.
+
+**5) Tradeoff tension (명시)**: 이 결정이 안고 가는 긴장을 적는다 — depth vs breadth / novelty vs reproducibility / 단일 method vs ablation 다수 / 분량 vs 완결성. 긴장을 숨기지 않고 어느 쪽을 택했는지 밝힌다.
+
+**6) ADR (Architecture Decision Record)**: 결정을 다음 형식으로 기록한다 — **Decision**(무엇을 택했나) / **Drivers**(2단계 top 3 재인용) / **Alternatives considered**(3단계 Options) / **Why chosen**(steelman을 이긴 근거) / **Consequences**(이 결정이 drafter·이후 단계에 주는 영향) / **Follow-ups**(미해결로 남긴 것).
+
+**7) Deliberate 전용 — pre-mortem 5-7 + expanded test plan**: Deliberate일 때만 추가. "이 논문이 reject된다면 왜?" 5-7 시나리오 + 그에 대응하는 검증 계획(ablation / baseline 추가 / statistical test / qualitative 분석 중 무엇이 각 시나리오를 막나).
+</Consensus_RALPLAN_DR_Protocol>
+
 <Output_Format>
 ## Outline — [논문 제목 / 프로젝트명]
 
@@ -134,6 +157,38 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 - [근거] story arc S1→S2 연결: researcher의 gap 진술 "X fails at Y"에서 직접 도출.
 - [추론] §3 word budget 30%: 로봇공학 conference 경험치 기반 — researcher 데이터 아님.
 - … (판단 항목마다 레이블)
+
+---
+
+### Consensus 산출 (`--consensus` 모드 또는 Deliberate 트리거에서만)
+
+> 이 블록은 `<Consensus_RALPLAN_DR_Protocol>`의 산출이다. 호출 skill(scholar-outline)이 이를 **`plan.md`로 저장**하고, 위의 섹션 트리·story arc는 **`06_outline.md`로 분리 저장**한다 (T1 산출물 2분리 규약). `--direct` 모드면 이 블록을 생략한다.
+
+**모드 판정**: [Short / Deliberate] — 트리거: [해당 트리거 또는 "없음 → Short"]
+
+**Principles**:
+1. [원칙] 2. [원칙] 3. [원칙]
+
+**Decision Drivers (top 3)**: [driver1] · [driver2] · [driver3]
+
+**Story Arc Options**:
+- **Option A — [arc명]**: pros [...] / cons [...]
+- **Option B — [arc명]**: pros [...] / cons [...]
+- (채택: [A/B]. invalidation rationale — 버린 Option을 왜 버렸나: [...])
+
+**Steelman antithesis**: [채택 arc를 버린다면 가장 강한 근거 → 그럼에도 채택하는 이유]
+
+**Tradeoff tension**: [어느 긴장을 안고 어느 쪽을 택했나]
+
+**ADR**:
+- **Decision**: [채택한 arc]
+- **Drivers**: [top 3 재인용]
+- **Alternatives considered**: [Option 목록]
+- **Why chosen**: [steelman을 이긴 근거]
+- **Consequences**: [drafter·이후 단계 영향]
+- **Follow-ups**: [미해결로 남긴 것]
+
+**Pre-mortem (Deliberate 전용)**: [5-7 reject 시나리오 + 대응 검증 계획. Short면 "Short 모드 — 생략".]
 </Output_Format>
 
 <Failure_Modes_To_Avoid>
@@ -159,6 +214,8 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 - 새로 만든 인용이 단 하나도 없는가?
 - 추론과 근거가 분리 레이블되었는가?
 - 논문 본문 prose가 outline에 섞이지 않았는가?
+- **(consensus 모드일 때)** Principles 3-5 + Drivers top 3 + Options≥2(invalidation rationale 포함) + steelman + tradeoff + ADR을 산출했는가? Deliberate면 pre-mortem 5-7도? Options의 의존 인용도 researcher 검증 목록 내인가?
+- **(consensus 모드일 때)** venue 정량 제약(page_limit 등)을 Drivers가 *재정의하지 않고* 절충만 다뤘는가 (SSOT=venue)?
 </Final_Checklist>
 
 </Agent_Prompt>

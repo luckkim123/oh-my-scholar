@@ -2,6 +2,22 @@
 
 All notable changes to oh-my-scholar (oms).
 
+## [Unreleased]
+
+### Changed
+- **라우팅 hook 계약 확장** (`hooks/scholar_route_emit.py`, UserPromptSubmit): STAGE 카탈로그에
+  `deepen` 토큰 추가 — `scholar-deepen` 스킬(research↔ideate 사이 주장 모호성 게이트)이 신설돼
+  단계 목록과 `STAGE(paper) →` 라인 양쪽에 반영
+  (`research|deepen|ideate|outline|draft|inspect|verify|revise|scholar-pilot`). stdlib only·
+  fail-open 패턴 유지. (omd `route_emit.py`의 `revise` 토큰 추가와 대칭 — hook 은 계약이라 양쪽
+  변경을 명문 기록.)
+- 라우팅 hook 테스트(`tests/test_scholar_route_emit.py`): 단계 열거 검증을 8→9개로 갱신
+  (`deepen` 포함). 기존 7건 + verify 7건 = 14 passed 유지.
+
+### Verification
+- `pytest tests/` — 14 passed (route 7 + verify 7), `deepen` 토큰 추가 후에도 전부 통과.
+- 두 hook 실행 시 valid JSON emit (`deepen` 포함 확인).
+
 ## [0.1.1] — 2026-05-28
 
 ### Added
