@@ -49,16 +49,22 @@ draft/revise된 .tex/.bib를 기계적 pass/fail 게이트로 검사한다. scho
      - **용어 일관**: 같은 개념 동일 용어, 약어 첫 등장 정의
      - **placeholder**: TODO/FIXME/XX 잔존 0
      - **인용 정합**: `\cite` ↔ .bib 항목 존재 (DOI 실재는 사람 확인 목록)
+     - **venue 메타 정합 (읽기전용)**: specificity↔origin↔learned_refs 무결성 (불일치=WARN, 수선 안 함)
 3. verifier 산출 수령 — 항목별 PASS/FAIL 취합.
 4. FAIL 항목 있으면 fixable_by_llm 분류:
    - fixable_by_llm=true → scholar-revise에 전달 가능
    - fixable_by_llm=false → 사람 확인 필요 목록
 5. 미검증 인용(DOI 실재·저자명 정확도 등) → 자동수정 없이 사람 확인 목록으로만 반환.
-6. 최종 판정 출력 (PASS: 전 항목 통과 / FAIL: 실패 항목 수).
+6. **venue 메타 정합 (읽기전용, H10)** — venue 카드/yaml 에 self-specialization 메타가 있으면 무결성만 확인:
+   - `specificity` ∈ [0,1] 이고 `(origin∈{inductive,learned} 항목 수)/(활성 기본값 수)` 와 일치하는가
+   - `learned` origin 항목마다 `learned_refs` provenance 가 있는가 (§6.C silent 변경 금지)
+   - 불일치 시 **경고(WARN)만** — FAIL 아님. ⚠️ verify 는 메타를 **읽기만**, 절대 수선하지 않는다
+     (메타 수선은 `scholar-learn` 사람 게이트 몫). 자동수정 금지 원칙과 동일.
+7. 최종 판정 출력 (PASS: 전 항목 통과 / FAIL: 실패 항목 수. 메타 WARN 은 FAIL 에 안 들어감).
 </Steps>
 
 <Output>
-- 항목별 결과표 (컴파일·수치·참조·용어·placeholder·인용 각 PASS/FAIL + 증거)
+- 항목별 결과표 (컴파일·수치·참조·용어·placeholder·인용 각 PASS/FAIL + 증거, venue 메타 PASS/WARN)
 - FAIL 항목 상세: 증거(로그 라인·grep 결과·파일:줄) + fixable_by_llm 분류
 - 인용 미검증 목록 (자동수정 없음 — 사람 확인 전용)
 - 최종 판정: **PASS** (전 항목 통과) 또는 **FAIL** (N개 항목 실패)

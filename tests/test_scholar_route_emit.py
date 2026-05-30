@@ -43,14 +43,32 @@ def test_context_states_stage_emit_contract():
 
 
 def test_context_lists_all_stages():
-    """③ 9개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
+    """③ 10개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
 
     deepen 은 scholar-deepen 스킬(research↔ideate 사이 모호성 게이트)이
-    실재하므로 STAGE 카탈로그에 포함돼야 한다 (T14 에서 추가)."""
+    실재하므로 STAGE 카탈로그에 포함돼야 한다 (T14 에서 추가).
+    learn 은 scholar-learn 스킬(관찰→venue 기본값 승격, 사람 게이트)이
+    실재하므로 메타 단계로 포함돼야 한다 (H9 에서 추가)."""
     out = context_of(run_hook({"prompt": "논문 작업"}))
     for stage in ("research", "deepen", "ideate", "outline", "draft",
-                  "inspect", "verify", "revise", "scholar-pilot"):
+                  "inspect", "verify", "revise", "learn", "scholar-pilot"):
         assert stage in out, f"stage '{stage}' missing from contract"
+
+
+def test_learn_stage_in_routing_token_line():
+    """③-b learn 메타 단계가 STAGE 토큰 줄에 명시돼야 (H9)."""
+    out = context_of(run_hook({"prompt": "이 관찰 규칙으로 굳혀줘"}))
+    assert "learn" in out
+    # learn 은 메타 단계 — 자동 발동 아님(사람 게이트)이 명시돼야
+    assert "사람 게이트" in out
+
+
+def test_learn_routing_keeps_citation_guard():
+    """③-c learn 추가가 citation 안전 가드를 깨지 않아야 (H9·§6.F)."""
+    out = context_of(run_hook({"prompt": "promote observation"}))
+    # citation/.bib 는 learn 승격 대상이 아님이 라우팅에 박혀야
+    assert "citation" in out
+    assert "영구 금지" in out or "승격 대상 아님" in out
 
 
 def test_context_states_citation_safety():
