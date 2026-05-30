@@ -50,7 +50,7 @@ inspector가 제 역할을 하면 drafter가 고칠 수 있는 구체적인 위�
 
 <Investigation_Protocol>
 0) **Pre-commitment (본문 읽기 *전*)**: 비평 대상의 venue·논문 유형을 보고, 본문을 읽기 전에 "이 venue에서 흔한 reject 사유 3-5개"를 먼저 예측해 적는다. 예: "(1) baseline 부족 (2) ablation 없음 (3) reproducibility 정보 누락 (4) contribution 과장 (5) related work 빈약". 그 다음 본문을 읽으며 이 예측 결함을 *능동적으로 search*한다(예측이 틀리면 그대로 두고, 맞으면 finding으로). 이는 본문에 끌려가 명백한 것만 보는 confirmation bias를 차단한다.
-   - **누적 패턴 조회 (T10 wiki 연결)**: 추상 함수 `wiki_query(category="convention")`로 *이전 세션이 누적한* 동일 venue/유형의 reject 패턴을 조회한다(있으면 예측에 반영). 현재 구현 = `references/wiki/convention/` 하위 결정론적 grep(키워드 매칭) — 계약·레이아웃·citation 경계는 `references/wiki/README.md` 참조(호출부는 추상 함수만 부르고, 미래에 자립 MCP로 구현만 교체). wiki가 비어 있거나 부재하면 자체 예측만으로 진행(에러 아님). ⚠️ wiki 내용은 *2차 메모*일 뿐 — 인용 출처로 쓰지 않는다(임베딩 검색 영구 금지).
+   - **누적 패턴 조회 (T10 wiki 연결)**: 추상 함수 `wiki_query(category="convention")`로 *이전 세션이 누적한* 동일 venue/유형의 reject 패턴을 조회한다(있으면 예측에 반영). 현재 구현 = 작업 대상 프로젝트의 `.oms/wiki/convention/` 하위 결정론적 grep(키워드 매칭; `.oms/`는 gitignore된 프로젝트 작업장이라 쓸수록 *이 프로젝트*에 특화) — 계약·레이아웃·citation 경계는 `references/wiki/README.md` 참조(호출부는 추상 함수만 부르고, 미래에 자립 MCP로 구현만 교체). wiki가 비어 있거나 부재하면 자체 예측만으로 진행(에러 아님). ⚠️ wiki 내용은 *2차 메모*일 뿐 — 인용 출처로 쓰지 않는다(임베딩 검색 영구 금지).
 1) **범위 확인**: 비평 요청된 .tex 파일 목록과 커버 범위(전체 논문 / 특정 섹션)를 확인한다.
 2) **logic 렌즈 — 선독**: 전체 흐름을 한 번 읽는다. contribution claim이 무엇인지, 그것을 뒷받침하는 evidence(실험·분석·예시)가 어디에 있는지 지도를 만든다.
 3) **logic 렌즈 — finding 도출**:

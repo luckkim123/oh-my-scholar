@@ -54,7 +54,12 @@ research question부터 제출 준비까지 논문 전 단계를 조율한다. O
 8. **revise**: scholar-revise → verify PASS까지 루프 (필요 시)
    ━━━ **GATE 3**: 제출 확인 (human) — confirm/revise/abort ━━━
 9. 제출 준비물 정리 (PDF·소스·체크리스트).
-10. **terminal cleanup** (GATE 3 confirm 후, 또는 사용자가 "정리해줘"/"작업 끝" 명시 시):
+10. **wiki capture (자동 특화 — 쓸수록 이 프로젝트에 맞춰짐)**: inspect/verify가 이번 세션에 *발견한* 재사용 가능한 패턴을 **작업 대상 프로젝트의 `.oms/wiki/<category>/*.md`**(plugin이 아니라 프로젝트 작업장; `.oms/`는 gitignore)에 **자동 append**한다 (승인 불필요 — 가벼운 채널). 이것이 다음 세션 inspector의 pre-commitment `wiki_query(category)`가 읽는 데이터 — 쓰기와 읽기가 닫혀 하네스를 쓸수록 이 venue/이 논문 프로젝트에 특화된다. (작업장이라 plugin 배포물·다른 프로젝트를 오염시키지 않고, marketplace update에도 안 날아간다.)
+    - **무엇을 적재**: ① venue별 반복 reject 패턴 → `convention/<venue>-reject-patterns.md` ② 이번에 택한 baseline·비교군·구조의 근거 → `decision/<slug>.md` ③ 발견한 외부 자원 포인터 → `reference/*.md`. inspector/verifier가 실제로 본 것만 — 추측 적재 금지.
+    - **append 형식**: 기존 .md 끝에 한 줄(또는 짧은 항목) 추가. 같은 패턴이 이미 있으면 중복 안 적음(grep 선확인). 새 category 파일은 자유 형식 .md(머신 스키마 없음).
+    - ⚠️ **citation-safe (필수 — 위반 시 OMS 정체성 붕괴)**: wiki는 **2차 메모**만. 인용·주장·수치 *내용*은 절대 적재 안 함(예측을 돕는 reject 사유·양식 규칙만). .bib는 scholar-research 검증 1차 출처로만 갱신 — wiki 발췌를 인용으로 끌어오지 않는다. 적재·조회 모두 **결정론적 텍스트만, 임베딩 금지**. 계약·경계는 `references/wiki/README.md` 참조.
+    - **자동이되 비파괴**: append-only(기존 줄 안 지움), 부재 디렉토리는 생성, 적재할 게 없으면 그냥 통과(빈 세션 OK). 사용자가 `--no-wiki`면 skip.
+11. **terminal cleanup** (GATE 3 confirm 후, 또는 사용자가 "정리해줘"/"작업 끝" 명시 시):
     - `.oms/<slug>/`의 정리 대상 **집계**(크기·개수): `renders/`·`gen-image/`·`tmp/` 전부 + `versions/`의 최신 1개·사용자 지정 이정표를 **제외한** 구버전. 이정표 선택을 위해 versions 목록을 사용자에게 보여준다.
     - **AskUserQuestion [정리 / 유지]** — 자동 삭제 절대 없음, 기본값 보수적(유지).
     - "정리" 선택 시 → **복구 가능 경로로 삭제**(영구 `rm` 금지): macOS `trash`(없으면 `~/.Trash`) / Linux `gio trash`·`trash-cli` / Windows PowerShell 휴지통 이동(`Shell.Application` ParseName+InvokeVerb('delete'), 영구 `Remove-Item` 금지 — documented, unverified) / 휴지통 없는 환경(CI·컨테이너)은 "영구 삭제" 사용자 재확인 후에만.
