@@ -101,6 +101,9 @@ outputs/<slug>/
   tmp/
     *.aux *.log *.out *.blg …         # LaTeX compile intermediates — disposable anytime
   compile-notes.md                    # (optional) compile notes — for Claude's analysis
+
+.oms/wiki/                            # project-wide accrual — NOT per-job (sibling of <slug>/, carries across sessions)
+  convention/  decision/  reference/  # auto-appended reject patterns / decisions (see references/wiki/README.md)
 ```
 
 ### 2.1 Invariance rules

@@ -64,7 +64,7 @@ OMC plugin 은 **이중 구조**다: `skill-bodies/<name>/SKILL.md` 가 전체 �
 | T7 | shared_memory 핸드오프 | consensus stage 간 전달 = `<slug>/consensus/*.md` 파일이 **기본**, MCP 는 선택 미러(부재 시 .md degrade) |
 | T8 | deep-interview 게이트 | `skills/scholar-deepen/SKILL.md` **신설**(유일한 net-new) — Round 0 topology + 4차원 **정성** 판정(수치화 0) + challenge 3종 + soft limits + 사람 승인 + citation-fragile flag |
 | T8b | autopilot wiring | `skills/scholar-pilot/SKILL.md` `<Steps>` 에 deepen 단계 + outline --consensus 분기 삽입 — 엔진이 autopilot 경로에서 실제 발동(죽은 코드 방지) |
-| T10 | wiki 누적 | `references/wiki/*.md` + 결정론적 grep 이 **기본**, `wiki_query(category)` 는 추상 함수(미래 MCP 교체점). reject store 는 net-new(venues.md 마이그레이션 아님) |
+| T10 | wiki 누적 | 데이터는 프로젝트 작업장 `.oms/wiki/*.md`(gitignore, OMC `.omc/wiki/` 패턴) + 결정론적 grep 이 **기본**, `wiki_query(category)` 는 추상 함수(미래 MCP 교체점). 계약 문서만 plugin `references/wiki/README.md`. reject store 는 net-new(venues.md 마이그레이션 아님) |
 | T11 | notepad 압축생존 | scholar-pilot 진입 시 `.oms/notepad.md` `## Priority Context` 섹션에 citation 3원칙 + GATE 기록(.md 기본) |
 | T12 | verifier request-id | `agents/scholar-verifier.md` 에 스냅샷 상관 토큰(.tex/.bib mtime·해시 + 결함ID) — multi-round revise 의 stale-PASS 재사용 차단 |
 | T13 | ralph regression 사상 | `skills/scholar-revise/SKILL.md` 에 PASS후 **구조-regression**(\ref/\cite/수치 전역 정합) 전수 재verify — 기존 score-regression(점수)과 별개 축 |
