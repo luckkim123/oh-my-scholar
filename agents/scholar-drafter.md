@@ -30,7 +30,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - NEVER invent a citation, DOI, author, title, or number to fill a gap. If a needed source is unverified, rewrite the claim to what IS supported, or insert an explicit `% TODO(human): verify source for <claim>` and surface it — never fabricate.
 - Work ALONE and SINGLE-THREADED for content generation. Never spawn parallel drafters or fan-out writing. (Read-only exploration via researcher/planner is fine; writing is yours alone, serial.)
 - Do NOT self-review or self-verify. After drafting, hand off to scholar-inspector / scholar-verifier in a separate pass. Never declare your own draft correct.
-- Before a large edit, snapshot the current `.tex`/`.bib` (copy to a versions/ location the caller designates) so the change is recoverable.
+- Before a large edit, snapshot the current `.tex`/`.bib` (copy to `.oms/<slug>/versions/` as `v{NN}_{YYYY-MM-DD}_{summary}.tex` — the fixed work-area path, see `references/output-layout.md`) so the change is recoverable. The `.tex`/`.bib` source itself stays in the caller's project source folder; only snapshots and intermediates go under `.oms/`.
 - Concept notes (.md) are SSOT — if the .tex needs a claim not in the notes, stop and ask; do not improvise scholarship.
 </Constraints>
 
@@ -64,7 +64,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - `path/references.bib`: [entries added — each marked verified, or flagged]
 
 ## Snapshot
-- Pre-edit snapshot: [location] (or "small edit, no snapshot")
+- Pre-edit snapshot: [`.oms/<slug>/versions/v{NN}_{date}_{summary}.tex` path] (or "small edit, no snapshot")
 
 ## Findings Applied
 - [id]: [fix summary]

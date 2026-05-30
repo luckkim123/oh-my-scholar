@@ -29,7 +29,7 @@ description: |
 - ⚠️ **생성은 단일 신중, 절대 병렬 금지** — 여러 섹션도 drafter 하나가 직렬로. 병렬 drafter dispatch 금지 (citation hallucination 증폭).
 - ⚠️ **인용 날조 금지** — 새 \cite는 검증된 .bib 항목에만. 미검증이면 주장 재작성 또는 사람에게 flag, 절대 지어내지 않음.
 - ⚠️ **.md SSOT 우선** — .tex가 노트에 없는 주장을 필요로 하면 멈추고 ideate/research로.
-- 큰 수정 전 버전 스냅샷.
+- 큰 수정 전 버전 스냅샷 — `.oms/<slug>/versions/`에 `v{NN}_{date}_{summary}.tex`로 (작업장 고정 경로, `references/output-layout.md` SSOT). .tex/.bib 소스 원본은 프로젝트 소스 폴더에 유지, 스냅샷만 `.oms/`로.
 - drafter는 self-approve 금지 — draft 후 scholar-inspect/verify 별도 pass로.
 </Execution_Policy>
 
@@ -38,11 +38,11 @@ description: |
 2. 작성 범위(섹션) 확정.
 3. `Task(subagent_type="oh-my-scholar:scholar-drafter", ...)` 단일 위임:
    - 입력: outline, 개념노트 경로, 범위 섹션, 기존 .tex/.bib, latex.md 카드(스타일)
-   - 지시: 한 섹션씩 직렬, 모든 \cite는 검증된 .bib에만, 미검증 인용은 flag, 큰 수정 전 스냅샷.
+   - 지시: 한 섹션씩 직렬, 모든 \cite는 검증된 .bib에만, 미검증 인용은 flag, 큰 수정 전 `.oms/<slug>/versions/`에 스냅샷.
 4. drafter 산출 받음 — 작성 파일 + 사람 확인 필요 목록(미검증 인용·fixable_by_llm=false).
 5. **검증은 별도** — scholar-verify/inspect로 넘김 (여기서 self-approve 안 함).
 </Steps>
 
 <Output>
-drafter가 쓴 .tex/.bib 파일 목록 + 스냅샷 위치 + 사람 확인 필요 목록(미검증 인용 등) + "scholar-verify로 넘길 준비됨" (self-approve 안 함 명시).
+drafter가 쓴 .tex/.bib 파일 목록(프로젝트 소스 폴더) + 스냅샷 위치(`.oms/<slug>/versions/`) + 사람 확인 필요 목록(미검증 인용 등) + "scholar-verify로 넘길 준비됨" (self-approve 안 함 명시).
 </Output>

@@ -23,7 +23,7 @@
 - **그림·표 번호 ↔ 본문 참조**: `\ref{fig:x}`/`\ref{tab:y}`가 실제 `\label`과 매칭되는가. dangling ref = fail.
 - **용어·약어 일관성**: 같은 개념을 다른 용어로 부르지 않는가. 첫 등장 시 약어 정의됐는가.
 
-## 3. 스타일 규칙 (drafter가 따름 — vault rules-paper-format 흡수)
+## 3. 스타일 규칙 (drafter가 따름 — house paper-format 규약)
 
 - **수식 내 텍스트는 영어만**: `\text{Uncertainty Cancellation}` ✓ / `\text{불확실성 상쇄}` ✗
 - **수식 번호는 `\tag{}`** 사용 (제목/섹션에 번호 박지 말 것)
