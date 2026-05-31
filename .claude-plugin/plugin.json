@@ -5,13 +5,16 @@
   "license": "MIT",
   "keywords": ["claude-code", "plugin", "paper", "latex", "bibtex", "research", "orchestration", "multi-agent", "citation"],
   "skills": [
+    "./skills/scholar-init/",
     "./skills/scholar-research/",
+    "./skills/scholar-deepen/",
     "./skills/scholar-ideate/",
     "./skills/scholar-outline/",
     "./skills/scholar-draft/",
     "./skills/scholar-inspect/",
     "./skills/scholar-verify/",
     "./skills/scholar-revise/",
+    "./skills/scholar-learn/",
     "./skills/scholar-pilot/"
   ],
   "hooks": {

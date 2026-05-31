@@ -140,6 +140,35 @@ running skill — capture it the same turn, before moving on:
 4. **Do it without being asked.** Writing the note is part of honoring the correction. Paper
    knowledge goes to *this harness's* `.oms/`, never to a distributed/user-scope config.
 
+### 1.4 Two wiki levels — local (this paper) vs global (parent `.oms/`)
+
+The light channel `wiki/` exists at **two levels**, both `.oms/`-relative (no absolute path,
+no env var, no XDG — preserves "never to a distributed/user-scope config" above):
+
+- **Local** = `<cwd>/.oms/wiki/` — knowledge specific to *this paper* (its reject patterns,
+  its decisions). Stays with the paper.
+- **Global** = the nearest **ancestor `.oms/wiki/`** found by ascent (cwd → parent, first
+  `.oms/` excluding self; git's `.git`-lookup pattern) — assets this *user* reuses across
+  **every** paper. Discovered, not configured: when the user runs from a papers-parent folder
+  (e.g. their workspace), that folder's `.oms/` is the global level.
+
+**What may rise to global** (the only things that leak upward — this is how the anti-pattern is
+honored, not violated): reusable assets only —
+
+| category | global-eligible | why |
+|:---|:---:|:---|
+| `pattern/` (성향: 표현·구조·작업방식·선호) | ✅ light-only, never enforced | identity, doesn't change per paper |
+| `convention/` (venue 양식·섹션 구조) | ✅ via human gate (§6.B) | reused per venue |
+| `decision/` (재사용 결정: "always ablation first") | ✅ | meta-decisions across papers |
+| `history/` (내 논문 history) | ✅ (global-only category) | init uses it to relate/dedup new papers |
+| this paper's topic/gap | ❌ stays local | paper-specific, not reusable |
+| **citation / `.bib`** | ❌ **permanently forbidden** | hallucination risk — §6.F invariant, never promoted to global |
+
+The global level is *the parent folder's `.oms/`* (still work-root-relative), **not** a
+distributed config — and only reusable assets cross up. Paper-specific knowledge and citations
+stay local/forbidden. `wiki_query` merges both levels (`references/wiki/README.md`), tagging
+`[wiki:local]`/`[wiki:global]`; the call site never changes.
+
 ---
 
 ## 2. The `learned.md` observation format (heavy-channel staging)

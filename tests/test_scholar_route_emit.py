@@ -43,16 +43,31 @@ def test_context_states_stage_emit_contract():
 
 
 def test_context_lists_all_stages():
-    """③ 10개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
+    """③ 11개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
 
     deepen 은 scholar-deepen 스킬(research↔ideate 사이 모호성 게이트)이
     실재하므로 STAGE 카탈로그에 포함돼야 한다 (T14 에서 추가).
     learn 은 scholar-learn 스킬(관찰→venue 기본값 승격, 사람 게이트)이
-    실재하므로 메타 단계로 포함돼야 한다 (H9 에서 추가)."""
+    실재하므로 메타 단계로 포함돼야 한다 (H9 에서 추가).
+    init 은 scholar-init 스킬(0단계 부트스트랩 — 새 논문 시작)이 실재하므로
+    포함돼야 한다 (scholar-init 도입에서 추가)."""
     out = context_of(run_hook({"prompt": "논문 작업"}))
-    for stage in ("research", "deepen", "ideate", "outline", "draft",
+    for stage in ("init", "research", "deepen", "ideate", "outline", "draft",
                   "inspect", "verify", "revise", "learn", "scholar-pilot"):
         assert stage in out, f"stage '{stage}' missing from contract"
+
+
+def test_init_stage_is_bootstrap_zero():
+    """③-d init 0단계가 STAGE 토큰 줄과 안내문에 명시돼야 (scholar-init).
+
+    새 논문 시작 = 부트스트랩이라는 의미와, 이미 .oms/<slug>/ 가 있으면
+    init 이 아니라는 멱등성 단서가 라우팅에 박혀야 한다."""
+    out = context_of(run_hook({"prompt": "새 논문 쓸래 폴더 만들어줘"}))
+    assert "init" in out
+    assert "부트스트랩" in out          # 0단계 의미
+    assert ".oms/" in out               # 전역/로컬 .oms 언급
+    # 이미 초기화된 폴더면 init 아님 (멱등성 단서)
+    assert "있으면 init 아님" in out
 
 
 def test_learn_stage_in_routing_token_line():

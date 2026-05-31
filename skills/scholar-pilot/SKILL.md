@@ -38,6 +38,7 @@ research question부터 제출 준비까지 논문 전 단계를 조율한다. O
 </Execution_Policy>
 
 <Steps>
+0. **init 흡수 (부트스트랩 — `.oms/<slug>/` 부재 시)**: 논문 폴더에 `.oms/<slug>/`·`meta.md`가 없으면, research로 곧장 들어가지 말고 먼저 `scholar-init`을 **권유**한다 — "이 논문 폴더가 아직 셋업 안 됐어요. 폴더 위치·venue·주제를 잡고 디렉토리를 만들까요?(scholar-init)". 사용자가 OK하면 init이 scaffold + `.oms/`를 만들고(상위 `.oms/` 전역 씨앗 참조), 종료 후 pilot이 1단계 research로 이어간다. 이미 `.oms/<slug>/`가 있으면 이 단계 skip(재init 안 함 — 멱등). ⚠️ 자동 진입이 아니라 권유 — 사용자 모르게 폴더를 만들지 않는다.
 1. **research**: scholar-research → 연구맵·gap·검증된 인용 (.md)
 2. **deepen**: scholar-deepen → 주장 모호성 게이트 (정성). research 다음, ideate 앞.
    - fresh subagent dispatch (컨트롤러 컨텍스트 오염 방지).
@@ -57,6 +58,7 @@ research question부터 제출 준비까지 논문 전 단계를 조율한다. O
 10. **wiki capture (자동 특화 — 쓸수록 이 프로젝트에 맞춰짐)**: inspect/verify가 이번 세션에 *발견한* 재사용 가능한 패턴을 **작업 대상 프로젝트의 `.oms/wiki/<category>/*.md`**(plugin이 아니라 프로젝트 작업장; `.oms/`는 gitignore)에 **자동 append**한다 (승인 불필요 — 가벼운 채널). 이것이 다음 세션 inspector의 pre-commitment `wiki_query(category)`가 읽는 데이터 — 쓰기와 읽기가 닫혀 하네스를 쓸수록 이 venue/이 논문 프로젝트에 특화된다. (작업장이라 plugin 배포물·다른 프로젝트를 오염시키지 않고, marketplace update에도 안 날아간다.)
     - **무엇을 적재**: ① venue별 반복 reject 패턴 → `convention/<venue>-reject-patterns.md` ② 이번에 택한 baseline·비교군·구조의 근거 → `decision/<slug>.md` ③ 발견한 외부 자원 포인터 → `reference/*.md`. inspector/verifier가 실제로 본 것만 — 추측 적재 금지.
     - **append 형식**: 기존 .md 끝에 한 줄(또는 짧은 항목) 추가. 같은 패턴이 이미 있으면 중복 안 적음(grep 선확인). 새 category 파일은 자유 형식 .md(머신 스키마 없음).
+    - **전역 승급 후보 hint (terminal에서만)**: 파이프라인 종료 시, 이번에 로컬 `.oms/wiki/`에 쌓인 것 중 *다음 논문에도 재사용각*인 자산(성향·venue 양식·재사용 결정·history)이 보이면 "이건 상위 `.oms/`(전역)로 올려둘까요?"를 사용자에게 권유 — 실제 승급은 `scholar-learn`의 로컬→전역 경로(사람 게이트). ⚠️ citation/.bib는 전역 승급 영구 금지. 자동 승급 없음.
     - ⚠️ **citation-safe (필수 — 위반 시 OMS 정체성 붕괴)**: wiki는 **2차 메모**만. 인용·주장·수치 *내용*은 절대 적재 안 함(예측을 돕는 reject 사유·양식 규칙만). .bib는 scholar-research 검증 1차 출처로만 갱신 — wiki 발췌를 인용으로 끌어오지 않는다. 적재·조회 모두 **결정론적 텍스트만, 임베딩 금지**. 계약·경계는 `references/wiki/README.md` 참조.
     - **자동이되 비파괴**: append-only(기존 줄 안 지움), 부재 디렉토리는 생성, 적재할 게 없으면 그냥 통과(빈 세션 OK). 사용자가 `--no-wiki`면 skip.
 11. **terminal cleanup** (GATE 3 confirm 후, 또는 사용자가 "정리해줘"/"작업 끝" 명시 시):

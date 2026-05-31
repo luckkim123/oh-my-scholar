@@ -12,23 +12,33 @@
 
 ## 디렉토리 레이아웃
 
-⚠️ **데이터는 작업장(`.oms/wiki/`)에 쌓인다 — 이 plugin repo가 아니다.** 이 README는 *계약 문서*라 plugin(`references/wiki/README.md`)에 배포되지만, 실제 누적 데이터는 **작업 대상 프로젝트 루트의 `.oms/wiki/`**에 쓰인다(`.oms/`는 gitignore — plugin/배포물을 더럽히지 않고, 프로젝트별로 발산해 "이 프로젝트에 특화"가 성립). OMC의 `.omc/wiki/`(project-local) 패턴과 동일.
+⚠️ **데이터는 작업장(`.oms/wiki/`)에 쌓인다 — 이 plugin repo가 아니다.** 이 README는 *계약 문서*라 plugin(`references/wiki/README.md`)에 배포되지만, 실제 누적 데이터는 **`.oms/wiki/`**에 쓰인다(`.oms/`는 gitignore — plugin/배포물을 더럽히지 않고 발산해 "이 사용자/이 논문에 특화"가 성립). OMC의 `.omc/wiki/`(project-local) 패턴과 동일.
+
+### ⭐ 2계층 — 로컬(이 논문) + 전역(상위 폴더 `.oms/`, ascent로 발견)
+
+`.oms/wiki/`는 **두 레벨**로 산다. 둘 다 cwd 상대 — **절대경로·환경변수·XDG 0개**(oms 철학 "work-root 상대" 그대로, 배포물 오염 없음):
 
 ```
-<프로젝트 루트>/.oms/wiki/          ← 작업장, gitignore, 프로젝트별 발산 (slug 밖 — 세션 넘어 누적)
-  convention/   *.md   ← venue별 reject 사유·양식 규칙 (inspector가 조회) — ⭐ heavy 승격 후보의 원천
-  pattern/      *.md   ← ⭐신설: 사용자가 *어떻게 일하나* (성향) — light 전용, 승격 안 함
-    work-profile.md      ← 주로 하는 작업·만지는 venue 종류 ("당신은 주로 IROS·디펜스 deck")
-    working-style.md     ← 작업 방식 (반례부터·결론 먼저 검토)
-    preferences.md       ← 성격·톤 선호 (장황함 싫어함·직설 선호)
-  decision/     *.md   ← 과거 결정 기록 (왜 이 baseline·이 비교군을 택했나·뭐가 잘 먹혔나)
-  reference/    *.md   ← 외부 자원 포인터 (venue CFP·평가 rubric 링크)
+<논문들의 부모 폴더>/.oms/wiki/      ← ⭐ 전역 레벨 — 이 *사용자*가 모든 논문에서 재사용
+  convention/   *.md   ← venue별 양식·섹션 구조 (재사용)
+  pattern/      *.md   ← 성향 (즐겨쓰는 표현·구조·작업방식·선호) — light 전용
+  decision/     *.md   ← 재사용 결정 (늘 ablation 먼저 등)
+  reference/    *.md   ← 자주 쓰는 자원 포인터
+  history/      *.md   ← ⭐신설: 내 논문 history (init이 중복·연결 참고)
+        ▲  발견 방법 = ascent (cwd→부모로, 가장 가까운 상위 .oms/ 하나, 자기 제외; git의 .git 찾기)
+        │
+<논문 폴더>/.oms/wiki/                ← 로컬 레벨 — 이 논문에만 특화 (slug 밖, 세션 넘어 누적)
+  convention/   *.md   ← 이 논문 reject 사유·양식 규칙 (inspector가 조회) — ⭐ heavy 승격 후보의 원천
+  pattern/      *.md   ← (대개 비어 있음 — 성향은 전역에 모임)
+  decision/     *.md   ← 이 논문 결정 (왜 이 baseline)
+  reference/    *.md   ← 이 논문 자원 포인터
 ```
 
 - 파일 1개 = 한 주제 (예: `convention/neurips-reject-patterns.md`).
 - 각 파일은 사람이 읽는 자유 형식 .md. 머신 파싱 스키마 없음(grep만 함).
-- `category`는 위 **4개** 하위 디렉토리 이름과 1:1.
+- `category`는 위 하위 디렉토리 이름과 1:1 (로컬 4개 + 전역은 `history/` 포함 5개).
 - ⚠️ `.oms/wiki/`는 *프로젝트 전체* 누적이라 작업별 `.oms/<slug>/`(output-layout) **밖**이다 — slug에 묶이지 않고 세션·작업을 넘어 산다.
+- ⚠️ **전역에 올라가는 건 "논문 무관 재사용 자산"만**(성향·venue 양식·history·재사용 결정). 논문 고유 지식은 그 논문 로컬에 남고, **citation/.bib는 전역 승격 영구 금지**(환각 위험). 이래서 oms의 "user-scope 금지" 안티패턴과 화해된다 — 전역은 *상위 폴더의 `.oms/`*(여전히 work-root 상대)이지 distributed config가 아니고, 새는 건 재사용 자산뿐이다.
 
 ### ⭐ `convention/` vs `pattern/` — heavy 승격 후보는 convention 에서만 (2026-05-31 H6 backport)
 
@@ -66,9 +76,16 @@ sightings: 3
 wiki_query(category) → 매칭된 .md 발췌 목록 (없으면 빈 목록)
 ```
 
-- **현재 구현**: 작업 대상 프로젝트의 `.oms/wiki/<category>/` 하위에서 **결정론적 grep**(키워드 매칭, CJK bi-gram 포함). 호출자(inspector·planner)가 venue·논문 유형·사용자 성향 키워드로 grep해 관련 발췌를 끌어온다. category 는 4개(`convention`·`pattern`·`decision`·`reference`) 중 하나. (디렉토리 부재면 빈 목록 — 신규 프로젝트는 빈 store에서 시작.)
-- **호출부와 구현부 경계 (미래 교체점)**: inspector는 `wiki_query`라는 *추상 함수*를 호출할 뿐, 그 구현이 grep인지 자립 MCP인지 모른다. 나중에 자립 wiki MCP를 도입하면 **이 함수의 구현만 grep→MCP로 교체**하고 호출부(inspector pre-commitment)는 바꾸지 않는다.
-- **부재 graceful degrade**: store가 비었거나 디렉토리가 없으면 빈 목록을 반환 — 에러가 아니다. inspector는 자체 예측만으로 진행한다.
+- **현재 구현 (2계층 ascent 병합)**:
+  ```
+  local_hits  = grep(<cwd>/.oms/wiki/<category>/, keywords)              # 로컬 — 이 논문
+  parent_oms  = ascent(<cwd>): cwd→부모로 올라가 첫 .oms/ (자기 제외)     # git의 .git 찾기
+  global_hits = grep(parent_oms/wiki/<category>/, keywords) if parent_oms else []  # 전역 — 사용자 재사용
+  return merge(local_hits, global_hits)   # 출처 태깅 [wiki:local] / [wiki:global]
+  ```
+  결정론적 grep만(키워드 매칭, CJK bi-gram 포함). 호출자(inspector·planner)가 venue·논문 유형·사용자 성향 키워드로 grep해 발췌를 끌어온다. category 는 로컬 4개(`convention`·`pattern`·`decision`·`reference`), 전역은 `history` 포함. (어느 레벨이든 디렉토리 부재면 그 레벨은 빈 목록 — 신규는 빈 store에서 시작.)
+- **호출부와 구현부 경계 (미래 교체점)**: inspector는 `wiki_query`라는 *추상 함수*를 호출할 뿐, 그 구현이 "2계층 grep"인지 자립 MCP인지 모른다. **ascent·병합·출처태깅은 전부 이 함수 구현 안에 갇혀** 있고, 호출부(inspector pre-commitment)는 한 줄도 안 바뀐다. 나중에 자립 wiki MCP를 도입하면 이 함수 구현만 교체.
+- **부재 graceful degrade**: 로컬·전역 어느 쪽이 비었거나 상위 `.oms/`가 없으면 그쪽은 빈 목록 — 에러가 아니다. inspector는 있는 것만(또는 자체 예측만)으로 진행한다.
 
 ---
 

@@ -63,6 +63,18 @@ scholar-inspector는 **판단만** 한다 — 기본값을 직접 쓰거나 강�
 - ⚠️ **2채널 분리 존중** — *무거운 채널*(기본값: learned.md → 승격 → venues.md)만 이 스킬의
   대상이고 게이트를 거친다. *가벼운 채널*(패턴/성향/결정: `.oms/wiki/*.md` 자동 append)은 게이트
   불필요 — 손대지 않고 읽기만. `wiki/pattern/`(성향)은 영구 light.
+- ⚠️ **로컬→전역 wiki 승급 (별도 경로, 저장 위치 축)** — 위 `scope: global`이 venues.md의 *적용
+  범위* 라벨인 것과 별개로, light 채널 자산을 **물리적 저장 위치**상 로컬 `.oms/wiki/`에서 *상위
+  폴더의 `.oms/wiki/`*(전역 레벨, ascent로 발견)로 올리는 경로가 있다. 논문 종료 시 "이 자산은
+  다음 논문에도 재사용각"인 후보(성향·venue 양식·재사용 결정·history)를 **사람 승인 후** 상위
+  `.oms/wiki/<category>/`에 복사한다. 기준:
+  - 대상: `pattern/`(성향)·`convention/`(venue 양식)·`decision/`(재사용 결정)·`history/`(논문 기록)
+    중 *논문 무관 재사용* 자산만. 이 논문 고유 reject·gap은 로컬에 남긴다.
+  - ⚠️ **citation/.bib는 전역 승급 영구 금지** (heavy든 light든, `learning-protocol.md` §6.F·§1.4).
+  - 사람 게이트 필수 — 자동 승급 없음. 상위 `.oms/`가 없으면 "부모 폴더에서 init하거나 거기
+    `.oms/wiki/`를 두라" 안내(임의로 부모·홈에 만들지 않음).
+  - 이는 venues.md 기본값 승격(heavy)과 다른 lane — light 자산의 *위치* 이동일 뿐 강제 기본값화가
+    아니다. `wiki/pattern/`은 전역에 올라가도 여전히 영구 light(enforce 안 함).
 - ⚠️ **provenance 강제** — 승격되는 각 기본값은 근거 learned.md 관찰 id를 venue의
   `learned_refs[]`에 기록. 출처 없는 기본값 = 추측 = silent 변경(§6.C 위반).
 - ⚠️ **specificity는 정직하게** — 항목 삭제 시에도 재계산(silent 변동 금지, §4 monotonic +
