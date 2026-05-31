@@ -85,4 +85,29 @@ OMC plugin 은 **이중 구조**다: `skill-bodies/<name>/SKILL.md` 가 전체 �
 
 ---
 
-**Analysis snapshot**: OMC 4.14.4 (런타임 핀 아님 — marketplace 최신 자동 추종, §2) · **isomorphic sibling**: oh-my-docs `references/omc-backport-analysis.md`(문서 도메인)
+## §4. 역방향 검토 — omp → oms backport (2026-05-31, 채택 0)
+
+이 문서는 본래 OMC → oms 방향이지만, 형제 **omp 가 0.2.0 에서 추가한 것**(omp 가 OMC backport 를
+oms 보다 더 깊이 밀어붙인 결과물, omp `references/omc-backport-analysis.md` T17~T25)을 oms 로
+*역방향* backport 할 가치가 있는지도 같은 잣대로 검토한다. (다음 세션이 같은 분석을 반복하지 않도록
+판정을 영속 기록.)
+
+**omp 0.2.0 신규 5종 → oms 채택 = 0.** 적대 검증(propose↔refute, 2026-05-31)에서 5후보 전부 기각:
+
+| omp 0.2.0 후보 | oms 판정 | 주 사유 |
+|:---|:---|:---|
+| `content_conventions[]` 규칙 타입 | REJECT | 도메인 비대칭 + 중복 — oms 는 매 실행 새 `.tex/.bib` 를 만드는 *생성 파이프라인*이라 정규식으로 반복 재스캔할 영속 corpus 가 없다. prose 품질은 scholar-inspect(formative)/scholar-verify(summative) **rubric**(정성·의미)이 이미 담당 — citation-bound prose 는 패턴이 아니라 *의미*가 정확성을 좌우하므로 rigid regex×present/absent 엔진은 부적합하고 패턴-충족형 hallucination 을 압박할 위험. |
+| content audit 축 (`check_content_rule`) | REJECT | rules.json 규칙 store·audit PASS/FAIL gate·specificity 카운터 세 전제가 oms 에 부재(의도된 부재). scholar-verify 가 compile/numeric/ref/placeholder/citation 을 *도메인 고유* 게이트로 이미 수행. |
+| dead-link (`find_dead_links`, `[[backlink]]`) | REJECT | oms 의 교차참조는 `[[wikilink]]` 웹이 아니라 LaTeX `\cite`/`\ref` 이고 그건 scholar-verify 가 이미 전수 매칭. `.oms/wiki/` 의 `[[backlink]]` 무결성은 *있으면 좋은* health-hint 수준이지 *필요한* 것은 아니며(무리하지 말라는 사용자 지침), omp 0.2.1 이 멀티-디렉토리 stem 오탐을 고친 데서 보듯 정확한 구현엔 비용이 든다. |
+| `.omp/CONVENTIONS.md` | REJECT | content_conventions[] 의 사람용 mirror — 비출 머신 규칙 자체가 oms 에 없어 고아 narrative 가 된다. oms 의 "기본값 카탈로그" 역할은 `venues.md` 가 이미 수행. |
+| specificity content 항 | REJECT | oms 는 이미 specificity 를 보유(learning-protocol §4, origin-비율 단일 값). content 항이 셀 대상(content_conventions 규칙 수) 자체가 없고, 한 항을 위해 메트릭을 다항식으로 재설계 + rules.json 인프라 수입은 over-engineering. |
+
+**결론**: omp 0.2.0 은 omp 도메인 고유(살아있는 `.omp/` 를 rules.json 정규식으로 반복 재검사하는
+관리 루프)라 oms 로 흘려보낼 게 코드·문장·health-hint 어느 형태로도 없다. 이는 2026-05-31 omx
+wiki 대조분석(6후보 중 5 REJECT, 유일 ADOPT 도 "문장만")과 동형이며, 그때 채택한 wiki append-only
+한 문장조차 oms 는 이미 learning-protocol §2 에 보유해 잔여가 0. omp 가 *OMC* 를 더 깊이 backport
+한 T20~T25(atomic-write·doctor·worktree-safety 등)도 oms 엔 부적합(생성 도메인 무관)이라 별도 채택 없음.
+
+---
+
+**Analysis snapshot**: OMC 4.14.4 (런타임 핀 아님 — marketplace 최신 자동 추종, §2) · **isomorphic sibling**: oh-my-docs `references/omc-backport-analysis.md`(문서 도메인) · **역방향 검토**: omp 0.2.0 → oms 채택 0(§4)

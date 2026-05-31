@@ -5,6 +5,12 @@ All notable changes to oh-my-scholar (oms).
 ## [Unreleased]
 
 ### Changed
+- **`references/omc-backport-analysis.md` §4 신설 — omp 0.2.0 역방향 backport 검토(채택 0).**
+  형제 omp 가 0.2.0 에 추가한 5종(content_conventions·content audit·dead-link·CONVENTIONS.md·
+  specificity content 항)을 oms 로 역방향 backport 할지 적대 검증 → 전부 REJECT. oms 는 생성
+  파이프라인이라 rules.json 정규식 audit 루프 전제가 부재하고, prose 품질은 inspect/verify rubric 이
+  이미 담당(citation-bound 는 패턴 아닌 의미가 정확성을 좌우). "역방향 채택 0" 을 영속 기록해 재검토
+  반복 방지. 코드 변경 0 — 문서만.
 - **라우팅 hook 계약 확장** (`hooks/scholar_route_emit.py`, UserPromptSubmit): STAGE 카탈로그에
   `deepen` 토큰 추가 — `scholar-deepen` 스킬(research↔ideate 사이 주장 모호성 게이트)이 신설돼
   단계 목록과 `STAGE(paper) →` 라인 양쪽에 반영
