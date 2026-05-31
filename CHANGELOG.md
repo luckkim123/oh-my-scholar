@@ -4,6 +4,43 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-31
+
+### Added
+- **`scholar-mock-review` 스킬 — venue-aware 모의 심사** (`skills/scholar-mock-review/SKILL.md`).
+  사용자 *자신의* 논문을 target venue reviewer 입장에서 심판한다 — venue 척도 점수 + 근거-anchor된
+  강점/약점 + venue-native 판정(accept/borderline/reject · letter A~D · minor/major revision). oms의
+  세 번째 평가 축 = **adjudicative 심판**(inspect=코치, verify=기계 게이트와 구분). 같은 .tex를 봐도
+  inspect는 "고쳐라"(저자 편), mock-review는 "내가 reviewer라면 이 점수·판정"(심판). 사용자 요청
+  "IROS에 낸다면 그 성격에 맞게 점수 매기고 부족한 점·revision 판정"에서 출발.
+- **`scholar-reviewer` agent** (`agents/scholar-reviewer.md`, opus, read-only). 두 mode:
+  (1) `mode=lens` — soundness/novelty/clarity-significance 한 렌즈로 strength/weakness(위치 anchor 필수)
+  평가, (2) `mode=area-chair` — 3렌즈 종합 → venue form per-axis 점수 → re-check → accept-bias
+  캘리브레이션 → venue-native 최종 판정. 앙상블 3렌즈 병렬 + AC 메타 패스(읽기전용이라 citation 안전 정합).
+- **`references/rubrics/venue-review-forms.md`** — venue별 심사 양식 SSOT. Form 1(NeurIPS/ICLR/ICML
+  1-4/1-10/1-5) · Form 2(CVPR/ICCV 라벨) · Form 3(IROS/ICRA letter A~D, multi-axis 숫자 없음) ·
+  Form 4(저널 minor/major revision). ⚠️ **컨퍼런스 vs 저널 판정 어휘 분리** — major/minor revision은
+  저널만; 컨퍼런스는 accept/borderline/reject(+rebuttal). 모든 척도 primary source(공식 reviewer
+  guideline·IEEE RAS·arXiv)로 검증, 출처 URL 명시.
+
+### Changed
+- **`references/rubrics/paper-eval.md` 2축 → 3축**: inspect(formative)/verify(summative)에
+  mock-review(adjudicative) 축 추가. 핵심 분리 표·"분리가 중요한 이유"를 3축으로 확장(코치 ≠ 기계
+  ≠ 심판). mock-review citation 안전(anchor 없는 weakness drop·novelty 질문 강등) 명문화.
+- **`references/venues.md`** — venue *제약*(page_limit·sections)과 *심사 양식*(venue-review-forms.md)의
+  역할 분리를 상단에 명시.
+- **`hooks/scholar_route_emit.py`** — STAGE 카탈로그에 `mock-review` 추가(.tex 레이어, inspect와 다른
+  심판 축). `STAGE(paper) → <…|inspect|mock-review|verify|…>` 토큰 줄 갱신. stdlib only·fail-open 유지.
+- **`.claude-plugin/plugin.json`** — skills[]에 scholar-mock-review 등록(inspect↔verify 사이).
+  `test_plugin_integrity.py`(plugin.json↔skills/ 1:1 강제) 통과.
+
+### Design / Evidence
+- 설계 근거: `docs/specs/2026-05-31-scholar-mock-review/design.md`. LLM 논문 리뷰 선행연구 조사
+  (MARG arXiv:2401.04259 — 단일 프롬프트 일반론 60%→앙상블 29%; AI-Scientist Nature 2026 — 앙상블+AC
+  ~인간 정확도; DeepReview ACL 2025 — re-check 단계; ICLR 2025 20K 실배포 — emit 전 신뢰성 게이트)에
+  기반해 아키텍처(앙상블 3렌즈+AC)와 가드레일(anchor 강제·novelty 질문 강등·injection 방어·accept-bias
+  캘리브레이션)을 결정. 모든 주장 URL 인용.
+
 ## [0.2.0] — 2026-05-31
 
 ### Added

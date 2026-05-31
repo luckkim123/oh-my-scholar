@@ -1,6 +1,8 @@
 # Venue Configuration Card
 
 > 학회/저널별 제약 SSOT. scholar-outline(섹션·페이지)·scholar-verify(page_limit·인용수)·scholar-drafter(class·template)가 참조. paper-write venues YAML을 단순화해 흡수.
+>
+> ⚠️ **venue별 *심사 양식*(점수 축·척도·판정 어휘)은 여기가 아니라 `rubrics/venue-review-forms.md`가 SSOT** — scholar-mock-review/scholar-reviewer가 그 카드를 읽는다. 이 카드는 *제약*(page_limit·min_citations·sections), 그 카드는 *심사 폼*(NeurIPS 1-4/1-10, IROS letter A~D, 저널 minor/major revision)으로 역할 분리.
 
 ## 스키마
 

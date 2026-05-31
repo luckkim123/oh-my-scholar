@@ -12,6 +12,7 @@
     "./skills/scholar-outline/",
     "./skills/scholar-draft/",
     "./skills/scholar-inspect/",
+    "./skills/scholar-mock-review/",
     "./skills/scholar-verify/",
     "./skills/scholar-revise/",
     "./skills/scholar-learn/",
