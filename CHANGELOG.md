@@ -4,6 +4,30 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-05-31
+
+### Fixed
+- **`.md` 중간산출물 위치 규칙 명문화 — source 폴더 오염 방지** (`references/output-layout.md`,
+  `skills/scholar-research|ideate|outline/SKILL.md`). 실사용(석사논문 작업) 중
+  research/ideate/outline 의 `.md` 중간산출물(연구맵·개념노트·outline)이 citation-bound
+  source 폴더(`paper/…`)에 잘못 생성되는 사고가 있었다. 원인 둘: ① `output-layout.md` 가
+  `.tex`/`.bib`/PDF 위치만 규정하고 `.md` 레이어는 **규정하지 않음(공백)**, ②
+  `scholar-research`/`scholar-ideate` 본문이 `paper/research`·`paper/methodology` 를
+  **예시로 유도** → "source ≠ intermediate" 라는 카드의 source-protection 원칙과 **자기모순**.
+  처방:
+  - `output-layout.md` §0·§2·§2.1·§6 에 `.md` stage 레이어(`research/ methodology/ outline/`)를
+    `.oms/<slug>/` 하위 **고정 경로 SSOT** 로 명시 — 이 노트들은 draft 의 *입력*(비계)이지
+    사용자 자산이 아니므로 workbench(`.oms/`)에 두고, source 폴더엔 `.tex`/`.bib` 만 남긴다.
+  - `scholar-research`/`scholar-ideate`/`scholar-outline` 본문의 산출물 저장 지시를
+    `paper/…` → `.oms/<slug>/{research,methodology,outline}/` 로 정정 (모호했던 "프로젝트 노트
+    폴더" 표현 포함).
+
+### Added
+- **회귀 가드 테스트** (`tests/test_md_stage_layout.py`, 3 cases). ① `output-layout.md` 가
+  `.md` 레이어 3폴더를 SSOT 로 명시하는지(공백 재발 방지), ② `.md`-stage 스킬 본문에
+  source-folder 오유도(`paper/research` 등)가 없는지(자기모순 재발 방지), ③ 각 스킬이
+  올바른 작업장 경로를 가리키는지 검증. 전체 스위트 39 → 42 passed.
+
 ## [0.3.0] — 2026-05-31
 
 ### Added

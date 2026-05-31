@@ -24,11 +24,13 @@ project root) — never hardcoded to any one machine or absolute path.
 | Area | What goes in | Who reads it | Cleaned? |
 |:---|:---|:---|:---:|
 | `outputs/<slug>/` | **The one copy the user sees** (`<slug>.pdf`, the compiled output) + optional verify evidence | the user | ❌ never touched automatically (user asset) |
-| `.oms/<slug>/` | Everything the user rarely needs directly — version snapshots, page renders, gen-image, compile temp | Claude (analysis) | ✅ confirmed-then-cleaned at terminal |
+| `.oms/<slug>/` | Everything the user rarely needs directly — `.md` stage notes (research/methodology/outline), version snapshots, page renders, gen-image, compile temp | Claude (analysis) | ✅ confirmed-then-cleaned at terminal |
 
 **Core**: `outputs/` is the "display shelf — this is the result right now," exactly one compiled
-PDF. `.oms/` is the "workbench." Version snapshots count as work-product and live on the workbench.
-This structurally prevents the output folder from bloating with snapshots and compile artifacts.
+PDF. `.oms/` is the "workbench." Both the `.md` stage notes (the draft's *inputs*) and the version
+snapshots count as work-product and live on the workbench. This structurally prevents the output
+folder from bloating — and keeps the project source folder holding *only* the citation-bound
+`.tex`/`.bib`, never scaffolding.
 
 **Source location (critical)**: the `.tex`/`.bib` source is **neither** in `outputs/` **nor** in
 `.oms/` — it stays in the project source folder the caller designates. OMS compiles *from* that
@@ -88,6 +90,12 @@ outputs/<slug>/
   verify-evidence.md                  # (optional) verification evidence table — for the user
 
 .oms/<slug>/                          # work area — everything the user rarely needs directly
+  research/
+    *.md                              # research stage: related-work map, gap analysis, axis notes
+  methodology/
+    *.md                              # ideate stage: concept notes (one per method/contribution) — the draft's SSOT
+  outline/
+    *.md                              # outline stage: section tree, story arc, figure plan
   versions/
     v{NN}_{YYYY-MM-DD}_{summary}.tex     # .tex/.bib version snapshots (before a large edit)
     v{NN}_{YYYY-MM-DD}_{summary}.bib
@@ -108,12 +116,23 @@ outputs/<slug>/
 
 ### 2.1 Invariance rules
 
-- The four subdirectories (`versions/ renders/ gen-image/ tmp/`) are **always this name, this
-  place**. They do not change by paper type.
+- The subdirectories split into two layers, both **always this name, this place** (they do not vary
+  by paper type):
+  - **`.md` stage layer** (`research/ methodology/ outline/`) — the `.md` intermediates produced by
+    the `.md`-stage skills (`scholar-research`, `scholar-ideate`, `scholar-outline`). These are the
+    draft's *inputs* (concept SSOT, gap map, section plan), **not** the citation-bound `.tex`/`.bib`
+    source. They are work-product (scaffolding for the draft), so they live on the workbench
+    (`.oms/`), **never inside the project source folder** (`paper/…`). Putting them next to the
+    `.tex`/`.bib` would mix scaffolding with the user's citation-bound asset — exactly what §0's
+    source-protection rule forbids.
+  - **`.tex` pipeline layer** (`versions/ renders/ gen-image/ tmp/`) — snapshots and compile
+    artifacts of the `.tex`/`.bib` source.
 - The structure is identical even when empty (a paper with no generated figures either leaves an
-  empty `gen-image/` or omits it — never a different name).
-- A new kind of intermediate maps into one of the four (no inventing a new top-level folder). Only a
-  genuinely new category that maps to none of them is added by amending this convention.
+  empty `gen-image/` or omits it — never a different name; likewise an early-stage paper may have
+  only `research/` populated).
+- A new kind of intermediate maps into one of the existing subdirectories (no inventing a new
+  top-level folder). Only a genuinely new category that maps to none of them is added by amending
+  this convention.
 
 ---
 
@@ -211,6 +230,8 @@ order = version number order = sort order, always.
 
 ## 6. Implementation checklist (consumers of this card)
 
+- [ ] `scholar-research` / `scholar-ideate` / `scholar-outline` write their `.md` notes into
+      `.oms/<slug>/research|methodology|outline/` — **never** into the project source folder (`paper/…`)
 - [ ] `scholar-draft` / `scholar-pilot` / `scholar-drafter` snapshot source into `.oms/<slug>/versions/`
 - [ ] the `.tex`/`.bib` source stays in the project source folder (never moved into `.oms/`)
 - [ ] `outputs/<slug>/<slug>.pdf` is the only compiled copy the user sees

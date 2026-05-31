@@ -42,7 +42,7 @@ description: |
    - 검증된 인용 목록 (저자·연도·제목 확인된 것)
    - gap 목록 (기존 방법이 해결 못한 것)
    - 미확인 flag 목록 (사람 확인 필요)
-4. 산출을 .md 연구노트로 호출자가 저장 (경로는 호출자가 결정 — 보통 `paper/research/*.md`).
+4. 산출을 .md 연구노트로 호출자가 작업장에 저장 — `.oms/<slug>/research/*.md` (output-layout.md §2 고정 경로). ⚠️ source 폴더(`paper/…`)에 두지 말 것 — 연구노트는 draft의 *입력*(비계)이지 citation-bound source 자산이 아니다.
 5. 미확인 flag가 있으면 사람에게 확인 요청 후 노트 갱신.
 </Steps>
 

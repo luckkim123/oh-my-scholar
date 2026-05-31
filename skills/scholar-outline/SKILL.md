@@ -57,7 +57,7 @@ research·ideate 단계의 산출물(연구맵, 개념노트 .md)을 받아 논�
    - 입력: 연구맵, 개념노트 경로, venue 카드(`references/venues.md`) 참조 지시
    - 지시: 섹션 트리(목적·핵심 메시지·word budget·의존 인용 key) + story arc 필요성 사슬 + word budget 합계 page_limit×500 이내 + 인용은 researcher 검증 목록에서만 + 누락 인용은 "researcher 재확인 필요" 표시
 4. planner 산출 받음 — 섹션 트리·story arc·word budget 요약·인용 의존 전체 매핑·미검증 인용 요청 목록.
-5. 산출물을 `06_outline.md`에 저장 (프로젝트 노트 폴더 기준).
+5. 산출물을 작업장 `.oms/<slug>/outline/06_outline.md`에 저장 (output-layout.md §2 고정 경로). ⚠️ source 폴더(`paper/…`)에 두지 말 것 — outline은 draft의 *입력*(비계)이지 citation-bound source 자산이 아니다.
 
 ### `--consensus` 경로 (4-agent 순차 — 병렬 절대 금지)
 > ⚠️ 아래 2c-1~2c-4는 MUST 순차. 각 step의 Task 결과를 await한 뒤 다음 Task를 발행한다. 같은 병렬 배치로 두 Task를 호출하지 않는다. (Execution_Policy 3중 문구)
@@ -66,7 +66,7 @@ research·ideate 단계의 산출물(연구맵, 개념노트 .md)을 받아 논�
 2c-3. **[planner 내 architect 책임]**: 별도 agent 아님 — planner가 2c-2에서 steelman/antithesis로 이미 수행(T1 경계 규약: architect agent 신설 안 함). 외부 자문이 *정말* 필요하면 inspector의 `<External_Consultation>` 경로로만.
 2c-4. **inspector** (`scholar-inspector`): 2c-2의 plan.md+outline을 formative 비평(critic 4기법). PASS/FAIL 안 냄 — 개선점만. *2c-2 결과를 입력으로*.
 2c-5. **재리뷰 loop**: inspector가 critical/important를 내면 planner 재위임(2c-2로) 후 재비평. **최대 = venue.max_review_rounds (venues.md에 키 없으면 기본 5)**. 5회 도달 시 best version + "consensus not reached — N rounds, 잔여 finding 목록" 명시하고 GATE 1로.
-2c-6. **2분리 저장**: `plan.md`(RALPLAN-DR+ADR, 결정 과정) + `06_outline.md`(Final 단일 arc 섹션 트리, 결정 결과). 둘 다 프로젝트 노트 폴더.
+2c-6. **2분리 저장**: `plan.md`(RALPLAN-DR+ADR, 결정 과정) + `06_outline.md`(Final 단일 arc 섹션 트리, 결정 결과). 둘 다 작업장 `.oms/<slug>/outline/` (output-layout.md §2). ⚠️ source 폴더(`paper/…`) 금지.
 
 ### 공통 — GATE 1
 > ⚠️ `--consensus`의 2c-* 순차 stage 간 전달은 아래 `<Consensus_Handoff>` 규약을 따른다 (rubber-stamp 방지).
