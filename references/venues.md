@@ -12,8 +12,15 @@ key:             # 식별자 (iros)
 class:           # \documentclass (ieeeconf)
 compile_engine:  # pdflatex | xelatex | lualatex
 bib_style:       # IEEEtran
+structure_type:  # flat | system | thesis — 규모 변주 (scholar-planner <Structure_Types>가 SSOT)
+                 #   모든 논문은 공통 골격(Intro→[Method 단위 1..N: Overview→Proposed→그 단위 실험]→Conclusion)을 공유.
+                 #   structure_type은 그 골격을 몇 번 반복·얼마나 펼치는가만 가른다(구조 자체는 같음).
+                 #   flat   = Method 단위 1개. 단편 논문(IROS/ICRA/RA-L/CVPR). Related Work 독립 섹션 II.
+                 #   system = 다중 기여 저널 시스템 논문(T-RO 등). 기여마다 골격 반복 + 공유 시스템 섹션 + (필요시) 후반 통합실험 hybrid.
+                 #   thesis = 다중 기여 학위논문. system과 동형 + 학위논문 양식요소. 하위형: thesis-by-papers(챕터 자체완결) vs monograph(챕터 축적·독립 Ch.2 RW).
+                 #   미지정이면 planner가 추론(page_limit 작고 기여 1개→flat / 크거나 null이고 기여 여러개→system·thesis).
 page_limit:      # 정수 또는 null(무제한)
-sections:        # [Introduction, Related Work, Method, ...]
+sections:        # [Introduction, Related Work, Method, ...]  ← flat 전용. system/thesis면 기여별 섹션·챕터 골격은 planner가 기여 수로 생성.
 required_sections: # 필수 섹션
 quality_threshold: # verify 통과 점수 (0-100, 기본 80)
 max_review_rounds: # revise 루프 최대 (기본 5)
@@ -44,6 +51,7 @@ key: iros
 class: ieeeconf
 compile_engine: pdflatex
 bib_style: IEEEtran
+structure_type: flat
 page_limit: 6
 sections: [Introduction, Related Work, Method, Experiments, Conclusion]
 quality_threshold: 80
@@ -60,10 +68,16 @@ name: "POSTECH M.Sc. Thesis"
 key: postech_msc_thesis
 class: report
 compile_engine: xelatex   # 한글 포함
+structure_type: thesis   # 다중 기여 학위논문. 공통 골격을 기여마다 반복. 하위형(thesis-by-papers/monograph)은 planner가 판정.
 page_limit: null
 quality_threshold: 80
 min_citations: 50
 review_weights: {logic: 1.2, prose: 1.2}
+# structure_type: thesis 면 planner가 기여 수로 챕터 골격을 생성한다 (공통 골격 반복):
+#   I. Introduction(Background, Contributions, Outline) → II. [공유 플랫폼/시스템](선택) →
+#   III~. [기여별 챕터, 각자 Overview→Proposed→그 기여 실험] → (필요시 후반 통합실험) →
+#   Conclusion → Summary(Korean) → References.
+#   thesis-by-papers면 각 챕터 자체완결+RW 분산 / monograph면 챕터 축적+독립 Ch.2 RW (planner <Structure_Types>가 SSOT).
 ```
 
 ## 예시 — 학습으로 특화된 IROS (specificity > 0)

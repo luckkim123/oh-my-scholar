@@ -4,6 +4,30 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-31
+
+### Added
+- **논문 구조 모델 — `scholar-planner`에 '공통 골격 + 규모 변주'** (`agents/scholar-planner.md`
+  `<Structure_Types>`, `references/venues.md` `structure_type`). 모든 학술 논문이 공유하는 공통
+  골격(`Introduction → [Method 단위 1..N: Overview→Proposed→그 단위 실험] → Conclusion`)을
+  planner에 명시하고, `structure_type`(`flat` | `system` | `thesis`)으로 그 골격을 *몇 번 반복·
+  얼마나 펼치는가*(규모)를 가른다. flat=단편(IROS/RA-L), system=다중 기여 저널 시스템 논문(T-RO),
+  thesis=다중 기여 학위논문(하위형 thesis-by-papers vs monograph). venues.md 스키마에 structure_type
+  필드 + IROS=flat·POSTECH thesis=thesis 예시. 근거: external-context 문헌조사(IMRaD·Milford·
+  Brown H2R·SPJ·IEEE RA-L·T-RO 실측·York/Oxbridge thesis guide — 출처 URL은
+  `docs/specs/2026-05-31-paper-structure-model/design.md`).
+
+### Fixed
+- **"기술 백서" 안티패턴 차단** — 기존 planner는 flat(단편) 구조 모델만 있어, 학위논문·다중 기여
+  시스템 논문을 줘도 방법을 여러 섹션에 나열 + **모든 실험을 끝 한 곳에 몰아넣는** 컨퍼런스식
+  평면구조로 outline했다(실사용 ASV-ROV 학위논문에서 발생). 이제 어느 규모에서도 "실험은 그 방법이
+  제안된 단위 안에" 두도록 규정. Investigation_Protocol·Success_Criteria 정합 + 회귀 가드
+  `tests/test_thesis_structure.py`(6 cases — 공통골격·세 변주·기술백서 안티패턴·monograph/by-papers
+  구분·structure_type 필드·범용성 고유명사 0). 39→48 passed.
+- **`06_outline.md` 하드코딩 prefix 제거 → `outline.md`** (`skills/scholar-outline/SKILL.md`,
+  `agents/scholar-planner.md`, 7곳). 의미 없는 번호(개념노트 `01~06_*.md`와 충돌)였다. plan.md와
+  동일하게 번호 없는 파일명으로 통일.
+
 ## [0.3.1] — 2026-05-31
 
 ### Fixed
