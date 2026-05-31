@@ -56,7 +56,22 @@ confidence 가 `low → med → high` 로 오르고, merge 시 **높은 쪽을 �
 이 반복-상승이 omp `evidence_count` 의 light 채널판이고, heavy 게이트로 잇는 신호다:
 `convention/` 노트가 **`confidence: high`** 에 도달 = 그 패턴의 `OBS` 가 `evidence_count ≥ 3` 에
 근접했을 가능성 = `scholar-learn` 이 볼 만한 시점. confidence 는 정성 3등급(+관측횟수)일 뿐 —
-**수치 가중합·threshold 매직넘버 없음.** 예:
+**수치 가중합·threshold 매직넘버 없음.**
+
+### ⭐ 노트는 *결론 + 근거*를 함께 담는다 (라벨-only 금지 — 재독 비용 방지)
+
+wiki 노트는 *결론(라벨)*만 적지 말고 **그 결론을 떠받친 load-bearing 근거 — 구체 사례·대조군·내부
+출처 포인터(어느 paper-slug/섹션을 다시 보면 되는지) — 를 같은 노트에 담는다.** 라벨만 남기면 다음
+세션이 그 결론의 근거를 확인하려 *원본을 다시 떠야 한다*(재독 비용 = 학습 실패의 전형). "X는 stage축이다"
+보다 "X는 두 독립 기여를 챕터로 안 묶고 stage 횡단 병치 — `<slug>` §목차 참조"가 재사용 가능한 지식이다.
+- ⚠️ **이건 *권고*다 — heavy 채널의 enumerable evidence 강제(`learning-protocol.md` §6.E)와 다르다.**
+  light 채널은 싸고 마찰 없는 게 가치라(§1) 근거 부재가 *거부 게이트*는 아니다. 근거를 담을수록 좋다는
+  규율이지, 없으면 막는 게 아니다.
+- ⚠️ **"출처 포인터" = 내부 paper-slug/섹션 포인터지 `.bib` citation 이 아니다** (§6.F·아래 citation 경계
+  불변 유지). "이 결론은 `<slug>` 의 어디를 다시 보면 된다"는 *내부 내비게이션*일 뿐, 논문 인용을 wiki 에
+  적는 게 아니다.
+
+예 (결론 + 근거 동반):
 
 ```markdown
 ---
@@ -65,7 +80,9 @@ sightings: 3
 ---
 # IROS reject patterns
 ## 2026-05-20 — ablation 누락 반복 지적 (3번째 관측 → high)
-...
+- 결론: IROS reviewer 는 ablation 부재를 reject 사유로 든다.
+- 근거(재방문 포인터): `iros-2026-nav` §4·`iros-2026-grasping` §5 에서 ablation 부재 지적 → 둘 다 추가.
+  (재확인 필요 시 이 두 slug 의 해당 섹션을 보면 됨 — citation 아님, 내부 내비게이션.)
 ```
 
 ---

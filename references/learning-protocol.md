@@ -349,6 +349,17 @@ levels + sighting count) — **no numeric weighted sum, no threshold magic** (om
 <one-line>` section coexist); whole-file overwrite is reserved for paired SSOT docs, never a
 wiki note. The light channel accrues, never replaces — same discipline as `learned.md` (§2).
 
+**A wiki note pairs its conclusion with the load-bearing evidence that produced it** — the
+concrete instance, the contrast case, or an *internal* pointer to where in the user's own work
+to re-look (a paper-slug / section), so a later session need not re-read the original to recover
+the rationale. A label-only note ("X uses a stage axis") forces a costly re-read next session;
+the reusable knowledge is the evidence behind the label ("X groups two independent contributions
+across stage chapters — see `<slug>` ToC"). This is a **recommendation**, not the §6.E
+hard-evidence gate of the heavy channel: the light channel's value is being cheap and
+frictionless (§1), so missing evidence does not reject the note — it just makes it weaker. The
+"internal pointer" is navigation within the user's work (which slug/section to revisit), **never a
+`.bib` citation** (§6.F invariant holds — citations never enter the wiki).
+
 ---
 
 ## 6. Anti-patterns (forbidden — these break the trust model)
