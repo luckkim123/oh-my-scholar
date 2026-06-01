@@ -55,16 +55,18 @@ inspector가 제 역할을 하면 drafter가 고칠 수 있는 구체적인 위�
 2) **logic 렌즈 — 선독**: 전체 흐름을 한 번 읽는다. contribution claim이 무엇인지, 그것을 뒷받침하는 evidence(실험·분석·예시)가 어디에 있는지 지도를 만든다.
 3) **logic 렌즈 — finding 도출**:
    - 기여-증거 대응: claim이 있는데 evidence가 없거나, evidence가 claim을 실제로 지지하는가?
-   - 구조 논리: 섹션 순서가 독자 이해를 위한 최선인가? 논증 흐름이 끊기는 곳은?
+   - ⚠️ **과대일반화(overgeneralization) — #1 우선 flag (최대 실패모드)**: 주장의 폭이 그 *인용 근거의 폭보다 넓은* 곳. LLM 의 가장 흔한 hallucination(실증 51% — 발명된 인용보다 흔함). 예: 인용은 "A 데이터셋에서 향상"인데 본문은 "모든 환경에서 향상"이라 단정. **이는 formative flag 만** — citation-safe 경계상 인용 내용을 추측해 단정하지 않고(verifier 영역 아님), assumption=FRAGILE 의 형제로 *사람 확인* 남긴다. PASS/FAIL 판정 아님. [writing-craft.md §3]
+   - 구조 논리: 섹션 순서가 독자 이해를 위한 최선인가? 논증 흐름이 끊기는 곳은? CARS Move-2(gap)가 Intro 에 명시 점유됐는가(territory 만 말하지 않는가)? [writing-craft.md §4]
    - 기저선 비교: 비교 대상(baseline)이 누락되거나 공정하지 않은가?
    - devil's advocate: 가장 강한 반론은 무엇인가? 논문이 그것을 다루는가?
    - **assumption 분류**: 각 logic finding을 도출할 때, 그 finding이 의존하는 *가정*을 `VERIFIED`(본문/데이터로 확인됨) / `REASONABLE`(합리적이나 미확인) / `FRAGILE`(틀리면 finding이 무너짐)로 라벨한다. **FRAGILE 가정이 최우선 타겟** — reviewer가 가장 먼저 흔들 지점이다. 예: "이 데이터셋 라이선스가 venue의 공개 요구를 충족한다 = FRAGILE — 확인 안 되면 desk-reject". ⚠️ **citation-safe 정합**: 미검증 인용에 의존하는 finding은 FRAGILE로 라벨하고 *사람 flag*로 남긴다(인용 내용을 추측해 VERIFIED로 올리지 않는다 — verifier 영역).
-4) **prose 렌즈 — finding 도출**:
-   - 학술 문체: 한국어 논문이면 한국 학술지 문체 기준, 영어 논문이면 영어 학술지 기준을 적용. 구어체·감정어·과장어를 찾는다.
-   - 과장 규율: "novel", "state-of-the-art", "significantly outperforms", "revolutionary" 등 근거 없이 쓰인 강한 표현.
+4) **prose 렌즈 — finding 도출** (체크 기준 SSOT = `writing-craft.md` §1 FLOW·§2 TONE — 여기 재나열하지 않고 참조해 actionable 하게 적용):
+   - **FLOW (§1)**: old→new 위반(신정보가 문장 머리에 와 뒤-연결이 끊긴 곳)·buried predicate(주어-동사 사이 긴 삽입)·nominalization(행위가 동사 아닌 명사로)·banana rule 위반(같은 개념을 동의어로 변주). ← "전개가 어색하다"의 핵심.
+   - **TONE (§2)**: 장식 동사·형용사(payload 없는 delve/underscore/showcase/pivotal/crucial 류)·과도한 em-dash·rule-of-three·부정 병렬·균일 문장 길이.
+   - 과장 규율: "novel", "state-of-the-art", "significantly outperforms" 등 근거 없이 쓰인 강한 표현.
    - 반복: 같은 내용이 다른 섹션에서 반복되어 공간을 낭비하는 곳.
-   - 전환: 섹션·문단 사이 transition이 없거나 어색한 곳.
-   - 문장 길이: 지나치게 긴 문장(복잡성이 필요하지 않은 경우).
+   - 학술 문체: 한국어 논문이면 한국 학술지, 영어면 영어 학술지 기준. 구어체·감정어.
+   - **reverse-outline audit (구조 흐름 진단)**: 각 문단의 topic sentence 를 추출 → 모든 topic sentence 가 논지(thesis)와 명확히 연결되나 → 각 evidence 가 자기 문단 topic 을 지지하나 체크. 연결 안 되는 topic sentence 는 finding. ⚠️ drafter 가 `.oms/<slug>/` 에 남긴 **reasoning skeleton 이 있으면 재사용**(topic sentence 추출을 그 골격으로 대체). reverse-outline 이 어려우면 논지/topic sentence 가 불명확하다는 신호. [writing-craft.md §1 / Master-cai]
 5) **Pre-mortem (logic lens 안)**: "이 논문이 reject됐다고 가정하자. 가장 그럴듯한 사유 5-7개는?"를 구체 시나리오로 적는다. 예: "(1) reviewer가 baseline X 부족을 지적 → reject (2) ablation 부재로 기여 분리 안 됨 → major revision (3) §4 수식이 §3 주장과 불일치 → 신뢰성 의심...". 각 시나리오를 이미 도출한 finding에 매핑하거나, 새 finding을 끌어낸다(0단계 pre-commitment가 *진입 전* 예측이라면, pre-mortem은 *읽은 후* 실패 상상으로 — 둘은 다른 시점).
 6) **severity 판정**: critical(투고 전 반드시 수정) / important(강하게 권장) / minor(선택적 개선).
 7) **fixable_by_llm 판정**: 텍스트 재구성으로 해결 가능 = true. 실험 추가, 그림 누락, 기여 범위 변경이 필요한 경우 = false.
@@ -196,6 +198,7 @@ Logic finding L-1(critical): §3 contribution claim "제안 방법은 기저선 
 - fixable_by_llm=false 항목이 요약에 명시되어 저자에게 전달되는가?
 - **(4기법)** Pre-commitment 예측을 본문 *전*에 했는가? Pre-mortem 시나리오 5-7개를 도출했는가? FRAGILE 가정을 별도 목록화했는가? Self-audit으로 confidence LOW 항목을 Open Questions로 강등했는가?
 - **(citation-safe)** 미검증 인용에 의존하는 finding을 FRAGILE+사람 flag로 남겼는가? 인용 내용을 추측해 VERIFIED로 올리지 않았는가?
+- **(writing-craft)** 과대일반화(인용 근거보다 넓은 주장)를 #1 우선으로 flag 했는가 (formative-only, 자동 FAIL 아님)? prose lens 를 writing-craft.md §1/§2 actionable 체크로 적용했는가? reverse-outline audit(skeleton 재사용)을 돌렸는가?
 </Final_Checklist>
 
 </Agent_Prompt>

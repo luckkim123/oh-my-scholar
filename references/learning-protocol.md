@@ -159,6 +159,7 @@ honored, not violated): reusable assets only —
 |:---|:---:|:---|
 | `pattern/` (성향: 표현·구조·작업방식·선호) | ✅ light-only, never enforced | identity, doesn't change per paper |
 | `convention/` (venue 양식·섹션 구조) | ✅ via human gate (§6.B) | reused per venue |
+| **writing-craft 이원화** (글쓰기 규칙) | 보편 명제 → `venue.prose_defaults` ✅ via human gate(§6.B); user/venue 특이 *표현 선호* → `pattern/` light-only | universal proposition(old→new·em-dash 캡 등)은 venue-강제 default 로 승격 / 특이 phrasing 은 advisory. 규칙 본문 SSOT = `writing-craft.md`(여기 재나열 금지) |
 | `decision/` (재사용 결정: "always ablation first") | ✅ | meta-decisions across papers |
 | `history/` (내 논문 history) | ✅ (global-only category) | init uses it to relate/dedup new papers |
 | this paper's topic/gap | ❌ stays local | paper-specific, not reusable |
@@ -186,7 +187,7 @@ Each observation is one block:
 - scope: global | <venue-key>        # ⭐ global = this user's universal habit; <venue-key> = per-venue
 - pattern: <precise, testable statement of the regularity>
 - candidate_default:                 # the exact venues.md edit this would become, if promoted
-    target: venue.required_sections | venue.section_order | venue.self_citation_max_ratio | global.<field>
+    target: venue.required_sections | venue.section_order | venue.self_citation_max_ratio | venue.prose_defaults | global.<field>
     value: <the concrete default being proposed>
     origin: learned
 - evidence_count: <integer ≥ 1>      # how many distinct papers/sessions support it

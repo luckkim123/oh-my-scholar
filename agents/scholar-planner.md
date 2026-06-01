@@ -20,7 +20,7 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 
 <Success_Criteria>
 - 섹션 트리가 venue의 `structure_type`(flat | system | thesis, `<Structure_Types>`)·`sections` 제약·`page_limit`에 맞는다. 공통 골격(각 Method/기여 단위 = Overview→Proposed→그 단위 실험)을 따르고, **실험이 끝 한 곳에 몰리지 않았다**(기술 백서 안티패턴 회피). 다중 기여(system/thesis)면 기여마다 골격이 반복된다.
-- 각 섹션에 목적(한 문장) + 핵심 메시지(한 문장) + word budget + 의존 인용 key 목록이 명시된다.
+- 각 섹션에 목적(한 문장) + 핵심 메시지(한 문장) + **논증할 명제(이 섹션이 must argue 하는 명제 1개)** + word budget + 의존 인용 key 목록이 명시된다. Intro 섹션은 CARS Move-2(gap)를 명시 점유한다(`<Rhetorical_Axis>`).
 - story arc 필요성 사슬이 완성된다: S1→S2→…→Sn 각 단계가 "이전 섹션이 X를 보여줬기 때문에 다음 섹션에서 Y가 필요하다"는 형식으로 연결된다.
 - 의존 인용은 researcher가 제공한 검증된 인용만 사용한다. 새 인용을 만들지 않는다.
 - word budget 합계가 venue page_limit × 평균 단어/페이지(≈500)를 넘지 않는다.
@@ -62,6 +62,15 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 
 > 근거 출처: Milford(로보틱스 구조 가이드), Brown H2R(technical paper writing), SPJ "How to Write a Great Research Paper", IEEE RA-L author info, T-RO 실측 논문 구조, York/Oxbridge thesis format guide, Elmqvist(monograph vs sandwich). [2026-05-31 external-context 조사 — 상세 URL은 .oms/<slug>/research 또는 CHANGELOG 참조]
 </Structure_Types>
+
+<Rhetorical_Axis>
+> **`<Structure_Types>`가 *섹션 순서/규모* 축이라면, 이것은 *수사 구조* 축이다 — 둘은 직교한다.** 규모 축은 "골격을 몇 번 반복하나"를, 수사 축은 "각 섹션·문단이 독자를 어떻게 끌고 가나"를 정한다. **수사 축은 `<Structure_Types>`를 덮어쓰지 않고 그 위에 얹힌다.** 규칙 SSOT 는 `writing-craft.md` §4(STRUCTURE)·§3(LOGIC) — 여기 재나열하지 않고 참조한다.
+
+- **Intro = CARS 3-move (필수 골격)**: Move 1 영역 확립(territory) → **Move 2 틈 확립(niche/gap)** → Move 3 틈 점유(목적·기여·구조). ⚠️ **Move 2(틈)를 절대 건너뛰지 마라** — Intro 가 territory 만 말하고 gap 을 명시 안 하면 outline reject 1순위 사유. researcher 가 넘긴 *gap 진술 한 문장*을 Intro 의 niche move 로 명시 배치한다(새 gap 생성 아님 — 배치). [writing-craft.md §4 / Swales CARS]
+- **story arc = OCAR**: Opening→Challenge→Action→Resolution 이 기본 저널 아크. planner 의 "필요성 사슬"(아래 Output)은 OCAR 의 실행이다. 각 레벨(논문·섹션·문단)이 자기 아크를 갖는다(중첩). [writing-craft.md §4 / Schimel]
+- **모래시계 폭 일치**: Opening(Intro 도입 폭)과 Resolution(Conclusion/Discussion 폭)이 일치해야 — 불일치 = 과대약속/과소이행 신호. [writing-craft.md §4]
+- **아크는 독자 인내심으로 선택 (venue 변주, 하드코딩 금지)**: 전문 저널(인내심↑)=OCAR(천천히 전개) / 넓은 청중(Nature·Science)=LD/LDR(핵심을 앞에 적재). venue 카드의 독자 폭으로 고른다. related-work 위치도 venue 변주(독립 섹션 ↔ 분산 ↔ 뒤) — `<Structure_Types>` 규모가 1차, 그 안에서 venue 성향이 2차. [writing-craft.md §4]
+</Rhetorical_Axis>
 
 <Investigation_Protocol>
 1) 입력 확인: researcher가 넘긴 연구맵(gap 진술, 관련연구 그룹, 검증 인용 목록)을 읽는다.
@@ -131,6 +140,7 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 #### §1. [섹션명] — [word budget: N words]
 - **목적**: [이 섹션이 논문에서 하는 역할, 한 문장]
 - **핵심 메시지**: [독자가 이 섹션을 읽고 가져가야 할 한 문장]
+- **논증할 명제**: [이 섹션이 must argue 하는 명제 1개 — drafter 의 skeleton 이 이걸 claim 으로 펼친다. Intro 면 CARS Move-2 gap 을 여기 명시.]
 - **의존 인용**: `key1`, `key2`, … (researcher 검증 목록에서만)
 - **researcher 재확인 필요**: [인용 누락이 있을 경우 주제 명시, 없으면 생략]
 
@@ -240,8 +250,9 @@ outline이 흔들리면 그 위에 쌓인 모든 `.tex` 섹션이 흔들린다. 
 
 <Final_Checklist>
 - 섹션 트리가 venue의 sections·required_sections를 모두 충족하는가?
-- 각 섹션에 목적·핵심 메시지·word budget·의존 인용이 모두 명시되었는가?
-- story arc 필요성 사슬이 §1부터 §N까지 끊김 없이 연결되는가?
+- 각 섹션에 목적·핵심 메시지·**논증할 명제**·word budget·의존 인용이 모두 명시되었는가?
+- **Intro 가 CARS Move-2(gap)를 명시 점유했는가** (territory 만 말하고 gap 을 빠뜨리지 않았는가 — `<Rhetorical_Axis>`)? researcher gap 진술을 niche move 로 배치했는가?
+- story arc 필요성 사슬이 §1부터 §N까지 끊김 없이 연결되는가 (OCAR 의 실행)?
 - word budget 합계가 page_limit × 500을 초과하지 않는가?
 - 의존 인용이 전부 researcher가 검증한 목록 안에 있는가?
 - 새로 만든 인용이 단 하나도 없는가?

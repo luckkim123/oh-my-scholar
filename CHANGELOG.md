@@ -4,6 +4,55 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-01
+
+### Added
+- **글쓰기 craft 규칙 주입 — `references/writing-craft.md` SSOT 신설**. drafter 산출물이 flow·tone·
+  logic·structure 네 차원에서 어색했던 근본 원인은 *아키텍처가 아니라 글쓰기 규칙 내용의 부재*
+  였다(글쓰기 어휘가 inspector prose lens 한 곳, 그나마 사후 비평 레인뿐 — 생성 시점에 흐름·어투를
+  빚을 수단 0). 4차원 규칙을 단일 카드로: §1 FLOW(Gopen-Swan old→new·banana rule)·§2 TONE(장식
+  동사·형용사 금지 원리·em-dash 캡)·§3 LOGIC(one-ping·TEEL·과대일반화 경고)·§4 STRUCTURE(CARS
+  3-move·OCAR·모래시계)·§5 VOICE(discipline>journal>personal)·§6 EXEMPLAR(~5 무작위 대표,
+  embedding 금지)·§7 기계 체크 토큰(verifier WARN SSOT). `latex.md`(조판)와 역할 분리, drafter·
+  inspector·verifier 가 *참조*(재나열 금지 — abstract-WARN 선례와 동일 drift 방지). 출처 anchor:
+  Gopen & Swan 1990·Swales CARS·Schimel OCAR·Peyton Jones·Nature HB 2025·AutoSurvey·WriteHERE.
+- **drafter 생성 흐름 보강 — skeleton 단계 + silent self-audit** (`agents/scholar-drafter.md`).
+  Step 4.5: prose 전 문단별 reasoning skeleton `{claim, cite-keys, link}` 산출(CARS Move-2·
+  one-ping 점유 확인, `.oms/<slug>/` 작업장에 — inspector reverse-outline 이 재사용). Step 5.5:
+  반환 전 §2/§7 기준 silent self-audit(위생이지 게이트 아님 — 자기승인 금지 불위배). citation
+  코어 불변(인라인 날조 금지가 skeleton 단계로 확장, 단일 신중 유지).
+- **planner 수사 구조 축 — `<Rhetorical_Axis>`** (`agents/scholar-planner.md`). v0.4.0 섹션-순서
+  모델(flat/system/thesis)과 *직교*: CARS 3-move(**Move-2 gap 강제** — Intro 가 territory 만
+  말하면 reject 1순위)·OCAR 아크·모래시계 폭 일치·아크는 독자 인내심으로 선택(venue 변주). 섹션
+  brief 에 "논증할 명제 1개" 필드 추가. researcher gap 진술을 niche move 로 배치(새 생성 아님).
+- **verify 글쓰기 WARN** (`agents/scholar-verifier.md` step 9.6 + `references/rubrics/paper-eval.md`).
+  writing-craft.md §7 토큰(장식어·em-dash·rule-of-three·부정 병렬)을 기계 검출하되 **WARN(FAIL
+  아님)** — abstract-WARN(0.4.x) 선례 그대로(정적 blocklist 부패·과검출 위험으로 강제 FAIL 은
+  false-positive). 멀티바이트 em-dash 는 Python `re` 로 확인.
+- **inspect 렌즈 보강** (`agents/scholar-inspector.md`). prose lens 를 writing-craft.md §1/§2
+  actionable 체크로 업그레이드 + **reverse-outline audit**(topic sentence 추출→논지 연결,
+  drafter skeleton 재사용) + logic lens 에 **과대일반화 flag**(인용 근거보다 넓은 주장 = #1 우선,
+  최대 실패모드 51% — formative-only, citation-safe 경계로 자동 FAIL 아님, assumption=FRAGILE 형제).
+- **learn 이원화 — `venue.prose_defaults`** (`references/learning-protocol.md` enum +
+  `references/venues.md` `voice`/`prose_defaults` 필드). 보편 글쓰기 명제(old→new·em-dash 캡)는
+  venue-강제 default 로 승격(사람 게이트), user/venue 특이 *표현 선호*는 wiki `pattern/`
+  light(advisory). citation/.bib 는 영구 비승격(§6.F) 유지.
+
+### Verification
+- 신규 회귀 가드 6 파일 45 tests (writing-craft 카드 7섹션·drafter skeleton/self-audit·planner
+  수사 축 직교+v0.4.0 회귀·verify WARN≠FAIL·inspect 렌즈·learn 이원화). 53 → **98 passed**.
+- reviewer 2-lane PASS: spec-compliance(6 컴포넌트 전부 COMPLIANT, 불변식·비목표 준수) +
+  code-quality(ship-ready, CRITICAL/MAJOR 0, MINOR tautology 1건 반영).
+
+### Notes
+- **WARN ≠ FAIL** 근거: 글쓰기 규칙은 정적 blocklist 가 부패하고(저자들이 'delve' 회피 시작)
+  문맥상 정당한 사용이 섞여(과검출) 강제 FAIL 은 false-positive — 검출은 WARN/formative 로만.
+- **repo/project 경계**: writing-craft.md 는 모든 사용자에게 배포되는 *보편* 규칙. 이 논문/이
+  사용자 특이 표현은 per-project `.oms/wiki/pattern/`(light)에만 — 배포 카드에 누출 금지(전 파일
+  고유명사 0 가드).
+- 설계·계획: `docs/specs/2026-06-01-writing-craft-injection/{design,plan}.md`.
+- ⚠️ runtime 반영은 marketplace update + 앱 restart 후(plugin 캐시 reload).
+
 ## [0.4.0] — 2026-05-31
 
 ### Added

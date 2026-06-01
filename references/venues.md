@@ -28,6 +28,11 @@ regression_threshold: # 점수 하락 허용치 (기본 5)
 min_citations:   # 최소 인용 수
 self_citation_max_ratio: # 자기인용 상한 (기본 0.20)
 review_weights:  # {logic: 1.0, prose: 0.8, ...} inspect 가중
+voice:           # active | passive | mixed — 태 선호 (STEM 기본 mixed: method 수동·기여 능동). 규칙 SSOT = writing-craft.md §5
+prose_defaults:  # 이 venue 에 강제된 *보편 글쓰기 명제* 목록 (scholar-learn 승격분). 예: [old_new_flow, em_dash_cap]
+                 #   값은 writing-craft.md 규칙의 *키*만 — 규칙 본문은 writing-craft.md 가 SSOT(여기 재나열 금지).
+                 #   user/venue 특이 *표현 선호*는 여기 아니라 wiki pattern/(light, advisory)로 간다(learning-protocol 이원화).
+                 #   exemplars: 스타일 모방용 ~5개 무작위 대표 문단 경로(유사도-curated/embedding 금지 — writing-craft.md §6).
 
 # ── ⭐ self-specialization 메타 (H5 — heavy-channel backport, 2026-05-31) ──
 specificity:     # 0..1 — 이 venue 기본값 중 *학습으로 굳은* 비율 (0=순수 템플릿 default, 1=완전 사용자 특화)
