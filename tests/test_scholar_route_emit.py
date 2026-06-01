@@ -119,3 +119,18 @@ def test_fail_open_on_bad_input():
         input="not json at all", capture_output=True, text=True,
     )
     assert proc.returncode == 0
+
+
+def test_context_states_knowledge_ssot_first_rule():
+    """⑧ 지식 SSOT 우선 규율: 양식·구조 판단 시 소스/일반론/기억보다
+    프로젝트의 .oms/wiki/convention/ 과 references/ 를 먼저 읽으라는 contract.
+
+    회귀 배경: 양식(가로 전면 그림 허용 여부) 질문에 .cls 부재만 보고
+    '신뢰할 출처 없음'으로 단정한 뒤에야 .oms/wiki 양식 카드를 뒤늦게 찾은
+    사고. wiki 에 답이 있는데 일반론으로 추측·단정하는 것을 결함으로 명시하고,
+    wiki 확인 전에는 '출처 없음' 선언조차 금지하도록 contract 에 못박는다."""
+    out = context_of(run_hook({"prompt": "이 논문 양식에 가로로 긴 그림 전면 배치 되나?"}))
+    assert ".oms/wiki/convention/" in out
+    assert "references/" in out
+    assert "먼저" in out   # 소스/일반론보다 wiki 를 '먼저'
+    assert "결함" in out   # wiki 두고 일반론 단정 = 결함 명시
