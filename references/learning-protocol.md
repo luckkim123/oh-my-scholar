@@ -426,6 +426,47 @@ wiki. This is the load-bearing oms invariant — violating it makes oms citation
 
 ---
 
+## 8. SSOT reading order (read before you write or critique)
+
+This card is about *learned* knowledge (the wiki/venues channels). But the same trust model
+applies to a paper's **own SSOT** — the per-project authority files that say what this paper
+*currently* is. Skills that write (`scholar-draft`, `scholar-revise`) or critique
+(`scholar-inspect`, `scholar-verify`) MUST read the SSOT *first*, in this priority order,
+before acting:
+
+```
+1st (authority — read first, every time):
+   .oms/<slug>/outline/outline.md        ← current section structure, story arc,
+                                             contribution↔section mapping, word budget
+   .oms/<slug>/methodology/*.md          ← each method/equation's source, meaning, assumptions
+
+2nd (secondary — supporting only, may be stale):
+   .oms/<slug>/research/*.md             ← related-work map / gaps (can be outdated post-ideate)
+   research_summary/ · code_survey/*     ← code/repo inventory notes (NOT authority on
+                                             chapter-axis or scope; structure redesigns
+                                             leave their chapter numbers stale)
+```
+
+**Why the order is load-bearing.** The 1st-tier files are the *current* design; the 2nd-tier
+notes are a snapshot of an earlier moment. A code-survey note that says "method X → Chapter 3"
+was true under an *old* outline; if the chapter axis was later restructured, that "Chapter 3"
+now points nowhere. Judging a draft (esp. the logic lens's "contribution↔evidence" check)
+against a 2nd-tier note instead of the current outline produces confident-but-wrong verdicts —
+mis-mapped contributions, scope mismatches, "this method is out of scope" calls that the
+outline contradicts.
+
+**Two rules that follow:**
+- **Never treat absence-from-outline as "out of scope."** If a method is in the code but not
+  in the outline, that is *either* a deliberate exclusion *or* an un-synced omission — you
+  cannot tell from the notes alone. Ask the human whether the actual experiment used it.
+- **The outline is the chapter-axis authority.** When a 2nd-tier note's section number
+  disagrees with the outline, the outline wins; the note is stale.
+
+(This is the per-project mirror of the wiki/venues trust model: 1st-tier SSOT is to a single
+paper what `venues.md` defaults are to the user's whole corpus.)
+
+---
+
 ## See also
 
 - `references/output-layout.md` — where `.oms/` files live; the paper-slug / wiki layout.

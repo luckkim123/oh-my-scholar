@@ -239,3 +239,7 @@ order = version number order = sort order, always.
 - [ ] `.gitignore` excludes `.oms/` and `outputs/*` (keep `outputs/.gitkeep`)
 - [ ] slug rule (§1.1) applied at research/intake (non-ASCII → ask once for an ASCII slug)
 - [ ] terminal cleanup (§5) goes through AskUserQuestion + trash + excludes the PDF and the source
+- [ ] **`.tex`↔`.oms` sync** (`learning-protocol.md` §8): after `scholar-draft`/`scholar-revise` makes a
+      structure-affecting `.tex` change (section move/merge/split, title change, major equation, \cite added),
+      `.oms/<slug>/outline/outline.md` + relevant `.oms/<slug>/methodology/*.md` (+ decision log if present)
+      are updated to match the `.tex` **in the same task** — a "revise PASS" is not complete until they agree
