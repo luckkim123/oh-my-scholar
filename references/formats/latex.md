@@ -30,6 +30,16 @@
 - **섹션 모듈화**: `sections/*.tex` 분리, `main.tex`에서 `\input`/`\subfile`
 - **인용은 `\cite{key}`**, .bib에서 centralized 관리 (bibtex.md 카드 참조)
 - **figure 캡션** non-empty, subfigure 라벨 일관
+- **abstract = 질적 의미만, 정량 수치·수식 금지** (drafter 규칙 + verifier WARN 검출):
+  - abstract 영역에는 정량 수치·배수·임계치·인라인 수식을 넣지 않는다. 속도값·성공률·factor(예: `N×`)·임계치(예: `≤ X m`)·`$...$` 수식은 모두 본문 Results 로 미룬다. abstract 에는 질적 표현만('faster'/'robust'/'real-time'/'by an order of magnitude' 등).
+  - **왜**: 본문과 중복이고, 맥락(baseline·조건) 없는 수치는 reviewer 의심을 사며, 수식이 평문 흐름을 끊는다. 학술지·Science·학위 공통 강한 관례.
+  - **verifier 검출 (WARN, FAIL 아님)** — 이 토큰 목록이 검출의 SSOT(verifier·테스트는 여기를 따른다, 재정의 금지):
+    - abstract 영역 추출: `\begin{abstract}`~`\end{abstract}` 환경, 또는 학위논문은 `ABSTRACT` 헤더~다음 `\clearpage`/`\chapter`. ⚠️ **둘 다 없으면 검사 skip(N/A) — 전체 문서 grep 금지** (abstract 못 찾았다고 본문 전체를 긁으면 Results 의 모든 수치가 오검출된다).
+    - 주석(`%`로 시작하는 줄)은 출력 안 되므로 검사에서 제외.
+    - grep 토큰: 인라인 수식 `$`; 배수 `\times`·유니코드 `×`·`[0-9][0-9.]*\s*\\?times`(escape 유무 무관, "5 times" 류 포함 — WARN 이라 과검출 허용); 부등호 LaTeX `\le`/`\geq` 와 유니코드 글리프 `≤`/`≥`; 수치+단위 `[0-9][0-9.]*\s*~?(m|cm|mm|km|s|ms|Hz|kHz|kg|g|dB|rad|deg|%|MB|GB)\b`(끝 `\b` 가 "6 missions" 류 오검출을 막는 load-bearing); 퍼센트 `[0-9][0-9.]*\s*\\?%`.
+    - 1건 이상 = WARN(전체 PASS 막지 않음). 0건 = PASS. ⚠️ 멀티바이트(`×·§·≤`) grep 은 환경(C-locale)에 따라 거짓 0건 가능 — 잔여 0건 확정은 Python `re`로 재확인(`LC_ALL=C grep` 단독 신뢰 금지).
+    - ⚠️ WARN 히트는 사람 확인 대상(단위처럼 보이는 영어 단어 `2 m`·`3 s` 같은 드문 오검출이 섞일 수 있음 — WARN 이라 무방).
+  - **venue 변주**: 일부 venue 가 abstract 핵심 수치 1개를 허용하므로 강제 FAIL 아님 — 검출만 하고 판정은 사람. (paper-eval.md verify 축 `abstract 규율 (WARN)` 행과 짝.)
 
 ## 4. 함정
 

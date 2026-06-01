@@ -26,8 +26,11 @@
 | placeholder | TODO/FIXME 잔존 0 | latex.md §1 |
 | 인용 정합 | `\cite` ↔ .bib, DOI 실재 | bibtex.md §1·2 |
 | 페이지/인용수 | venue page_limit·min_citations | venues.md |
+| abstract 규율 (WARN) | abstract 영역에 정량 수치·수식·배수 잔존 0 (질적 의미만) | latex.md §3 |
 
 **FAIL이면 무엇이 왜 실패했는지 증거(로그 라인·grep 결과)와 함께.** "should/probably/seems" 금지 — fresh 증거만.
+
+> **WARN ≠ FAIL** (venue 메타 정합과 동일 처리): `abstract 규율` 위반은 전체 PASS 를 막지 않고 **경고(WARN)**로만 보고한다. 근거 — abstract 에 정량 수치를 넣지 않는 것은 학술지·Science·학위 공통 강한 관례지만, 일부 venue(예: 특정 IEEE letter)는 핵심 수치 1개를 abstract 에 허용하기도 해 강제 FAIL 은 false-positive 위험이 있다. 따라서 검출은 하되 판정은 사람에게 맡긴다. (정량 수치는 본문 Results 로 미루는 것이 기본 — abstract = 질적 의미만.)
 
 ## inspect 축 (formative — 판단형 비평)
 

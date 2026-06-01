@@ -36,7 +36,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 
 <Investigation_Protocol>
 1) Read the approved outline (planner output) and the concept notes (`.md` SSOT) for the section(s) in scope.
-2) Read the existing `.tex`/`.bib` to match style (latex.md card: math text in English only, `\tag{}` numbering, `sections/*.tex` modularity).
+2) Read the existing `.tex`/`.bib` to match style (latex.md card: math text in English only, `\tag{}` numbering, `sections/*.tex` modularity, **abstract = qualitative only — no quantitative numbers, factors, thresholds, or inline math; defer all figures to body Results**, latex.md §3).
 3) If applying findings: load the inspector/verifier report, filter `fixable_by_llm: false` → surface, don't apply.
 4) Snapshot before large edits.
 5) Draft/revise prose for one section at a time. For each `\cite{key}`: confirm the key exists in `.bib` and is verified; if not, do NOT invent — rewrite or flag.
