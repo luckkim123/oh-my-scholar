@@ -37,17 +37,18 @@ draft된 .tex에 코드 리뷰를 건다. scholar-inspector(읽기전용)에게 
 </Execution_Policy>
 
 <Steps>
-1. 대상 .tex 파일 경로와 비평 범위(전체 또는 특정 섹션) 확인.
-2. `Task(subagent_type="oh-my-scholar:scholar-inspector", ...)` 위임 (logic·prose 병렬 dispatch 가능):
-   - 입력: .tex 파일 경로, 비평 범위, paper-eval.md 루브릭(inspect 축), latex.md 카드
+1. **SSOT 먼저 읽기 (필수, `references/learning-protocol.md` §8)** — .tex만 보고 비평하지 말 것. logic 렌즈가 "기여-증거 대응"을 판단하려면 *무엇이 이 논문의 진짜 기여·챕터축·절배치인지*를 1차 SSOT에서 알아야 한다. 비평 전 반드시 `.oms/<slug>/outline/outline.md`(현행 섹션 구조·story arc·기여 매핑)와 `.oms/<slug>/methodology/*.md`(각 방법·수식의 출처·의미)를 읽어 현행 상태를 파악한다. `research_summary/`·code_survey 노트는 2차 보조일 뿐 — 챕터축·스코프 판단의 권위가 아니다(구조 재설계로 stale될 수 있음). SSOT를 건너뛰면 outdated 노트를 기준으로 오판한다.
+2. 대상 .tex 파일 경로와 비평 범위(전체 또는 특정 섹션) 확인.
+3. `Task(subagent_type="oh-my-scholar:scholar-inspector", ...)` 위임 (logic·prose 병렬 dispatch 가능):
+   - 입력: .tex 파일 경로, 비평 범위, **현행 outline·methodology SSOT 경로(§1에서 읽은 것)**, paper-eval.md 루브릭(inspect 축), latex.md 카드
    - 지시:
-     - **logic 렌즈**: 기여-증거 대응, 구조 논리, 기저선 비교, devil's advocate
+     - **logic 렌즈**: 기여-증거 대응(현행 outline 기준), 구조 논리, 기저선 비교, devil's advocate
      - **prose 렌즈**: 학술 문체, 과장 규율, 반복, 전환, 문장 길이
      - 각 finding: severity(critical/important/minor) + location(.tex 섹션·줄) + issue + evidence(.tex 원문 인용) + suggestion + fixable_by_llm(true/false)
      - PASS/FAIL 판정 출력 금지
-3. inspector 산출 수령 — finding 목록 취합.
-4. 요약 출력: severity별 finding 수 + critical 항목 우선 나열 + fixable_by_llm 분류.
-5. "수정 원하면 → scholar-revise, 게이트 판정 원하면 → scholar-verify" 안내.
+4. inspector 산출 수령 — finding 목록 취합.
+5. 요약 출력: severity별 finding 수 + critical 항목 우선 나열 + fixable_by_llm 분류.
+6. "수정 원하면 → scholar-revise, 게이트 판정 원하면 → scholar-verify" 안내.
 </Steps>
 
 <Output>

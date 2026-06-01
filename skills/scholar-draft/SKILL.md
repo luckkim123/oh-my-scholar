@@ -45,4 +45,6 @@ description: |
 
 <Output>
 drafter가 쓴 .tex/.bib 파일 목록(프로젝트 소스 폴더) + 스냅샷 위치(`.oms/<slug>/versions/`) + 사람 확인 필요 목록(미검증 인용 등) + "scholar-verify로 넘길 준비됨" (self-approve 안 함 명시).
+
+⚠️ **완료조건 — .tex↔.oms 동기화 (`references/learning-protocol.md` §8)**: draft가 outline 대비 **구조에 영향 주는 변경**(섹션 신설·이동·제목 변경, 주요 수식 도입, \cite 추가)을 만들었으면, **같은 작업 안에서** `.oms/<slug>/outline/outline.md`(섹션 트리·인용 의존 매핑)와 관련 `.oms/<slug>/methodology/*.md`(반영된 개념·수식)를 현 .tex와 일치하도록 갱신한다. 단순 산문 교정(구조 무변경)은 갱신 불필요. 갱신을 빠뜨리면 outline이 stale되어 다음 inspect/verify가 옛 구조를 기준으로 오판한다 — drift 금지.
 </Output>

@@ -4,6 +4,27 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+### Fixed
+- **SSOT 읽기 우선순위 강제 (결함 A)** — 사실검증/작성 스킬이 작업 시작 시 1차 SSOT
+  (`.oms/<slug>/outline/outline.md` + `methodology/*.md`)를 먼저 읽도록 강제하는 메커니즘이
+  없어, 2차 자료(`research_summary/code_survey/*`)부터 읽혀 구조 재설계로 stale된 노트의
+  챕터 번호를 현행 구조에 잘못 매핑하는 오판이 가능했다. 처방: `references/learning-protocol.md`
+  §8(SSOT reading order — 1차 outline·methodology > 2차 research·code_survey, "부재≠스코프밖"
+  + "outline=챕터축 권위" 두 규칙) 신설 + `scholar-inspect` Steps §1 에 SSOT 먼저 읽기 강제
+  (inspect 가 .tex 만 읽던 진짜 공백 자리). draft 는 기존 "⚠️ .md SSOT 우선"(L31)이 이미
+  충족해 미변경(중복 회피).
+- **`.tex`↔`.oms` 동기화 완료조건 명문화 (결함 B)** — `.tex` 구조 변경(절 이동·제목 변경·수식
+  교체·\cite 추가) 후 같은 작업 안에서 outline·methodology·결정기록을 갱신하라는 완료조건이
+  없어 .oms 가 stale 로 남는 drift 가 발생했다(omp "organize 후 인덱스 sync 완료조건" 동형).
+  처방: `scholar-draft`·`scholar-revise` `<Output>` 에 동기화 완료조건(revise 는 결정기록
+  `SECTION_REVIEW_DECISIONS`류 포함) + `references/output-layout.md` §6 체크리스트 항목.
+  단순 산문 교정(구조 무변경)은 면제. verify 재실행 강제는 과중으로 제외.
+
+### Added
+- **회귀 테스트** `tests/test_ssot_priority_and_sync.py` (7건) — 결함 A·B 메커니즘 드리프트 가드
+  (learning-protocol §8 존재·읽기순서, inspect SSOT-first, draft·revise 동기화 완료조건,
+  output-layout 체크리스트). 96 → 103 passed.
+
 ## [0.5.0] — 2026-06-01
 
 ### Added

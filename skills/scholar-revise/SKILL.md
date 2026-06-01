@@ -51,5 +51,8 @@ description: |
 
 <Output>
 PASS 받은 .tex/.bib + 반복 이력(각 회차 FAIL→수정 요지) + 최종 verify 증거표 + 사람 escalation 목록(fixable=false·미검증 인용).
+
+⚠️ **완료조건 — .tex↔.oms 동기화 (`references/learning-protocol.md` §8)**: revise 루프가 outline 대비 **구조에 영향 주는 변경**(섹션 이동·통합·분리, 제목 변경, 주요 수식 교체, \cite 추가)을 만들었으면 — revise 루프 중엔 섹션 통합·분리가 흔하다 — PASS 후 **같은 작업 안에서** `.oms/<slug>/outline/outline.md`와 관련 `.oms/<slug>/methodology/*.md`, 그리고 결정기록(`.oms/<slug>/outline/SECTION_REVIEW_DECISIONS.md`류가 있으면 거기에 무엇을 왜 바꿨는지 한 블록)을 현 .tex와 일치시킨다. 이 동기화가 끝나야 "revise PASS" 인정. 빠뜨리면 .oms가 stale되어 다음 세션의 draft/inspect가 옛 구조 기준으로 오판한다 — drift 금지.
+
 또는 stop 보고(같은 결함 3회 / regression / 최대 반복 초과 + 남은 결함).
 </Output>
