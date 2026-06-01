@@ -17,6 +17,13 @@
 - **자기인용 비율**: 저자명 제공 시 self-citation ratio 계산, venue `self_citation_max_ratio`(기본 0.20) 초과 = 경고.
 - **최소 인용 수**: venue `min_citations` 미만 = 경고.
 
+> **외부 검증 패턴 — zero-assumption multi-DB**: 어떤 인용도 신뢰하지 않고 *모든* reference를
+> 다중 DB(Semantic Scholar·CrossRef·arXiv)에 독립 대조하는 게 검증된 패턴이다. 한 연구는
+> 2,581 refs를 이 방식으로 91.7% 검증하며 fabricated/retracted/orphan/predatory를 탐지했다
+> ([Zero-Assumption Protocol, arXiv:2511.04683](https://arxiv.org/abs/2511.04683)). oms의 위
+> DOI/존재 검증은 이 패턴의 부분 구현 — 가능하면 단일 DB가 아니라 다중 DB 교차 대조로 확장.
+> ⚠️ 이는 *탐지* 강화일 뿐 — 자동수정은 §3에 따라 영구 금지(검증은 결함 플래그, 수정은 사람).
+
 ## 3. ⚠️ citation 자동 수정 금지 (oms 핵심 원칙)
 
 verifier·hook은 **감지·경고만** 한다. 절대 하지 않는 것:

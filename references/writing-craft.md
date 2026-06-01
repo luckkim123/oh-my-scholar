@@ -30,6 +30,7 @@
 - **forward-reference**: 각 기여 bullet 은 그 증거를 forward-reference(Section X)한다. ⚠️ "The rest of this paper is structured as follows…" 금지 — 기여 bullet 의 forward-reference 가 그 역할을 대신. [Peyton Jones]
 - **TEEL 문단**: 본문 문단 = Topic sentence(요점 먼저) → Evidence(데이터·인용) → Explanation(해석) → Link(다음 논지로). [academic-research-skills]
 - **과대일반화(overgeneralization) 경고 — 최대 실패모드**: 인용 근거보다 넓은 주장이 LLM 의 #1 hallucination(실증 51%, 발명된 논문보다 흔함). 주장의 폭을 그 근거의 폭에 맞춘다. [AutoSurvey 오류분류]
+- **LLM 학술글쓰기 추가 실패모드 (drafter 가 빠지는 함정)**: 외부가 문서화한 실패모드 중 위 과대일반화 외에 별도로 경계할 것 — ① **수치 hallucination**(그럴듯하나 source data 와 불일치하는 통계·수치) → 모든 정량 주장은 결과 노트에 대조 ② **method 일반화**(구체 구현 대신 표준 method 를 기술) → method 절은 *이* 시스템의 실제 구현을 쓴다. (③ 용어 혼동 = 관련 용어를 호환 취급은 §1 banana rule 의 이면 — 거기로.) ⚠️ blog 출처(drafter 규칙으로 채택, 인용 주장 아님 — §출처 honesty). [manuelcorpas 2026-01 / 전역 wiki reference]
 
 ## §4. STRUCTURE — 논문·섹션 구조
 
@@ -45,7 +46,7 @@
 
 ## §6. EXEMPLAR — 스타일 모방
 
-- **~5개 무작위 대표 문단**: 목표 venue/저자의 실제 문단 ~5개를 verbatim exemplar 로 프롬프트에 주입한다. ⚠️ **유사도-curated 선택 금지(역효과 실증) — *무작위 대표* 표본**. ~5개 초과 금지(plateau). **embedding/임베딩 검색 영구 금지**(oms anti-embedding 정합). venues.md 의 `voice`/`exemplars` 필드로 공급. [EMNLP 2025 style-imitation]
+- **~5개 무작위 대표 문단**: 목표 venue/저자의 실제 문단 ~5개를 verbatim exemplar 로 프롬프트에 주입한다. ⚠️ **유사도-curated 선택 금지(역효과 실증) — *무작위 대표* 표본**. ~5개 초과 금지(plateau). **embedding/임베딩 검색 영구 금지**(oms anti-embedding 정합). venues.md 의 `voice`/`exemplars` 필드로 공급. [EMNLP 2025 style-imitation; introduction few-shot 도 3-shot 후 plateau 재확인 — arXiv:2508.14273 (self-verified)]
 
 ## §7. 기계 체크 토큰 (verifier WARN 검출 SSOT)
 

@@ -28,6 +28,7 @@ description: |
 <Execution_Policy>
 - ⚠️ **인용 날조 금지** — researcher agent가 강제. 존재하지 않는 논문·저자·연도 생성 절대 금지. 미확인 출처는 flag로 남기고 사람에게 확인 요청.
 - ⚠️ **병렬 읽기는 OK, 병렬 인용 생성은 금지** — 여러 자료를 동시에 읽고 분석하는 것은 허용. 단, 인용 항목 자체를 여러 agent가 병렬 생성하면 hallucination 증폭.
+- ⚠️ **passage-level grounding** — 인용은 abstract 만 보고 만들지 말고 cited text span(전문 passage)에 grounding 한다. abstract-only 조건이 passage-level 보다 hallucination 이 많다는 실증 ([arXiv:2309.06365](https://arxiv.org/abs/2309.06365), self-verified). research(검색)→draft(생성) 분리가 knowledge-hallucination 을 줄이는 구조적 이유 ([arXiv:2510.24476](https://arxiv.org/abs/2510.24476)). 외부 지형 전체: 전역 wiki `reference/llm-paper-writing-landscape.md`.
 - 산출물은 .md 연구노트 — .tex 직접 작성 금지. 노트가 ideate/outline/draft의 입력이 됨.
 - researcher는 self-approve 금지 — 노트 산출 후 사람 검토 권장.
 </Execution_Policy>

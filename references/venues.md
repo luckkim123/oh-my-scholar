@@ -27,6 +27,12 @@ max_review_rounds: # revise 루프 최대 (기본 5)
 regression_threshold: # 점수 하락 허용치 (기본 5)
 min_citations:   # 최소 인용 수
 self_citation_max_ratio: # 자기인용 상한 (기본 0.20)
+llm_policy:       # 이 venue 의 LLM-사용 정책 (drafter 가 disclosure 제안, verify 가 author-책임 환기)
+                 #   {author_responsible: true, llm_authorship: forbidden, citation_verification: required, prompt_injection: forbidden, disclosure: required|optional}
+                 #   ⚠️ self-verified 등급 — venue 정책은 매년 갱신되니 *제출 전 정책 원문 1차 대조 필수*.
+                 #   근거(2026-06 조사): NeurIPS 2025/ICML 2026/ICLR — LLM 저자 금지 + 저자가 모든 citation 실재·정확 검증 책임,
+                 #   ICML 은 prompt injection 금지 명시. 출처: neurips.cc/Conferences/2025/LLM. 전역 wiki reference 에 지형.
+                 #   oms 활용: draft 가 산출 논문에 LLM-use acknowledgment(CLASSICA 3기준: 검증·실질기여·투명성)를 제안, verify 가 "모든 citation 저자 검증 책임" 환기.
 review_weights:  # {logic: 1.0, prose: 0.8, ...} inspect 가중
 voice:           # active | passive | mixed — 태 선호 (STEM 기본 mixed: method 수동·기여 능동). 규칙 SSOT = writing-craft.md §5
 prose_defaults:  # 이 venue 에 강제된 *보편 글쓰기 명제* 목록 (scholar-learn 승격분). 예: [old_new_flow, em_dash_cap]
@@ -64,6 +70,7 @@ max_review_rounds: 5
 min_citations: 15
 self_citation_max_ratio: 0.20
 review_weights: {logic: 1.0, prose: 0.8}
+llm_policy: {author_responsible: true, llm_authorship: forbidden, citation_verification: required, prompt_injection: forbidden, disclosure: required}
 ```
 
 ## 예시 — POSTECH 석사논문 (thesis)

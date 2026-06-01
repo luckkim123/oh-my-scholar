@@ -401,6 +401,15 @@ candidates**. A `candidate_default.target` naming `citation`/`bib`/a specific re
 `.tex`/`.bib` SSOT of a paper-slug; they never become a learned default and never enter the
 wiki. This is the load-bearing oms invariant — violating it makes oms citation-unsafe.
 
+> **외부 정당화 (왜 이 불변식이 과잉이 아닌가)**: 인용은 "실재하나(correctness)"만으론
+> 부족하다 — 모델이 실제로 그 문서에 의존하지 않고 사후 정당화(post-rationalization)하면
+> *unfaithful*이고, 측정 결과 최대 57%의 인용이 faithfulness를 결여한다
+> ([Correctness is not Faithfulness in RAG Attributions, arXiv:2412.18004](https://arxiv.org/abs/2412.18004)).
+> 최첨단 autonomous 논문 시스템(Zochi)조차 citation formatting을 의도적으로
+> human-in-the-loop으로 남긴다 ([intology.ai/blog/zochi-acl](https://www.intology.ai/blog/zochi-acl)).
+> oms가 인용을 자동 승격·자동 수정하지 않는 것은 시류 정합이다. (외부 지형 전체:
+> 전역 wiki `reference/llm-paper-writing-landscape.md`.)
+
 ---
 
 ## 7. End-to-end trace (how one learned default happens)
