@@ -121,6 +121,33 @@ def test_fail_open_on_bad_input():
     assert proc.returncode == 0
 
 
+def test_context_states_oms_mandatory_no_skip():
+    """⑨ oms 강제(skip 금지): 논문 작업이면 직접 수행하거나 OMC 병렬로 때우지
+    말고 *반드시* oms STAGE 를 경유하라는 강제 문구가 contract 에 박혀야.
+
+    배경(사용자 요청 2026-06-02): omha 가 도메인 우선으로 oms 를 1순위 진입시키는
+    것과 짝을 이뤄, oms 자신의 라우팅 hook 도 '논문인데 oms 안 쓰고 직접 처리'를
+    명시적으로 금지한다. citation 무결성 가드가 oms 안에만 있으므로, oms 를
+    건너뛰면 그 가드도 건너뛰는 셈 — 이 인과를 contract 가 밝혀야 한다.
+    SSOT: workspace .sp/specs/2026-06-02-oms-wiki-and-domain-routing-design.md §3.5."""
+    out = context_of(run_hook({"prompt": "이 논문 introduction 초안 써줘"}))
+    assert "반드시" in out                      # 강제 톤
+    # 직접 수행/skip 금지 의미가 명시돼야
+    assert ("직접 수행" in out or "직접 처리" in out or "건너뛰" in out)
+    # oms 를 건너뛰면 citation 가드도 건너뛴다는 인과 (왜 강제인지)
+    assert ("무결성" in out or "가드" in out)
+
+
+def test_oms_mandatory_does_not_block_session():
+    """⑨-b 강제 문구는 advisory(주입)일 뿐 fail-open 을 깨지 않아야 — exit 0 유지."""
+    proc = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps({"prompt": "논문 verify"}),
+        capture_output=True, text=True,
+    )
+    assert proc.returncode == 0
+
+
 def test_context_states_knowledge_ssot_first_rule():
     """⑧ 지식 SSOT 우선 규율: 양식·구조 판단 시 소스/일반론/기억보다
     프로젝트의 .oms/wiki/convention/ 과 references/ 를 먼저 읽으라는 contract.
