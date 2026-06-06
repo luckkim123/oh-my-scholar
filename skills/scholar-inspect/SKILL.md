@@ -1,60 +1,60 @@
 ---
 name: scholar-inspect
 description: |
-  .tex 초안을 formative 비평 — logic·prose 두 렌즈로 개선점을 찾아 돌려준다.
-  판단형 코드 리뷰. PASS/FAIL 안 냄 — 그건 scholar-verify 몫.
-  읽기전용이라 병렬 inspector dispatch 가능.
-  Triggers: 검토해줘, 비평, 리뷰해줘, 개선점, inspect, 피드백, 논리 봐줘, 문체 봐줘
+  Formative critique of a .tex draft — finds improvement points through two lenses, logic and prose, and returns them.
+  Judgment-style code review. Does NOT issue PASS/FAIL — that is scholar-verify's job.
+  Read-only, so parallel inspector dispatch is possible.
+  Triggers: 검토해줘, 비평, 리뷰해줘, 개선점, inspect, 피드백, 논리 봐줘, 문체 봐줘, review, critique, feedback, check logic, check prose
 ---
 
-# scholar-inspect — 논문 초안 formative 비평
+# scholar-inspect — formative critique of a paper draft
 
 <Purpose>
-draft된 .tex에 코드 리뷰를 건다. scholar-inspector(읽기전용)에게 위임해 logic·prose 두 렌즈로 개선점을 찾아 반환한다. 코드의 "코드 리뷰" — 판단형이지 기계 게이트가 아니다.
+Run a code review on a drafted .tex. Delegates to scholar-inspector (read-only) to find improvement points through two lenses, logic and prose, and returns them. The "code review" of code — judgment-style, not a mechanical gate.
 
-⚠️ **PASS/FAIL을 내지 않는다.** 통과·실패 판정이 목적이면 scholar-verify를 쓸 것. 여기서 나오는 것은 severity 분류된 개선점 목록이며, 최종 판단은 사람이 한다.
+⚠️ **Does not issue PASS/FAIL.** If your goal is a pass/fail verdict, use scholar-verify. What comes out here is a severity-classified list of improvement points; the final judgment is made by a human.
 </Purpose>
 
 <Use_When>
-- draft/revise 후 제출 전에 논리·문체 개선점을 비평받고 싶을 때
-- 기여-증거 대응, 구조 논리, 학술 문체, 과장 표현을 점검받고 싶을 때
-- 수정 우선순위를 잡기 위해 severity 분류된 피드백이 필요할 때
+- After draft/revise, before submission, when you want logic and prose improvement points critiqued
+- When you want contribution-evidence correspondence, structural logic, academic prose, and overclaiming checked
+- When you need severity-classified feedback to prioritize revisions
 </Use_When>
 
 <Do_Not_Use_When>
-- 통과/실패 게이트 판정이 필요하면 → scholar-verify
-- 비평 결과를 바로 .tex에 반영하고 싶으면 → scholar-revise
-- 아직 draft가 없으면 → scholar-draft 먼저
-- 개념이 .md에 굳지 않은 상태면 → scholar-ideate 먼저
+- If you need a pass/fail gate verdict → scholar-verify
+- If you want to apply the critique results directly to the .tex → scholar-revise
+- If there is no draft yet → scholar-draft first
+- If the concepts are not yet settled in .md → scholar-ideate first
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- ⚠️ **PASS/FAIL 판정 금지** — inspector가 "통과" "실패" "거절" 같은 게이트 언어를 쓰면 이 분리가 무너진다. finding은 severity(critical/important/minor) + 개선 제안으로만.
-- ⚠️ **읽기전용** — inspector는 .tex/.bib를 수정하지 않는다. 비평만.
-- ⚠️ **self-approval 금지** — drafter와 inspector는 다른 lane. 자기가 쓴 draft를 자기가 inspect하지 않는다.
-- logic과 prose는 독립적이므로 inspector를 병렬 dispatch해도 안전(읽기전용).
-- fixable_by_llm=false 항목(실험 누락·기여 범위 변경 등)은 자동 수정 시도 금지 — 사람 플래그만.
+- ⚠️ **No PASS/FAIL verdict** — if the inspector uses gate language like "pass," "fail," or "reject," this separation collapses. A finding must be only severity (critical/important/minor) + an improvement suggestion.
+- ⚠️ **Read-only** — the inspector does not modify .tex/.bib. Critique only.
+- ⚠️ **No self-approval** — the drafter and the inspector are different lanes. You do not inspect a draft you wrote yourself.
+- Since logic and prose are independent, dispatching inspectors in parallel is safe (read-only).
+- For fixable_by_llm=false items (missing experiments, contribution-scope changes, etc.), do not attempt automatic fixes — human flag only.
 </Execution_Policy>
 
 <Steps>
-1. **SSOT 먼저 읽기 (필수, `references/learning-protocol.md` §8)** — .tex만 보고 비평하지 말 것. logic 렌즈가 "기여-증거 대응"을 판단하려면 *무엇이 이 논문의 진짜 기여·챕터축·절배치인지*를 1차 SSOT에서 알아야 한다. 비평 전 반드시 `.oms/<slug>/outline/outline.md`(현행 섹션 구조·story arc·기여 매핑)와 `.oms/<slug>/methodology/*.md`(각 방법·수식의 출처·의미)를 읽어 현행 상태를 파악한다. `research_summary/`·code_survey 노트는 2차 보조일 뿐 — 챕터축·스코프 판단의 권위가 아니다(구조 재설계로 stale될 수 있음). SSOT를 건너뛰면 outdated 노트를 기준으로 오판한다.
-2. 대상 .tex 파일 경로와 비평 범위(전체 또는 특정 섹션) 확인.
-3. `Task(subagent_type="oh-my-scholar:scholar-inspector", ...)` 위임 (logic·prose 병렬 dispatch 가능):
-   - 입력: .tex 파일 경로, 비평 범위, **현행 outline·methodology SSOT 경로(§1에서 읽은 것)**, paper-eval.md 루브릭(inspect 축), latex.md 카드
-   - 지시:
-     - **logic 렌즈**: 기여-증거 대응(현행 outline 기준), 구조 논리, 기저선 비교, devil's advocate
-     - **prose 렌즈**: 학술 문체, 과장 규율, 반복, 전환, 문장 길이
-     - 각 finding: severity(critical/important/minor) + location(.tex 섹션·줄) + issue + evidence(.tex 원문 인용) + suggestion + fixable_by_llm(true/false)
-     - PASS/FAIL 판정 출력 금지
-4. inspector 산출 수령 — finding 목록 취합.
-5. 요약 출력: severity별 finding 수 + critical 항목 우선 나열 + fixable_by_llm 분류.
-6. "수정 원하면 → scholar-revise, 게이트 판정 원하면 → scholar-verify" 안내.
+1. **Read the SSOT first (required, `references/learning-protocol.md` §8)** — do not critique by looking only at the .tex. For the logic lens to judge "contribution-evidence correspondence," it must know *what this paper's true contributions, chapter axis, and section placement actually are* from the primary SSOT. Before critiquing, you must read `.oms/<slug>/outline/outline.md` (current section structure, story arc, contribution mapping) and `.oms/<slug>/methodology/*.md` (the source and meaning of each method and equation) to grasp the current state. The `research_summary/` and code_survey notes are only secondary aids — they are not the authority for chapter-axis and scope judgments (they can go stale through structural redesign). If you skip the SSOT, you will misjudge against outdated notes.
+2. Confirm the target .tex file path and the critique scope (whole document or a specific section).
+3. Delegate via `Task(subagent_type="oh-my-scholar:scholar-inspector", ...)` (logic and prose can be dispatched in parallel):
+   - Inputs: .tex file path, critique scope, **current outline and methodology SSOT paths (the ones read in §1)**, paper-eval.md rubric (inspect axes), latex.md card
+   - Instructions:
+     - **logic lens**: contribution-evidence correspondence (against the current outline), structural logic, baseline comparison, devil's advocate
+     - **prose lens**: academic prose, overclaiming discipline, repetition, transitions, sentence length
+     - Each finding: severity (critical/important/minor) + location (.tex section, line) + issue + evidence (quote from the .tex source) + suggestion + fixable_by_llm (true/false)
+     - Do not output a PASS/FAIL verdict
+4. Receive the inspector's output — collect the finding list.
+5. Output a summary: number of findings per severity + critical items listed first + fixable_by_llm classification.
+6. Guidance: "If you want to apply fixes → scholar-revise; if you want a gate verdict → scholar-verify."
 </Steps>
 
 <Output>
-- finding 목록 (severity · location · issue · evidence · suggestion · fixable_by_llm)
-- severity별 카운트 (critical N / important N / minor N)
-- fixable_by_llm=false 항목 → 사람 확인 필요 목록
-- 다음 단계 안내 (revise / verify)
-- ⚠️ PASS/FAIL 판정 없음 — 판단은 사람이.
+- Finding list (severity · location · issue · evidence · suggestion · fixable_by_llm)
+- Per-severity counts (critical N / important N / minor N)
+- fixable_by_llm=false items → list requiring human confirmation
+- Next-step guidance (revise / verify)
+- ⚠️ No PASS/FAIL verdict — the judgment is the human's.
 </Output>

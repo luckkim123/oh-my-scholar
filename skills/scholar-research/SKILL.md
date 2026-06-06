@@ -1,52 +1,52 @@
 ---
 name: scholar-research
 description: |
-  관련연구·선행연구 지형을 조사하고 gap을 식별 → .md 연구노트로 산출.
-  citation-bound라 인용 검증 강제, 날조 금지. 병렬 읽기는 OK, 인용 생성은 검증 후만.
+  Survey the related-work / prior-art landscape and identify gaps → produce a .md research note.
+  Citation-bound, so citation verification is enforced and fabrication is prohibited. Parallel reading is OK; citation generation only after verification.
   Triggers: 관련연구 조사, related work, 선행연구, gap 찾아, 문헌조사, 리서치 해줘, 연구 지형, survey, 논문 조사
 ---
 
-# scholar-research — 관련연구 조사 & gap 식별
+# scholar-research — Related-Work Survey & Gap Identification
 
 <Purpose>
-논문 작성 전 관련연구 지형을 체계적으로 조사하고 gap을 식별한다. scholar-researcher에게 위임해 검증된 인용·연구맵·gap 목록을 .md 연구노트로 산출. 코드의 "요구사항 수집" — 무엇을 왜 해야 하는지 근거를 먼저 쌓는 단계.
+Systematically survey the related-work landscape before writing a paper and identify gaps. Delegate to scholar-researcher to produce verified citations, a research map, and a gap list as a .md research note. The code-equivalent of "requirements gathering" — the stage where you first build up the evidence for what to do and why.
 </Purpose>
 
 <Use_When>
-- 논문을 시작하기 전 관련연구 맵과 gap이 필요할 때
-- related work 섹션 작성 전 실질적인 선행연구 조사가 필요할 때
-- 기존 방법들의 한계를 체계적으로 정리하고 싶을 때
-- ideate/outline에 앞서 근거 자료를 확보해야 할 때
+- When you need a related-work map and gaps before starting a paper
+- When you need substantive prior-art research before writing a related-work section
+- When you want to systematically organize the limitations of existing methods
+- When you need to secure supporting material ahead of ideate/outline
 </Use_When>
 
 <Do_Not_Use_When>
-- outline이 이미 있고 이제 개념을 정리할 단계라면 → scholar-ideate
-- 초안이 있고 관련연구 섹션을 직접 작성할 단계라면 → scholar-draft
-- 특정 논문의 수식·주장을 검증하는 거라면 → scholar-verify
+- If an outline already exists and it's now time to organize concepts → scholar-ideate
+- If a draft exists and it's time to directly write the related-work section → scholar-draft
+- If you're verifying the equations/claims of a specific paper → scholar-verify
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- ⚠️ **인용 날조 금지** — researcher agent가 강제. 존재하지 않는 논문·저자·연도 생성 절대 금지. 미확인 출처는 flag로 남기고 사람에게 확인 요청.
-- ⚠️ **병렬 읽기는 OK, 병렬 인용 생성은 금지** — 여러 자료를 동시에 읽고 분석하는 것은 허용. 단, 인용 항목 자체를 여러 agent가 병렬 생성하면 hallucination 증폭.
-- ⚠️ **passage-level grounding** — 인용은 abstract 만 보고 만들지 말고 cited text span(전문 passage)에 grounding 한다. abstract-only 조건이 passage-level 보다 hallucination 이 많다는 실증 ([arXiv:2309.06365](https://arxiv.org/abs/2309.06365), self-verified). research(검색)→draft(생성) 분리가 knowledge-hallucination 을 줄이는 구조적 이유 ([arXiv:2510.24476](https://arxiv.org/abs/2510.24476)). 외부 지형 전체: 전역 wiki `reference/llm-paper-writing-landscape.md`.
-- 산출물은 .md 연구노트 — .tex 직접 작성 금지. 노트가 ideate/outline/draft의 입력이 됨.
-- researcher는 self-approve 금지 — 노트 산출 후 사람 검토 권장.
+- ⚠️ **No citation fabrication** — enforced by the researcher agent. Never generate non-existent papers, authors, or years. Leave unverified sources as flags and ask a human to confirm.
+- ⚠️ **Parallel reading is OK, but parallel citation generation is prohibited** — reading and analyzing multiple sources at once is allowed. However, if multiple agents generate the citation entries themselves in parallel, hallucination is amplified.
+- ⚠️ **passage-level grounding** — do not build citations from the abstract alone; ground them in the cited text span (the full passage). The abstract-only condition produces more hallucination than passage-level ([arXiv:2309.06365](https://arxiv.org/abs/2309.06365), self-verified). The structural reason that separating research (search) → draft (generation) reduces knowledge-hallucination ([arXiv:2510.24476](https://arxiv.org/abs/2510.24476)). Full external landscape: global wiki `reference/llm-paper-writing-landscape.md`.
+- The deliverable is a .md research note — do not write .tex directly. The note becomes the input for ideate/outline/draft.
+- The researcher must not self-approve — human review after producing the note is recommended.
 </Execution_Policy>
 
 <Steps>
-1. 조사 주제·범위 확인 (논문 주제, 타깃 베뉴, 이미 알고 있는 선행연구).
-2. `Task(subagent_type="oh-my-scholar:scholar-researcher", ...)` 위임:
-   - 입력: 논문 주제, 조사 범위, 이미 가진 참고문헌 목록(있으면), 관련 참고 노트 경로(있으면)
-   - 지시: 관련연구 클러스터링, 각 방법의 한계·gap 식별, 인용은 검증된 것만(미확인은 flag), 병렬 읽기 OK
-3. researcher 산출 받음:
-   - 연구 지형 맵 (방법 계열별 분류)
-   - 검증된 인용 목록 (저자·연도·제목 확인된 것)
-   - gap 목록 (기존 방법이 해결 못한 것)
-   - 미확인 flag 목록 (사람 확인 필요)
-4. 산출을 .md 연구노트로 호출자가 작업장에 저장 — `.oms/<slug>/research/*.md` (output-layout.md §2 고정 경로). ⚠️ source 폴더(`paper/…`)에 두지 말 것 — 연구노트는 draft의 *입력*(비계)이지 citation-bound source 자산이 아니다.
-5. 미확인 flag가 있으면 사람에게 확인 요청 후 노트 갱신.
+1. Confirm the survey topic and scope (paper topic, target venue, prior work you already know).
+2. Delegate via `Task(subagent_type="oh-my-scholar:scholar-researcher", ...)`:
+   - Input: paper topic, survey scope, list of references you already have (if any), paths to relevant reference notes (if any)
+   - Instructions: cluster related work, identify the limitations/gaps of each method, cite only verified items (flag the unverified), parallel reading is OK
+3. Receive the researcher's output:
+   - Research landscape map (classified by method family)
+   - List of verified citations (those with confirmed author/year/title)
+   - Gap list (what existing methods fail to solve)
+   - List of unverified flags (need human confirmation)
+4. The caller saves the output as a .md research note in the workspace — `.oms/<slug>/research/*.md` (fixed path per output-layout.md §2). ⚠️ Do not place it in the source folder (`paper/…`) — a research note is the *input* (scaffolding) for the draft, not a citation-bound source asset.
+5. If there are unverified flags, ask a human to confirm and then update the note.
 </Steps>
 
 <Output>
-연구 지형 맵 + 검증된 인용 목록 + gap 목록이 담긴 .md 연구노트 내용 + 미확인 flag 목록(있으면) + "scholar-ideate 또는 scholar-outline으로 넘길 준비됨" (self-approve 안 함 명시).
+The contents of a .md research note containing the research landscape map + list of verified citations + gap list + list of unverified flags (if any) + "ready to hand off to scholar-ideate or scholar-outline" (explicitly stating no self-approve).
 </Output>

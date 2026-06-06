@@ -1,13 +1,15 @@
 """Atomic JSON write for .oms/ state files. stdlib only, cross-platform.
 
-oms 가 *citation-bound 소스*(.tex/.bib)는 절대 .oms/ 로 옮기지 않으면서도,
-*자기 상태 파일*(scholar-init 의 venue-config·meta, 향후 인덱스류) 쓰기엔 동등한
-write-safety 가 없었다. 쓰기 중 크래시 시 상태 파일이 손상되면 부트스트랩이 깨지므로,
-임시파일에 먼저 쓰고 fsync 후 atomic rename 한다.
+oms never moves *citation-bound sources* (.tex/.bib) into .oms/, yet it had no
+equivalent write-safety for writes to its *own state files* (scholar-init's
+venue-config/meta, future index files). If a state file is corrupted by a crash
+mid-write, bootstrap breaks — so write to a temp file first, fsync, then atomic
+rename.
 
-os.replace() 는 POSIX 와 Windows 모두 동일 볼륨 내 atomic rename 을 보장한다
-(Python 3.3+) — 부분쓰기 상태가 target 에 노출되지 않는다. third-party 의존 없음.
-(omp 의 hooks/omp_atomic.py 와 동일 패턴을 oms 맥락으로 이식.)
+os.replace() guarantees an atomic same-volume rename on both POSIX and Windows
+(Python 3.3+) — a partial-write state is never exposed at the target. No
+third-party dependency. (Same pattern as omp's hooks/omp_atomic.py, ported into
+the oms context.)
 """
 import json
 import os
@@ -16,18 +18,20 @@ from pathlib import Path
 
 
 def atomic_write_json(target, data) -> None:
-    """`data`(JSON 직렬화 가능)를 `target` 경로에 원자적으로 쓴다.
+    """Atomically write `data` (JSON-serializable) to the `target` path.
 
-    상위 디렉토리는 필요 시 생성한다(.oms/<slug>/ 같은 중첩 경로 지원).
-    한글 등 비ASCII 는 이스케이프 없이 보존한다(.oms 메모는 한국어 다수).
+    Creates parent directories as needed (supports nested paths like .oms/<slug>/).
+    Preserves non-ASCII (e.g. Korean) without escaping (.oms notes are often Korean).
     """
     target = Path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
-    # mkstemp 자체가 실패하면 tmp 가 bind 안 되므로 None 으로 초기화 — except 에서
-    # UnboundLocalError 가 원래 예외(디스크 풀·권한 등)를 덮는 것을 막는다.
+    # Initialize tmp to None: if mkstemp itself fails, tmp is never bound, so this
+    # prevents an UnboundLocalError in the except block from masking the original
+    # exception (disk full, permissions, etc.).
     tmp = None
     try:
-        # 같은 디렉토리에 임시파일을 만들어야 os.replace 가 같은 볼륨 atomic rename 이 된다.
+        # The temp file must live in the same directory so os.replace is a
+        # same-volume atomic rename.
         fd, tmp = tempfile.mkstemp(
             dir=str(target.parent), prefix=".oms-tmp-", suffix=".json"
         )
@@ -35,9 +39,9 @@ def atomic_write_json(target, data) -> None:
             json.dump(data, f, ensure_ascii=False, indent=2)
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp, target)  # atomic — 부분쓰기 상태가 노출되지 않음
+        os.replace(tmp, target)  # atomic — a partial-write state is never exposed
     except BaseException:
-        # 실패 시 임시파일을 남기지 않는다(잔재 방지). 원래 예외는 그대로 전파.
+        # On failure, leave no temp file behind. Re-raise the original exception.
         if tmp is not None:
             try:
                 os.unlink(tmp)

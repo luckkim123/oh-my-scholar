@@ -1,77 +1,77 @@
-# references/wiki — 세션 넘어 누적되는 2차 메모 store (쓸수록 이 프로젝트에 특화)
+# references/wiki — secondary memo store that accumulates across sessions (more use = more specialized to this project)
 
-이 store는 **세션 휘발 데이터를 "랩 표준"으로 compound**하기 위한 영속 메모다. **양방향 루프**로 동작한다:
-- **쓰기 (자동)**: scholar-pilot의 wiki capture 단계가 inspect/verify가 발견한 reject 패턴·결정을 **자동 append**한다 (승인 불필요 — 가벼운 채널, `scholar-pilot/SKILL.md` Step 10).
-- **읽기 (자동)**: 다음 세션 inspector의 pre-commitment가 `wiki_query(category)`로 그 누적 패턴을 조회한다.
+This store is a persistent memo for **compounding session-volatile data into a "lab standard."** It operates as a **bidirectional loop**:
+- **Write (automatic)**: scholar-pilot's wiki capture stage **auto-appends** the reject patterns and decisions discovered by inspect/verify (no approval needed — lightweight channel, `scholar-pilot/SKILL.md` Step 10).
+- **Read (automatic)**: the next session's inspector pre-commitment queries that accumulated pattern via `wiki_query(category)`.
 
-쓰기와 읽기가 닫혀 **하네스를 쓸수록 이 venue·이 논문 프로젝트에 점점 특화**된다 — 사용자가 명시적으로 "학습해"라고 부르지 않아도. 배포 시엔 빈 store(범용)지만 운영하며 발산한다.
+With write and read closed into a loop, **the more you use the harness, the more it specializes to this venue and this paper project** — even without the user explicitly invoking "learn this." At deployment the store is empty (general-purpose), but it diverges as you operate it.
 
-`wiki_query(category)` 추상 함수의 현재 구현 대상이며, 비어 있거나 부재해도 동작이 깨지지 않는다(inspector가 자체 예측으로 진행).
+This is the current implementation target of the `wiki_query(category)` abstract function, and behavior does not break even if it is empty or absent (the inspector proceeds with its own predictions).
 
 ---
 
-## 디렉토리 레이아웃
+## Directory layout
 
-⚠️ **데이터는 작업장(`.oms/wiki/`)에 쌓인다 — 이 plugin repo가 아니다.** 이 README는 *계약 문서*라 plugin(`references/wiki/README.md`)에 배포되지만, 실제 누적 데이터는 **`.oms/wiki/`**에 쓰인다(`.oms/`는 gitignore — plugin/배포물을 더럽히지 않고 발산해 "이 사용자/이 논문에 특화"가 성립). OMC의 `.omc/wiki/`(project-local) 패턴과 동일.
+⚠️ **Data accumulates in the workspace (`.oms/wiki/`) — not in this plugin repo.** This README is a *contract document*, so it ships with the plugin (`references/wiki/README.md`), but the actual accumulated data is written to **`.oms/wiki/`** (`.oms/` is gitignored — so it diverges without polluting the plugin/distribution, which is how "specialized to this user / this paper" holds). Same as OMC's `.omc/wiki/` (project-local) pattern.
 
-### ⭐ 2계층 — 로컬(이 논문) + 전역(상위 폴더 `.oms/`, ascent로 발견)
+### ⭐ Two layers — local (this paper) + global (parent folder's `.oms/`, found by ascent)
 
-`.oms/wiki/`는 **두 레벨**로 산다. 둘 다 cwd 상대 — **절대경로·환경변수·XDG 0개**(oms 철학 "work-root 상대" 그대로, 배포물 오염 없음):
+`.oms/wiki/` lives at **two levels**. Both are cwd-relative — **zero absolute paths, env vars, or XDG** (oms philosophy "work-root relative" as-is, no distribution pollution):
 
 ```
-<논문들의 부모 폴더>/.oms/wiki/      ← ⭐ 전역 레벨 — 이 *사용자*가 모든 논문에서 재사용
-  convention/   *.md   ← venue별 양식·섹션 구조 (재사용)
-  pattern/      *.md   ← 성향 (즐겨쓰는 표현·구조·작업방식·선호) — light 전용
-  decision/     *.md   ← 재사용 결정 (늘 ablation 먼저 등)
-  reference/    *.md   ← 자주 쓰는 자원 포인터
-  history/      *.md   ← ⭐신설: 내 논문 history (init이 중복·연결 참고)
-        ▲  발견 방법 = ascent (cwd→부모로, 가장 가까운 상위 .oms/ 하나, 자기 제외; git의 .git 찾기)
+<parent folder of the papers>/.oms/wiki/      ← ⭐ global level — reused by this *user* across all papers
+  convention/   *.md   ← per-venue formats and section structure (reusable)
+  pattern/      *.md   ← tendencies (favorite expressions, structures, working style, preferences) — light-only
+  decision/     *.md   ← reusable decisions (e.g. always do ablation first)
+  reference/    *.md   ← pointers to frequently used resources
+  history/      *.md   ← ⭐new: my paper history (init references for duplicates and linking)
+        ▲  discovery method = ascent (cwd→parent, the single nearest ancestor .oms/, excluding self; like git finding .git)
         │
-<논문 폴더>/.oms/wiki/                ← 로컬 레벨 — 이 논문에만 특화 (slug 밖, 세션 넘어 누적)
-  convention/   *.md   ← 이 논문 reject 사유·양식 규칙 (inspector가 조회) — ⭐ heavy 승격 후보의 원천
-  pattern/      *.md   ← (대개 비어 있음 — 성향은 전역에 모임)
-  decision/     *.md   ← 이 논문 결정 (왜 이 baseline)
-  reference/    *.md   ← 이 논문 자원 포인터
+<paper folder>/.oms/wiki/                ← local level — specialized to this paper only (outside slug, accumulates across sessions)
+  convention/   *.md   ← this paper's reject reasons and format rules (queried by inspector) — ⭐ the source of heavy promotion candidates
+  pattern/      *.md   ← (usually empty — tendencies gather at the global level)
+  decision/     *.md   ← this paper's decisions (why this baseline)
+  reference/    *.md   ← this paper's resource pointers
 ```
 
-- 파일 1개 = 한 주제 (예: `convention/neurips-reject-patterns.md`).
-- 각 파일은 사람이 읽는 자유 형식 .md. 머신 파싱 스키마 없음(grep만 함).
-- `category`는 위 하위 디렉토리 이름과 1:1 (로컬 4개 + 전역은 `history/` 포함 5개).
-- ⚠️ `.oms/wiki/`는 *프로젝트 전체* 누적이라 작업별 `.oms/<slug>/`(output-layout) **밖**이다 — slug에 묶이지 않고 세션·작업을 넘어 산다.
-- ⚠️ **전역에 올라가는 건 "논문 무관 재사용 자산"만**(성향·venue 양식·history·재사용 결정). 논문 고유 지식은 그 논문 로컬에 남고, **citation/.bib는 전역 승격 영구 금지**(환각 위험). 이래서 oms의 "user-scope 금지" 안티패턴과 화해된다 — 전역은 *상위 폴더의 `.oms/`*(여전히 work-root 상대)이지 distributed config가 아니고, 새는 건 재사용 자산뿐이다.
+- One file = one topic (e.g. `convention/neurips-reject-patterns.md`).
+- Each file is human-readable free-form .md. No machine-parsing schema (grep only).
+- `category` maps 1:1 to the subdirectory names above (4 local + 5 for global including `history/`).
+- ⚠️ `.oms/wiki/` is a *project-wide* accumulation, so it sits **outside** the per-task `.oms/<slug>/` (output-layout) — not bound to a slug, it lives across sessions and tasks.
+- ⚠️ **Only "paper-agnostic reusable assets" go up to the global level** (tendencies, venue formats, history, reusable decisions). Paper-specific knowledge stays local to that paper, and **citation/.bib is permanently forbidden from global promotion** (hallucination risk). This is how it reconciles with oms's "no user-scope" anti-pattern — the global level is *the parent folder's `.oms/`* (still work-root relative), not distributed config, and what flows up is only reusable assets.
 
-### ⭐ `convention/` vs `pattern/` — heavy 승격 후보는 convention 에서만 (2026-05-31 H6 backport)
+### ⭐ `convention/` vs `pattern/` — heavy promotion candidates come only from convention (2026-05-31 H6 backport)
 
-이 둘의 분리가 핵심이다 (`references/learning-protocol.md` §1):
-- **`convention/`** = *산출물이 어떻게 생겼나* (섹션 순서·캡션 양식·reject 사유). 반복 관측되면
-  `learned.md` 로 escalate 돼 **heavy 채널 승격 후보**가 된다 (venue 기본값으로 굳을 수 있음).
-- **`pattern/`** = *사용자가 어떻게 일하나* (성향·작업방식·선호). **light 전용 — 절대 승격 안 함.**
-  성향은 enforce 대상이 아니라 모든 단계가 톤·상세도를 맞추려 *읽는* 메모일 뿐. `pattern/` 노트가
-  `learned.md` 로 올라가는 일은 없다.
+The separation of these two is key (`references/learning-protocol.md` §1):
+- **`convention/`** = *what the output looks like* (section order, caption format, reject reasons). When observed repeatedly it
+  escalates to `learned.md` and becomes a **heavy channel promotion candidate** (may harden into a venue default).
+- **`pattern/`** = *how the user works* (tendencies, working style, preferences). **Light-only — never promoted.**
+  Tendencies are not enforcement targets, just memos that every stage *reads* to match tone and level of detail. A `pattern/` note
+  never rises to `learned.md`.
 
-### ⭐ confidence frontmatter — 반복 관측이 신뢰도를 올린다 (OMC backport, H6)
+### ⭐ confidence frontmatter — repeated observation raises confidence (OMC backport, H6)
 
-각 wiki 노트는 frontmatter `confidence: high | med | low` 를 단다. 같은 패턴을 다시 관측하면
-confidence 가 `low → med → high` 로 오르고, merge 시 **높은 쪽을 유지**(약한 재관측에 강등 안 됨).
-이 반복-상승이 omp `evidence_count` 의 light 채널판이고, heavy 게이트로 잇는 신호다:
-`convention/` 노트가 **`confidence: high`** 에 도달 = 그 패턴의 `OBS` 가 `evidence_count ≥ 3` 에
-근접했을 가능성 = `scholar-learn` 이 볼 만한 시점. confidence 는 정성 3등급(+관측횟수)일 뿐 —
-**수치 가중합·threshold 매직넘버 없음.**
+Each wiki note carries the frontmatter `confidence: high | med | low`. Observing the same pattern again raises
+confidence `low → med → high`, and on merge it **keeps the higher side** (no demotion from a weak re-observation).
+This repetition-driven rise is the light-channel version of omp's `evidence_count`, the signal that connects to the heavy gate:
+when a `convention/` note reaches **`confidence: high`**, the pattern's `OBS` has likely
+approached `evidence_count ≥ 3` = a good time for `scholar-learn` to look. confidence is just a qualitative 3-tier grade (+ observation count) —
+**no numeric weighted sum or threshold magic number.**
 
-### ⭐ 노트는 *결론 + 근거*를 함께 담는다 (라벨-only 금지 — 재독 비용 방지)
+### ⭐ A note holds *conclusion + evidence* together (no label-only — avoids re-reading cost)
 
-wiki 노트는 *결론(라벨)*만 적지 말고 **그 결론을 떠받친 load-bearing 근거 — 구체 사례·대조군·내부
-출처 포인터(어느 paper-slug/섹션을 다시 보면 되는지) — 를 같은 노트에 담는다.** 라벨만 남기면 다음
-세션이 그 결론의 근거를 확인하려 *원본을 다시 떠야 한다*(재독 비용 = 학습 실패의 전형). "X는 stage축이다"
-보다 "X는 두 독립 기여를 챕터로 안 묶고 stage 횡단 병치 — `<slug>` §목차 참조"가 재사용 가능한 지식이다.
-- ⚠️ **이건 *권고*다 — heavy 채널의 enumerable evidence 강제(`learning-protocol.md` §6.E)와 다르다.**
-  light 채널은 싸고 마찰 없는 게 가치라(§1) 근거 부재가 *거부 게이트*는 아니다. 근거를 담을수록 좋다는
-  규율이지, 없으면 막는 게 아니다.
-- ⚠️ **"출처 포인터" = 내부 paper-slug/섹션 포인터지 `.bib` citation 이 아니다** (§6.F·아래 citation 경계
-  불변 유지). "이 결론은 `<slug>` 의 어디를 다시 보면 된다"는 *내부 내비게이션*일 뿐, 논문 인용을 wiki 에
-  적는 게 아니다.
+A wiki note should not record only the *conclusion (label)* but should hold **the load-bearing evidence that supports that conclusion — concrete cases, control groups,
+internal source pointers (which paper-slug/section to revisit) — in the same note.** If only the label is left behind, the next
+session has to *re-open the original* to verify the conclusion's basis (re-reading cost = the classic learning failure). "X is a stage axis"
+is less reusable than "X juxtaposes two independent contributions across stages without bundling them into chapters — see `<slug>` §table-of-contents."
+- ⚠️ **This is a *recommendation* — different from the heavy channel's enumerable-evidence enforcement (`learning-protocol.md` §6.E).**
+  The light channel's value is being cheap and frictionless (§1), so missing evidence is not a *reject gate*. It is a discipline
+  that says the more evidence you include the better, not a block when it is absent.
+- ⚠️ **"Source pointer" = an internal paper-slug/section pointer, not a `.bib` citation** (§6.F · keeping the citation boundary
+  invariant below). "Revisit such-and-such part of `<slug>` for this conclusion" is just *internal navigation*; it does not
+  write a paper citation into the wiki.
 
-예 (결론 + 근거 동반):
+Example (conclusion + evidence together):
 
 ```markdown
 ---
@@ -79,44 +79,44 @@ confidence: high
 sightings: 3
 ---
 # IROS reject patterns
-## 2026-05-20 — ablation 누락 반복 지적 (3번째 관측 → high)
-- 결론: IROS reviewer 는 ablation 부재를 reject 사유로 든다.
-- 근거(재방문 포인터): `iros-2026-nav` §4·`iros-2026-grasping` §5 에서 ablation 부재 지적 → 둘 다 추가.
-  (재확인 필요 시 이 두 slug 의 해당 섹션을 보면 됨 — citation 아님, 내부 내비게이션.)
+## 2026-05-20 — repeated mention of missing ablation (3rd observation → high)
+- Conclusion: IROS reviewers cite the absence of ablation as a reject reason.
+- Evidence (revisit pointers): missing ablation flagged in `iros-2026-nav` §4 · `iros-2026-grasping` §5 → both added.
+  (If re-verification is needed, look at the relevant sections of these two slugs — not a citation, internal navigation.)
 ```
 
 ---
 
-## `wiki_query(category)` 추상 함수 계약
+## `wiki_query(category)` abstract function contract
 
 ```
-wiki_query(category) → 매칭된 .md 발췌 목록 (없으면 빈 목록)
+wiki_query(category) → list of matched .md excerpts (empty list if none)
 ```
 
-- **현재 구현 (2계층 ascent 병합)**:
+- **Current implementation (2-layer ascent merge)**:
   ```
-  local_hits  = grep(<cwd>/.oms/wiki/<category>/, keywords)              # 로컬 — 이 논문
-  parent_oms  = ascent(<cwd>): cwd→부모로 올라가 첫 .oms/ (자기 제외)     # git의 .git 찾기
-  global_hits = grep(parent_oms/wiki/<category>/, keywords) if parent_oms else []  # 전역 — 사용자 재사용
-  return merge(local_hits, global_hits)   # 출처 태깅 [wiki:local] / [wiki:global]
+  local_hits  = grep(<cwd>/.oms/wiki/<category>/, keywords)              # local — this paper
+  parent_oms  = ascent(<cwd>): go cwd→parent to the first .oms/ (excluding self)     # like git finding .git
+  global_hits = grep(parent_oms/wiki/<category>/, keywords) if parent_oms else []  # global — user reuse
+  return merge(local_hits, global_hits)   # source-tagged [wiki:local] / [wiki:global]
   ```
-  결정론적 grep만(키워드 매칭, CJK bi-gram 포함). 호출자(inspector·planner)가 venue·논문 유형·사용자 성향 키워드로 grep해 발췌를 끌어온다. category 는 로컬 4개(`convention`·`pattern`·`decision`·`reference`), 전역은 `history` 포함. (어느 레벨이든 디렉토리 부재면 그 레벨은 빈 목록 — 신규는 빈 store에서 시작.)
-- **호출부와 구현부 경계 (미래 교체점)**: inspector는 `wiki_query`라는 *추상 함수*를 호출할 뿐, 그 구현이 "2계층 grep"인지 자립 MCP인지 모른다. **ascent·병합·출처태깅은 전부 이 함수 구현 안에 갇혀** 있고, 호출부(inspector pre-commitment)는 한 줄도 안 바뀐다. 나중에 자립 wiki MCP를 도입하면 이 함수 구현만 교체.
-- **부재 graceful degrade**: 로컬·전역 어느 쪽이 비었거나 상위 `.oms/`가 없으면 그쪽은 빈 목록 — 에러가 아니다. inspector는 있는 것만(또는 자체 예측만)으로 진행한다.
+  Deterministic grep only (keyword matching, including CJK bi-gram). The caller (inspector·planner) greps with venue, paper-type, and user-tendency keywords to pull excerpts. category is the 4 local ones (`convention`·`pattern`·`decision`·`reference`), plus `history` for global. (At any level, if the directory is absent, that level returns an empty list — new ones start from an empty store.)
+- **Caller/implementation boundary (future replacement point)**: the inspector merely calls the *abstract function* `wiki_query`; it does not know whether the implementation is "2-layer grep" or a standalone MCP. **Ascent, merge, and source-tagging are all enclosed inside this function's implementation,** and the caller (inspector pre-commitment) does not change a single line. If a standalone wiki MCP is introduced later, only this function's implementation is swapped.
+- **Graceful degrade on absence**: if either local or global is empty, or there is no ancestor `.oms/`, that side returns an empty list — not an error. The inspector proceeds with only what exists (or with its own prediction only).
 
 ---
 
-## 이 store가 *새로* 수집하는 데이터 (net-new — 마이그레이션 아님)
+## Data this store collects *newly* (net-new — not a migration)
 
-reject 사유·결함 패턴은 **net-new 데이터**다. 기존 `references/formats/venues.md`(또는 venue 카드)는 `page_limit`·`sections`·`quality_threshold`만 있고 *reject 필드가 없다* — 따라서 이 wiki는 venue 카드에서 마이그레이션하는 게 아니라, inspector 세션이 비평하면서 *새로 수집해* 적재한다.
+Reject reasons and defect patterns are **net-new data**. The existing `references/formats/venues.md` (or venue cards) only have `page_limit`·`sections`·`quality_threshold` and *no reject field* — so this wiki is not migrated from venue cards; rather, inspector sessions *collect it newly* as they critique and load it in.
 
-적재 주체 = **scholar-pilot의 wiki capture 단계가 자동으로** (verify 직후, terminal 전 — `scholar-pilot/SKILL.md` Step 10). inspect/verify가 이번 세션에 발견한 reject 패턴을 `convention/<venue>-reject-patterns.md`에 append. 단독 단계 실행 시엔 호출자가 직접 적재할 수도 있다. **자동이 기본** — 이것이 위 양방향 루프의 쓰기 절반이다. 사용자 `--no-wiki`면 skip. append-only·grep으로 중복 선확인·빈 세션이면 통과·추측 적재 금지(실제 발견한 것만).
+The loading party = **scholar-pilot's wiki capture stage automatically** (right after verify, before terminal — `scholar-pilot/SKILL.md` Step 10). It appends the reject patterns discovered in this session by inspect/verify into `convention/<venue>-reject-patterns.md`. When running standalone stages, the caller may load it directly. **Automatic is the default** — this is the write half of the bidirectional loop above. Skipped if the user passes `--no-wiki`. Append-only · pre-check for duplicates with grep · pass through on an empty session · no speculative loading (only what was actually discovered).
 
 ---
 
-## ⚠️ citation 안전 경계 (필수 — 위반 시 OMS 정체성 붕괴)
+## ⚠️ citation safety boundary (mandatory — violation collapses the OMS identity)
 
-- **wiki 내용은 *2차 메모*일 뿐 — 1차 인용 출처로 절대 쓰지 않는다.** .bib 갱신은 scholar-research가 검증한 1차 출처로만(citation 안전 3원칙 유지). wiki에 적힌 논문 언급을 인용으로 끌어오지 않는다.
-- **조회는 결정론적 키워드 매칭만 — 임베딩 검색 영구 금지.** grep(현재) 또는 미래 MCP 모두 결정론적 매칭이어야 한다. 임베딩 유사도 검색은 환각 인용을 끌어오므로 **현재도 미래도 금지**(불변 제약).
-- wiki는 *예측을 돕는 메모*지 *사실의 출처*가 아니다. inspector는 wiki 발췌를 `[wiki]`로 출처 표시해 자체 예측(`[자체예측]`)과 구분한다.
-- ⚠️ **light→enforce 직승 금지** (H6 backport, `learning-protocol.md` §6.D): wiki 노트(confidence high 여도)는 *조언*일 뿐 강제 기본값이 아니다. venue 기본값으로 굳히려면 반드시 `learned.md` 의 heavy 채널을 거쳐 **사람 게이트**를 통과해야 한다. confidence 가 아무리 높아도 wiki 가 직접 venue 기본값을 바꾸지 않는다. 특히 `pattern/`(성향)은 영구히 light — 승격 대상이 아니다.
+- **Wiki content is only a *secondary memo* — never used as a primary citation source.** .bib updates only use primary sources verified by scholar-research (keeping the 3 citation-safety principles). Paper mentions written in the wiki are not pulled in as citations.
+- **Lookup is deterministic keyword matching only — embedding search is permanently forbidden.** Both grep (current) and a future MCP must be deterministic matching. Embedding-similarity search pulls in hallucinated citations, so it is **forbidden now and in the future** (invariant constraint).
+- The wiki is a *memo that aids prediction*, not a *source of fact*. The inspector marks wiki excerpts with `[wiki]` to distinguish them from its own predictions (`[self-prediction]`).
+- ⚠️ **No direct light→enforce promotion** (H6 backport, `learning-protocol.md` §6.D): a wiki note (even at confidence high) is only *advice*, not an enforced default. To harden it into a venue default it must pass through the heavy channel of `learned.md` and clear a **human gate**. No matter how high the confidence, the wiki does not directly change a venue default. In particular `pattern/` (tendencies) is permanently light — not a promotion target.

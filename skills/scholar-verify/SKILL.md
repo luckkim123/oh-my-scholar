@@ -1,73 +1,73 @@
 ---
 name: scholar-verify
 description: |
-  .tex/.bib를 summative 자동 게이트 — 컴파일·수치·참조·용어·placeholder·인용을 기계적으로 PASS/FAIL.
-  코드의 "CI". 비평·조언 없음, 객관 증거만.
-  인용 결함 감지 시 자동수정 금지 — 사람 확인 목록으로만.
-  Triggers: 검증해줘, verify, 통과 확인, 컴파일 체크, 인용 검증, 게이트 확인, PASS 판정
+  Summative automatic gate for .tex/.bib — mechanically PASS/FAIL on compilation, numbers, references, terminology, placeholders, and citations.
+  The "CI" of code. No critique or advice, objective evidence only.
+  On detecting a citation defect, no auto-fix — human-confirmation list only.
+  Triggers: 검증해줘, verify, 통과 확인, 컴파일 체크, 인용 검증, 게이트 확인, PASS 판정, verify, compile check, citation verification, gate check, PASS verdict
 ---
 
-# scholar-verify — 논문 초안 summative 게이트
+# scholar-verify — summative gate for the paper draft
 
 <Purpose>
-draft/revise된 .tex/.bib를 기계적 pass/fail 게이트로 검사한다. scholar-verifier(읽기전용)에게 위임해 컴파일·수치 정합·그림표 참조·용어 일관·placeholder·인용 정합 항목을 점검한다. 코드의 "CI" — 객관 증거로만, 조언·비평 없음.
+Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate to scholar-verifier (read-only) to check compilation, numerical consistency, figure/table references, terminology consistency, placeholders, and citation consistency. The "CI" of code — objective evidence only, no advice or critique.
 
-⚠️ **비평·조언을 하지 않는다.** 논리·문체 개선점이 목적이면 scholar-inspect를 쓸 것. 여기서 나오는 것은 항목별 PASS/FAIL과 증거뿐이다.
-⚠️ **인용 결함은 자동 수정하지 않는다.** 인용 오류를 감지해도 .bib를 건드리지 않는다 — 사람 확인 목록으로만 돌려준다.
+⚠️ **Does not give critique or advice.** If the goal is logic/prose improvement points, use scholar-inspect. What comes out here is only per-item PASS/FAIL and evidence.
+⚠️ **Does not auto-fix citation defects.** Even when a citation error is detected, it does not touch .bib — it returns a human-confirmation list only.
 </Purpose>
 
 <Use_When>
-- draft/revise 후 제출 전 객관적 통과 판정이 필요할 때
-- 컴파일 오류·undefined ref·수치 불일치·placeholder 잔존을 기계적으로 확인할 때
-- 인용(\cite ↔ .bib) 정합을 검사할 때
-- venue 페이지 한도·최소 인용 수 충족 여부를 확인할 때
+- When an objective pass verdict is needed after draft/revise, before submission
+- When mechanically verifying compile errors, undefined refs, numerical mismatches, or leftover placeholders
+- When inspecting citation (\cite ↔ .bib) consistency
+- When confirming whether the venue page limit and minimum citation count are met
 </Use_When>
 
 <Do_Not_Use_When>
-- 논리·문체 비평·조언이 필요하면 → scholar-inspect
-- 비평 결과를 .tex에 반영하고 싶으면 → scholar-revise / scholar-draft
-- 아직 draft가 없으면 → scholar-draft 먼저
+- If logic/prose critique or advice is needed → scholar-inspect
+- If you want to apply critique results to the .tex → scholar-revise / scholar-draft
+- If there is no draft yet → scholar-draft first
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- ⚠️ **fresh 증거만** — "should/probably/seems/아마도" 금지. 로그 라인·grep 결과·실제 수치로만 판정.
-- ⚠️ **인용 자동수정 절대 금지** — \cite ↔ .bib 불일치·DOI 미검증 등 인용 결함은 감지만 하고 .bib를 수정하지 않는다. 사람 확인 목록으로 반환.
-- ⚠️ **조언·비평 금지** — verifier는 "이 문장이 약하다" 같은 판단형 코멘트를 달지 않는다.
-- ⚠️ **self-approval 금지** — drafter/reviser와 verifier는 다른 lane.
-- FAIL 항목은 무엇이 왜 실패했는지 증거(로그 라인·grep 결과·파일:줄 위치) 첨부 필수.
-- FAIL이 있으면 fixable_by_llm 분류 — true(텍스트·ref 수정)는 scholar-revise로, false(실험 데이터 누락·그림 생성 등)는 사람 플래그.
+- ⚠️ **Fresh evidence only** — "should/probably/seems/아마도" forbidden. Judge only with log lines, grep results, and actual numbers.
+- ⚠️ **Citation auto-fix absolutely forbidden** — citation defects such as \cite ↔ .bib mismatches or unverified DOIs are detected only, never fixing the .bib. Return them as a human-confirmation list.
+- ⚠️ **No advice or critique** — the verifier does not attach judgmental comments like "this sentence is weak".
+- ⚠️ **No self-approval** — drafter/reviser and verifier are different lanes.
+- For FAIL items, attaching evidence of what failed and why (log line, grep result, file:line location) is mandatory.
+- If there are FAILs, classify by fixable_by_llm — true (text/ref fixes) goes to scholar-revise, false (missing experimental data, figure generation, etc.) is flagged for a human.
 </Execution_Policy>
 
 <Steps>
-1. 대상 .tex/.bib 파일 경로, venue 정보(page_limit·min_citations) 확인.
-2. `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` 위임:
-   - 입력: .tex/.bib 경로, paper-eval.md 루브릭(verify 축), latex.md 카드, bibtex.md 카드, venues.md
-   - 지시: 아래 6개 항목 각각 PASS/FAIL + 증거 출력. 조언·비평 없음. 인용 결함은 목록만.
-     - **컴파일**: latexmk exit 0, undefined ref/cite 0
-     - **수치 정합**: 본문 수치 ↔ 표/그림 일치
-     - **그림·표 참조**: `\ref` ↔ `\label` 전수 매칭
-     - **용어 일관**: 같은 개념 동일 용어, 약어 첫 등장 정의
-     - **placeholder**: TODO/FIXME/XX 잔존 0
-     - **인용 정합**: `\cite` ↔ .bib 항목 존재 (DOI 실재는 사람 확인 목록)
-     - **abstract 규율 (WARN)**: abstract 영역에 정량 수치·수식·배수 잔존 (질적 의미만이어야 함) — latex.md §3. 검출=WARN(FAIL 아님), venue 변주 존재
-     - **venue 메타 정합 (읽기전용)**: specificity↔origin↔learned_refs 무결성 (불일치=WARN, 수선 안 함)
-3. verifier 산출 수령 — 항목별 PASS/FAIL 취합.
-4. FAIL 항목 있으면 fixable_by_llm 분류:
-   - fixable_by_llm=true → scholar-revise에 전달 가능
-   - fixable_by_llm=false → 사람 확인 필요 목록
-5. 미검증 인용(DOI 실재·저자명 정확도 등) → 자동수정 없이 사람 확인 목록으로만 반환.
-6. **venue 메타 정합 (읽기전용, H10)** — venue 카드/yaml 에 self-specialization 메타가 있으면 무결성만 확인:
-   - `specificity` ∈ [0,1] 이고 `(origin∈{inductive,learned} 항목 수)/(활성 기본값 수)` 와 일치하는가
-   - `learned` origin 항목마다 `learned_refs` provenance 가 있는가 (§6.C silent 변경 금지)
-   - 불일치 시 **경고(WARN)만** — FAIL 아님. ⚠️ verify 는 메타를 **읽기만**, 절대 수선하지 않는다
-     (메타 수선은 `scholar-learn` 사람 게이트 몫). 자동수정 금지 원칙과 동일.
-7. 최종 판정 출력 (PASS: 전 항목 통과 / FAIL: 실패 항목 수. **WARN(메타 정합·abstract 규율)은 FAIL 에 안 들어감** — 보고만, 사람 판단).
+1. Confirm the target .tex/.bib file paths and venue info (page_limit·min_citations).
+2. Delegate via `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)`:
+   - Input: .tex/.bib paths, paper-eval.md rubric (verify axis), latex.md card, bibtex.md card, venues.md
+   - Instruction: output PASS/FAIL + evidence for each of the 6 items below. No advice or critique. Citation defects as a list only.
+     - **Compilation**: latexmk exit 0, undefined ref/cite 0
+     - **Numerical consistency**: body numbers ↔ tables/figures match
+     - **Figure/table references**: `\ref` ↔ `\label` matched exhaustively
+     - **Terminology consistency**: same concept uses the same term, abbreviations defined on first appearance
+     - **placeholder**: TODO/FIXME/XX leftovers 0
+     - **Citation consistency**: `\cite` ↔ .bib entry exists (DOI existence goes to the human-confirmation list)
+     - **Abstract discipline (WARN)**: quantitative numbers, formulas, or multipliers left in the abstract region (it should be qualitative meaning only) — latex.md §3. Detection = WARN (not FAIL), venue variation exists
+     - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
+3. Receive the verifier output — collate per-item PASS/FAIL.
+4. If there are FAIL items, classify by fixable_by_llm:
+   - fixable_by_llm=true → can be passed to scholar-revise
+   - fixable_by_llm=false → list requiring human confirmation
+5. Unverified citations (DOI existence, author-name accuracy, etc.) → return as a human-confirmation list only, with no auto-fix.
+6. **Venue meta consistency (read-only, H10)** — if the venue card/yaml has self-specialization meta, confirm only its integrity:
+   - is `specificity` ∈ [0,1] and does it match `(count of items with origin∈{inductive,learned}) / (count of active defaults)`
+   - does each `learned`-origin item have `learned_refs` provenance (§6.C no silent changes)
+   - on mismatch, **WARN only** — not FAIL. ⚠️ verify only **reads** the meta, never repairs it
+     (meta repair is `scholar-learn`'s human-gate job). Same as the auto-fix-forbidden principle.
+7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline) does not count toward FAIL** — reported only, human judgment).
 </Steps>
 
 <Output>
-- 항목별 결과표 (컴파일·수치·참조·용어·placeholder·인용 각 PASS/FAIL + 증거, abstract 규율·venue 메타 PASS/WARN)
-- FAIL 항목 상세: 증거(로그 라인·grep 결과·파일:줄) + fixable_by_llm 분류
-- 인용 미검증 목록 (자동수정 없음 — 사람 확인 전용)
-- 최종 판정: **PASS** (전 항목 통과) 또는 **FAIL** (N개 항목 실패)
-- FAIL 시 다음 단계: fixable=true → scholar-revise, fixable=false → 사람 처리 후 재verify
+- Per-item results table (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, venue meta PASS/WARN)
+- FAIL item details: evidence (log line, grep result, file:line) + fixable_by_llm classification
+- List of unverified citations (no auto-fix — human confirmation only)
+- Final verdict: **PASS** (all items pass) or **FAIL** (N items failed)
+- On FAIL, next step: fixable=true → scholar-revise, fixable=false → re-verify after human handling
 </Output>

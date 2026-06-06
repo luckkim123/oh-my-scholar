@@ -157,11 +157,11 @@ honored, not violated): reusable assets only —
 
 | category | global-eligible | why |
 |:---|:---:|:---|
-| `pattern/` (성향: 표현·구조·작업방식·선호) | ✅ light-only, never enforced | identity, doesn't change per paper |
-| `convention/` (venue 양식·섹션 구조) | ✅ via human gate (§6.B) | reused per venue |
-| **writing-craft 이원화** (글쓰기 규칙) | 보편 명제 → `venue.prose_defaults` ✅ via human gate(§6.B); user/venue 특이 *표현 선호* → `pattern/` light-only | universal proposition(old→new·em-dash 캡 등)은 venue-강제 default 로 승격 / 특이 phrasing 은 advisory. 규칙 본문 SSOT = `writing-craft.md`(여기 재나열 금지) |
-| `decision/` (재사용 결정: "always ablation first") | ✅ | meta-decisions across papers |
-| `history/` (내 논문 history) | ✅ (global-only category) | init uses it to relate/dedup new papers |
+| `pattern/` (disposition: phrasing, structure, working style, preferences) | ✅ light-only, never enforced | identity, doesn't change per paper |
+| `convention/` (venue format, section structure) | ✅ via human gate (§6.B) | reused per venue |
+| **writing-craft split** (writing rules) | universal proposition → `venue.prose_defaults` ✅ via human gate (§6.B); user/venue-specific *phrasing preference* → `pattern/` light-only | a universal proposition (old→new, em-dash cap, etc.) is promoted to a venue-enforced default / specific phrasing is advisory. Rule body SSOT = `writing-craft.md` (do not re-list here) |
+| `decision/` (reusable decision: "always ablation first") | ✅ | meta-decisions across papers |
+| `history/` (my paper history) | ✅ (global-only category) | init uses it to relate/dedup new papers |
 | this paper's topic/gap | ❌ stays local | paper-specific, not reusable |
 | **citation / `.bib`** | ❌ **permanently forbidden** | hallucination risk — §6.F invariant, never promoted to global |
 
@@ -401,14 +401,15 @@ candidates**. A `candidate_default.target` naming `citation`/`bib`/a specific re
 `.tex`/`.bib` SSOT of a paper-slug; they never become a learned default and never enter the
 wiki. This is the load-bearing oms invariant — violating it makes oms citation-unsafe.
 
-> **외부 정당화 (왜 이 불변식이 과잉이 아닌가)**: 인용은 "실재하나(correctness)"만으론
-> 부족하다 — 모델이 실제로 그 문서에 의존하지 않고 사후 정당화(post-rationalization)하면
-> *unfaithful*이고, 측정 결과 최대 57%의 인용이 faithfulness를 결여한다
+> **External justification (why this invariant is not overkill)**: a citation being merely
+> "real (correctness)" is not enough — if the model did not actually rely on that document but
+> post-rationalizes it, it is *unfaithful*, and measurements show up to 57% of citations lack
+> faithfulness
 > ([Correctness is not Faithfulness in RAG Attributions, arXiv:2412.18004](https://arxiv.org/abs/2412.18004)).
-> 최첨단 autonomous 논문 시스템(Zochi)조차 citation formatting을 의도적으로
-> human-in-the-loop으로 남긴다 ([intology.ai/blog/zochi-acl](https://www.intology.ai/blog/zochi-acl)).
-> oms가 인용을 자동 승격·자동 수정하지 않는 것은 시류 정합이다. (외부 지형 전체:
-> 전역 wiki `reference/llm-paper-writing-landscape.md`.)
+> Even a state-of-the-art autonomous paper system (Zochi) deliberately keeps citation formatting
+> human-in-the-loop ([intology.ai/blog/zochi-acl](https://www.intology.ai/blog/zochi-acl)).
+> oms's refusal to auto-promote or auto-fix citations is in line with the field. (Full external
+> landscape: global wiki `reference/llm-paper-writing-landscape.md`.)
 
 ---
 

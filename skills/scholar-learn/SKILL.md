@@ -1,172 +1,129 @@
 ---
 name: scholar-learn
 description: |
-  관찰 → venue 기본값 승격 (oms의 핵심 진화 게이트) — 운영 중 `.oms/learned.md`에 쌓인 관찰과
-  `.oms/wiki/`의 자동 누적 패턴을 scholar-inspector가 read-only로 검토해, 어느 것이
-  `references/venues.md`의 강제 기본값(required sections·ordering·self-cite 상한 등)으로 승격될
-  자격이 있는지 판단한다. 무거운 채널(기본값)은 반드시 사람 승인 게이트를 거치고, 승격될 때마다
-  venue specificity가 올라가 "범용 → 이 사용자 특화"가 한 칸 진행된다. 자동 승격 없음 — 사람이
-  게이트를 끊는다. citation/.bib 승격 영구 금지.
+  Observation → venue default promotion (oms's core evolution gate) — during operation, the observations
+  accumulated in `.oms/learned.md` and the auto-accumulated patterns in `.oms/wiki/` are reviewed read-only
+  by scholar-inspector to judge which ones qualify for promotion into the enforced defaults of
+  `references/venues.md` (required sections, ordering, self-cite caps, etc.). The heavy channel (defaults)
+  must always pass a human approval gate, and each promotion raises venue specificity, advancing one step from
+  "general → specialized to this user". No automatic promotion — the human breaks the gate. Citation/.bib
+  promotion is permanently forbidden.
   Triggers: 학습 반영, 규칙 승격, 관찰 정리, learned 검토, 패턴 굳혀, 이거 기본값으로,
   scholar learn, promote observation, learn venue defaults, specificity 올려, 진화 게이트
 ---
 
-# scholar-learn — 관찰 → venue 기본값 승격 (핵심 진화 게이트)
+# scholar-learn — observation → venue default promotion (core evolution gate)
 
 <Purpose>
-oms의 비대칭 — "배포 시 범용, 쓸수록 이 사용자에게 특화" — 이 *강제까지 닫히는* 단계. 운영 중
-`.oms/learned.md`에 쌓인 관찰(예: "IROS 논문엔 항상 Ablation 섹션 — 3회 반복")을
-scholar-inspector(read-only)가 읽고, 어느 관찰이 `references/venues.md`의 **강제 기본값**으로
-승격(promote)될 자격이 있는지 판단한다. 승격은 이후 모든 그 venue 작업의 *기본 가정*을 바꾸는
-**한 방향 래칫**(잘못 승격되면 outline이 매번 틀린 섹션을 깔고, verify가 거짓 경고)이라 항상 사람
-승인 게이트를 거친다. 승격마다 venue의 `specificity`가 0(순수 템플릿)→1(완전 특화) 쪽으로 오른다.
-scholar-inspector는 **판단만** 한다 — 기본값을 직접 쓰거나 강제하지 않으며, 사람이 게이트를 끊은
-뒤에야 이 스킬이 디스크에 반영한다. 동역학의 정본은 `references/learning-protocol.md`.
+The stage where oms's asymmetry — "general at deployment, specialized to this user the more it's used" — *closes
+all the way to enforcement*. During operation, scholar-inspector (read-only) reads the observations accumulated
+in `.oms/learned.md` (e.g. "IROS papers always have an Ablation section — repeated 3 times") and judges which
+observations qualify for promotion into the **enforced defaults** of `references/venues.md`. Promotion is a
+**one-way ratchet** that changes the *baseline assumption* of all subsequent work on that venue (if promoted
+wrongly, the outline lays down the wrong section every time and verify raises false warnings), so it always
+passes a human approval gate. Each promotion raises the venue's `specificity` toward 0 (pure template) → 1
+(fully specialized). scholar-inspector **only judges** — it does not write or enforce defaults directly, and
+only after the human breaks the gate does this skill commit it to disk. The canonical reference for the dynamics
+is `references/learning-protocol.md`.
 </Purpose>
 
 <Use_When>
-- 운영 중 `.oms/learned.md`에 관찰이 충분히 쌓여 "이제 venue 기본값으로 굳힐까?"를 판단할 때
-- 같은 패턴(섹션·순서·self-cite 상한)이 반복 관측돼 강제 기본값으로 올리고 싶을 때
-- 사용자가 "앞으로 IROS는 항상 X" 라고 명시했고(=user_stated) 그걸 venue 기본값으로 굳힐 때
-- venue specificity를 올려 oms가 이 사용자에게 더 특화되길 원할 때
-- scholar-pilot이 운영 루프 중 "승격 후보 N건 쌓임" 알림을 띄웠을 때
+- During operation, when enough observations have accumulated in `.oms/learned.md` to judge "should we now solidify these into venue defaults?"
+- When the same pattern (section, ordering, self-cite cap) has been observed repeatedly and you want to raise it to an enforced default
+- When the user explicitly stated "from now on IROS is always X" (=user_stated) and you want to solidify it as a venue default
+- When you want to raise venue specificity so oms becomes more specialized to this user
+- When scholar-pilot has surfaced a "N promotion candidates accumulated" notice during the operating loop
 </Use_When>
 
 <Do_Not_Use_When>
-- `.oms/learned.md`가 비어 있으면 → 아직 승격할 관찰이 없다. 운영하며 inspect/verify가 채운다.
-- 가벼운 패턴·성향·결정 메모일 뿐 강제 기본값까지는 아니면 → 승격하지 말고 `.oms/wiki/`에 자동
-  누적되게 둔다(게이트 불필요, 다음 세션 grep 회수). 특히 `wiki/pattern/`(성향)은 영구히 light —
-  절대 승격 대상 아님. 모든 관찰이 기본값이 되는 게 아니다.
-- ⚠️ **citation·.bib·"이 논문 인용" 류라면 → 영구히 승격 금지** (`learning-protocol.md` §6.F).
-  candidate_default.target에 citation/bib가 오면 스키마에서 거부. 인용은 paper-slug의 .tex/.bib
-  SSOT에만 산다.
-- 논문 *품질 검증*(PASS/FAIL)이라면 → `scholar-verify`. learn은 기본값을 *만들고*, verify는
-  *판정*한다 — 다른 lane.
-- 초안을 *쓰는* 거라면 → `scholar-draft`. learn은 파일 내용을 안 만든다(메타 학습만).
+- If `.oms/learned.md` is empty → there are no observations to promote yet. inspect/verify fill it as you operate.
+- If it's merely a light pattern, preference, or decision memo and not an enforced default → don't promote; leave it to auto-accumulate in `.oms/wiki/` (no gate needed, recovered via grep next session). In particular, `wiki/pattern/` (preferences) is permanently light — never a promotion target. Not every observation becomes a default.
+- ⚠️ **If it's a citation, .bib, or "cite this paper" type → permanently forbidden from promotion** (`learning-protocol.md` §6.F). If candidate_default.target is citation/bib, the schema rejects it. Citations live only in the paper-slug's .tex/.bib SSOT.
+- If it's *quality verification* of the paper (PASS/FAIL) → `scholar-verify`. learn *creates* defaults, verify *judges* — different lane.
+- If you're *writing* a draft → `scholar-draft`. learn does not create file content (meta-learning only).
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- ⚠️ **사람 승인 게이트 절대 강제 (핵심)** — scholar-inspector는 승격 *제안*만 낸다. 어떤 관찰도
-  사람 승인 없이 `venues.md`에 자동 반영되지 않는다. 자동 통과 없음. confidence·evidence가 아무리
-  높아도(§6.B). 잘못 승격된 기본값 1개의 비용(매 작업 거짓 가정) > 놓친 기본값 1개의 비용(다음
-  learn에서 다시 올림).
-- ⚠️ **승격 기준은 AND (learning-protocol.md §3)** — 반복 `evidence_count ≥ 3` + 반례 0 +
-  user_overridden 아님 + 안정 + 모순 없음. **전부** 충족해야 사람 게이트行. 점수 합산 아님.
-  - ⭐ **user_stated 예외 (review #1 해소)**: 사용자가 직접 말한 규칙(`user_stated: true`)은
-    evidence 1이어도 반복 바를 건너뛰고 게이트로 — 사용자가 직접 말한 = 이미 의도. 단 **게이트는
-    여전히 거친다**(어느 scope? 기존과 모순?). 자동 강제는 여기서도 금지.
-  - ⭐ **3회 바는 매직넘버가 아니다 (review #2 해소)**: omp §3.1이 "convention vs coincidence
-    최소선"으로 정당화한 값. learning-protocol.md §3.1을 그대로 따른다.
-- ⚠️ **scope 구분 (oms 특유 — omp엔 없음)** — 승격은 항상 scope에 묶인다: `global`(이 사용자
-  보편 습관) vs `<venue-key>`(그 venue 한정). "Ablation 항상"이 IROS엔 맞고 thesis엔 아닐 수
-  있다. inspector는 각 candidate의 scope를 명시하고, specificity는 scope별로 따로 계산.
-- ⚠️ **2채널 분리 존중** — *무거운 채널*(기본값: learned.md → 승격 → venues.md)만 이 스킬의
-  대상이고 게이트를 거친다. *가벼운 채널*(패턴/성향/결정: `.oms/wiki/*.md` 자동 append)은 게이트
-  불필요 — 손대지 않고 읽기만. `wiki/pattern/`(성향)은 영구 light.
-- ⚠️ **로컬→전역 wiki 승급 (별도 경로, 저장 위치 축)** — 위 `scope: global`이 venues.md의 *적용
-  범위* 라벨인 것과 별개로, light 채널 자산을 **물리적 저장 위치**상 로컬 `.oms/wiki/`에서 *상위
-  폴더의 `.oms/wiki/`*(전역 레벨, ascent로 발견)로 올리는 경로가 있다. 논문 종료 시 "이 자산은
-  다음 논문에도 재사용각"인 후보(성향·venue 양식·재사용 결정·history)를 **사람 승인 후** 상위
-  `.oms/wiki/<category>/`에 복사한다. 기준:
-  - 대상: `pattern/`(성향)·`convention/`(venue 양식)·`decision/`(재사용 결정)·`history/`(논문 기록)
-    중 *논문 무관 재사용* 자산만. 이 논문 고유 reject·gap은 로컬에 남긴다.
-  - ⚠️ **citation/.bib는 전역 승급 영구 금지** (heavy든 light든, `learning-protocol.md` §6.F·§1.4).
-  - 사람 게이트 필수 — 자동 승급 없음. 상위 `.oms/`가 없으면 "부모 폴더에서 init하거나 거기
-    `.oms/wiki/`를 두라" 안내(임의로 부모·홈에 만들지 않음).
-  - 이는 venues.md 기본값 승격(heavy)과 다른 lane — light 자산의 *위치* 이동일 뿐 강제 기본값화가
-    아니다. `wiki/pattern/`은 전역에 올라가도 여전히 영구 light(enforce 안 함).
-- ⚠️ **provenance 강제** — 승격되는 각 기본값은 근거 learned.md 관찰 id를 venue의
-  `learned_refs[]`에 기록. 출처 없는 기본값 = 추측 = silent 변경(§6.C 위반).
-- ⚠️ **specificity는 정직하게** — 항목 삭제 시에도 재계산(silent 변동 금지, §4 monotonic +
-  deletion 규칙). 더 특화돼 보이려 부풀리지 않는다.
-- **판정 ≠ 승인 ≠ 강제 (self-approval 3중 금지, review #4 해소)** — scholar-inspector는
-  read-only로 승격을 *판정*만 하고(같은 컨텍스트에서 자기 판정을 승인하지 않음), scholar-learn은
-  사람 게이트 통과분을 *디스크에 쓰기*만 하며(판정 안 함), 준수 *검증*은 별도 컨텍스트의
-  scholar-verify 몫. 세 역할이 분리된다.
-- **diff로 제시** — 기존 venues.md가 있으므로 inspector는 전체가 아니라 *delta*(Added/Changed
-  기본값)로 제안해 사람이 변경분만 검토하게 한다.
-- 학습 채널·승격 기준·specificity 공식의 정본은 `references/learning-protocol.md`,
-  venue 스키마는 `references/venues.md`, wiki 규약은 `references/wiki/README.md`가 SSOT.
+- ⚠️ **Human approval gate is absolutely mandatory (core)** — scholar-inspector only issues promotion *proposals*. No observation is auto-committed to `venues.md` without human approval. No automatic passing. No matter how high confidence/evidence is (§6.B). The cost of 1 wrongly-promoted default (a false assumption on every task) > the cost of 1 missed default (raise it again at the next learn).
+- ⚠️ **Promotion criteria are AND (learning-protocol.md §3)** — repeated `evidence_count ≥ 3` + 0 counterexamples + not user_overridden + stable + no contradiction. **All** must be met to go to the human gate. Not a score sum.
+  - ⭐ **user_stated exception (resolves review #1)**: a rule the user stated directly (`user_stated: true`) skips the repetition bar even with evidence 1 and goes to the gate — the user stating it directly = already intent. But it **still passes the gate** (which scope? does it contradict an existing one?). Auto-enforcement is forbidden here too.
+  - ⭐ **The 3-times bar is not a magic number (resolves review #2)**: it's the value omp §3.1 justifies as the "minimum line for convention vs coincidence". Follows learning-protocol.md §3.1 verbatim.
+- ⚠️ **scope distinction (oms-specific — not in omp)** — promotion is always bound to a scope: `global` (this user's universal habit) vs `<venue-key>` (limited to that venue). "Always Ablation" may be right for IROS but not for a thesis. The inspector states each candidate's scope, and specificity is computed separately per scope.
+- ⚠️ **Respect the 2-channel separation** — only the *heavy channel* (defaults: learned.md → promote → venues.md) is the target of this skill and passes the gate. The *light channel* (patterns/preferences/decisions: `.oms/wiki/*.md` auto-append) needs no gate — read only, don't touch. `wiki/pattern/` (preferences) is permanently light.
+- ⚠️ **Local→global wiki elevation (separate path, storage-location axis)** — separate from `scope: global` above being a *scope-of-application* label in venues.md, there is a path that elevates light-channel assets by **physical storage location** from the local `.oms/wiki/` to the *parent folder's `.oms/wiki/`* (global level, discovered by ascent). At paper close, candidates that "this asset is reusable for the next paper too" (preferences, venue formats, reuse decisions, history) are copied **after human approval** into the parent `.oms/wiki/<category>/`. Criteria:
+  - Targets: among `pattern/` (preferences), `convention/` (venue formats), `decision/` (reuse decisions), `history/` (paper records), only *paper-agnostic reusable* assets. This paper's unique rejects/gaps stay local.
+  - ⚠️ **citation/.bib are permanently forbidden from global elevation** (whether heavy or light, `learning-protocol.md` §6.F·§1.4).
+  - Human gate required — no automatic elevation. If the parent `.oms/` does not exist, advise "init in the parent folder or place a `.oms/wiki/` there" (do not arbitrarily create one in the parent or home).
+  - This is a different lane from venues.md default promotion (heavy) — it's merely a *location* move of light assets, not making them an enforced default. `wiki/pattern/` remains permanently light even when elevated to global (not enforced).
+- ⚠️ **provenance enforcement** — each promoted default records the source learned.md observation id in the venue's `learned_refs[]`. A default without a source = a guess = a silent change (§6.C violation).
+- ⚠️ **specificity honestly** — recompute even on item deletion (no silent drift, §4 monotonic + deletion rule). Don't inflate it to look more specialized.
+- **Judgment ≠ approval ≠ enforcement (triple self-approval ban, resolves review #4)** — scholar-inspector only *judges* promotion read-only (it does not approve its own judgment in the same context), scholar-learn only *writes to disk* what passed the human gate (no judging), and compliance *verification* is the job of scholar-verify in a separate context. The three roles are separated.
+- **Present as a diff** — since venues.md already exists, the inspector proposes not the whole file but a *delta* (Added/Changed defaults) so the human reviews only the changes.
+- The canonical reference for the learning channels, promotion criteria, and specificity formula is `references/learning-protocol.md`; the venue schema is `references/venues.md`; the wiki convention SSOT is `references/wiki/README.md`.
 </Execution_Policy>
 
 <Steps>
-1. **SSOT·전제 확인**: 작업 루트와 `.oms/learned.md`가 있는지 확인. 비었으면 중단하고 "승격할
-   관찰이 없다 — 운영하며 inspect/verify가 채운다"고 안내. 다음을 읽는다:
-   - `.oms/learned.md` — 승격 대기 관찰 (이 스킬의 입력)
-   - `references/venues.md` — 진화시킬 기존 venue 기본값 (blind 교체 아니라 *evolve*)
-   - `.oms/wiki/convention/*.md` — 가벼운 채널. confidence high 신호가 쌓였나 grep(읽기만)
-   - `references/learning-protocol.md` — 2채널·승격 기준·specificity 공식 (정본)
-2. **관찰 분류 (2채널 판별)**: learned.md의 각 관찰을 (a) venue 기본값 승격 후보(무거운 채널 —
-   게이트 대상) vs (b) 패턴/성향 메모(가벼운 채널 — wiki로 두고 게이트 불필요)로 가른다. 모든
-   관찰이 기본값이 되는 게 아니다 — learning-protocol.md 채널 기준 적용. citation/.bib류는 즉시
-   배제(§6.F).
-3. **승격 후보 1차 선별 (증거 바)**: 무거운 채널 후보 각각에 §3 기준 적용 — evidence_count ≥ 3
-   (또는 user_stated:true면 1) + 반례 0. 넘으면 "승격 제안", 애매하면 "held candidate". 근거
-   수집까지가 컨트롤러 몫, 최종 판정·draft는 다음 단계 agent에 위임.
-4. **agent 위임 (승격 판정 — read-only)** — scholar-inspector에 단일 위임. fresh subagent로
-   컨트롤러 컨텍스트 오염 방지. 하나의 신중한 합성이므로 **병렬 inspector 금지**:
+1. **Confirm SSOT and prerequisites**: check that the working root and `.oms/learned.md` exist. If empty, stop and advise "there are no observations to promote — inspect/verify fill it as you operate". Read the following:
+   - `.oms/learned.md` — observations awaiting promotion (the input to this skill)
+   - `references/venues.md` — existing venue defaults to evolve (an *evolve*, not a blind replace)
+   - `.oms/wiki/convention/*.md` — light channel. grep whether high-confidence signals have accumulated (read only)
+   - `references/learning-protocol.md` — 2-channel, promotion criteria, specificity formula (canonical)
+2. **Classify observations (2-channel discrimination)**: split each observation in learned.md into (a) venue default promotion candidates (heavy channel — gate target) vs (b) pattern/preference memos (light channel — leave in wiki, no gate needed). Not every observation becomes a default — apply the learning-protocol.md channel criteria. Citation/.bib types are excluded immediately (§6.F).
+3. **First-pass screening of promotion candidates (evidence bar)**: apply the §3 criteria to each heavy-channel candidate — evidence_count ≥ 3 (or 1 if user_stated:true) + 0 counterexamples. If it clears, "promotion proposal"; if ambiguous, "held candidate". The controller's job is up to gathering the evidence; the final judgment/draft is delegated to the agent in the next step.
+4. **Delegate to agent (promotion judgment — read-only)** — single delegation to scholar-inspector. Fresh subagent to prevent controller-context pollution. Since it's one careful synthesis, **no parallel inspectors**:
 
    ```
    Task(
      subagent_type="oh-my-scholar:scholar-inspector",
      description="scholar-learn: judge learned.md observations for promotion into venues.md",
      prompt="""
-     역할: scholar-learn 승격 판단. 아래 .oms SSOT를 읽고, learned.md 관찰 중 어느 것이
-     venues.md 강제 기본값으로 승격될 자격이 있는지 판단해 **제안(diff)** 을 내라. 너는
-     read-only다 — venues.md를 직접 쓰지 말고, 준수를 판정하지 마라. 사람 승인 게이트가
-     네 제안과 디스크 사이에 있다.
+     Role: scholar-learn promotion judgment. Read the .oms SSOT below and, among the learned.md observations,
+     judge which qualify for promotion into venues.md enforced defaults and issue a **proposal (diff)**. You are
+     read-only — do not write venues.md directly, and do not judge compliance. A human approval gate sits
+     between your proposal and disk.
 
-     입력 (읽을 것):
-     - .oms/learned.md                # 승격 대기 관찰 (scope·evidence·반례·user_stated 포함)
-     - references/venues.md           # 진화시킬 기존 기본값 (evolve, not replace)
-     - .oms/wiki/convention/*.md      # 가벼운 채널 confidence 신호 (읽기만)
-     - references/learning-protocol.md # 2채널·승격 기준 §3·specificity 공식 §4 (정본)
+     Inputs (to read):
+     - .oms/learned.md                # observations awaiting promotion (incl. scope, evidence, counterexamples, user_stated)
+     - references/venues.md           # existing defaults to evolve (evolve, not replace)
+     - .oms/wiki/convention/*.md      # light-channel confidence signals (read only)
+     - references/learning-protocol.md # 2-channel, promotion criteria §3, specificity formula §4 (canonical)
 
-     지시:
-     - 승격 기준은 AND(§3): evidence_count ≥ 3 + 반례 0 + user_overridden 아님 + 안정 + 모순 없음.
-       단 user_stated:true 후보는 evidence 1이어도 게이트로(반복 바 면제, §1.feedback.2). 자동 강제 금지.
-     - 각 candidate의 scope(global | <venue-key>)를 명시. specificity는 scope별 계산.
-     - 승격되는 각 기본값은 근거 learned.md 관찰 id를 learned_refs[]에 기록(provenance).
-     - specificity를 §4 공식으로 정직하게 재계산(부풀리지 말 것). 항목 삭제도 재계산 이벤트.
-     - 전체 파일이 아니라 venues.md 대비 **diff**(Added/Changed 기본값)로 제시.
-     - ⚠️ citation/.bib/특정 인용 target은 승격 후보에서 거부(§6.F).
-     - 출력: 승격/held 결정 + scope + provenance 표 + specificity 근거 + 사람 결정 목록.
-       venues.md를 쓰지 말고 제안만. self-approve 금지(판정 ≠ 승인 ≠ 검증).
+     Instructions:
+     - Promotion criteria are AND (§3): evidence_count ≥ 3 + 0 counterexamples + not user_overridden + stable + no contradiction.
+       But a user_stated:true candidate goes to the gate even with evidence 1 (repetition bar waived, §1.feedback.2). No auto-enforcement.
+     - State each candidate's scope (global | <venue-key>). Compute specificity per scope.
+     - Each promoted default records the source learned.md observation id in learned_refs[] (provenance).
+     - Recompute specificity honestly with the §4 formula (don't inflate). Item deletion is also a recompute event.
+     - Present as a **diff** against venues.md (Added/Changed defaults), not the whole file.
+     - ⚠️ Reject citation/.bib/specific-citation targets from promotion candidates (§6.F).
+     - Output: promote/held decisions + scope + provenance table + specificity rationale + human decision list.
+       Do not write venues.md, propose only. No self-approve (judgment ≠ approval ≠ verification).
      """
    )
    ```
 
-   ━━━ **GATE (핵심 승격 게이트 — human)**: inspector의 diff·scope·provenance·specificity 근거를
-   사람에게 제시하고 결정을 받는다 — promote(승인) / hold(보류) / edit(일부만) / abort.
-   **자동 통과 절대 없음.** user_stated held candidate를 사람이 "올려"라고 하면 여기서 결정. ━━━
-5. **승인분 반영 (게이트 통과 후에만)**: 사람이 승인한 기본값만 이 스킬이 디스크에 쓴다.
-   - **먼저** 기존 venue 값을 스냅샷(작업장 versions/, `output-layout.md` work layer 규약 따름 —
-     승격은 한 방향 래칫이라 롤백 지점). retention: 최신 N개만 남기고 trash 경유 prune(영구 rm 금지).
-   - `references/venues.md`(또는 프로젝트 `.oms/venues/<key>.yaml`) — 승인된 기본값 추가/변경,
-     `learned_refs[]`에 출처 관찰 id, `origins`에 해당 항목 `learned` 표시, scope별 `specificity`
-     재계산. (스키마 부합 재확인.)
-   - 페어 사람-narrative 동기(있으면) — venue 설명이 바뀌면 같은 패스에서 갱신(drift 방지, §6.C).
-   - `.oms/learned.md` — 승격된 관찰은 "promoted → venues.md (date)"로 마킹, held는 candidate
-     유지(다음 learn 재평가).
-6. **후속 안내**: 기본값이 바뀌었으므로 다음 그 venue 작업부터 scholar-outline이 새 기본값을 깐다고
-   안내. scholar-verify의 venue 메타 정합 점검(H10)으로 specificity↔origin 일관을 확인하라고 안내.
-   learn 자체는 논문 내용을 안 만진다.
+   ━━━ **GATE (core promotion gate — human)**: present the inspector's diff, scope, provenance, and specificity rationale to the human and obtain a decision — promote (approve) / hold / edit (only some) / abort.
+   **Absolutely no automatic passing.** If the human says "raise it" for a user_stated held candidate, the decision is made here. ━━━
+5. **Commit approved items (only after passing the gate)**: only defaults the human approved are written to disk by this skill.
+   - **First** snapshot the existing venue values (workspace versions/, following the `output-layout.md` work-layer convention — promotion is a one-way ratchet, so this is the rollback point). retention: keep only the latest N and prune via trash (no permanent rm).
+   - `references/venues.md` (or project `.oms/venues/<key>.yaml`) — add/change approved defaults, source observation id in `learned_refs[]`, mark the relevant item `learned` in `origins`, recompute `specificity` per scope. (Re-confirm schema conformance.)
+   - Paired human-narrative companion (if present) — if the venue description changes, update it in the same pass (drift prevention, §6.C).
+   - `.oms/learned.md` — mark promoted observations "promoted → venues.md (date)", keep held ones as candidates (re-evaluated at the next learn).
+6. **Follow-up guidance**: since the defaults changed, advise that scholar-outline will lay down the new defaults starting from the next work on that venue. Advise checking specificity↔origin consistency via scholar-verify's venue meta-consistency check (H10). learn itself does not touch paper content.
 </Steps>
 
 <Output>
-- scholar-inspector의 **승격 제안 diff**(Added/Changed 기본값) + scope + provenance 표(각 기본값 →
-  learned.md 관찰 id) + specificity 변화 근거 + 사람 결정 목록.
-- GATE 결정 이력(promote/hold/edit/abort).
-- 게이트 통과 시: 갱신된 `venues.md`(learned_refs[]·origins·specificity) + 마킹된 learned.md 경로.
-- held candidate 목록(다음 learn 재평가) + "scholar-verify 메타 정합 점검 권장" 안내.
-- inspector는 self-approve 안 함 명시 — 승격은 사람 게이트가 끊었고, 준수 판정은 별도 컨텍스트
-  (scholar-verify)의 몫. citation/.bib는 승격 대상이 아니었음을 확인(§6.F).
+- scholar-inspector's **promotion proposal diff** (Added/Changed defaults) + scope + provenance table (each default → learned.md observation id) + specificity-change rationale + human decision list.
+- GATE decision history (promote/hold/edit/abort).
+- On passing the gate: updated `venues.md` (learned_refs[]·origins·specificity) + path to the marked learned.md.
+- Held-candidate list (re-evaluated at the next learn) + "scholar-verify meta-consistency check recommended" advisory.
+- Note that the inspector does not self-approve — promotion was broken by the human gate, and compliance judgment is the job of a separate context (scholar-verify). Confirm that citation/.bib were not promotion targets (§6.F).
 </Output>
 
 <Citation_Safety>
-⚠️ oms 정체성의 핵심 불변. scholar-learn은 **절대** 다음을 하지 않는다:
-- citation·.bib 엔트리·"이 논문을 인용한다" 류를 venue 기본값으로 승격 (target enum 거부, §6.F).
-- 임베딩/유사도 검색으로 관찰을 회수 (결정론적 grep만, §6.A).
-- 날조 evidence로 ≥3 바를 채움 (실제 paper-slug/이벤트만, §6.E).
-승격 대상은 *구조·순서·양식·작업방식 사양*뿐. 인용은 학습되지 않는다.
+⚠️ A core invariant of oms identity. scholar-learn **never** does the following:
+- Promote a citation, .bib entry, or "cite this paper" type into a venue default (target enum rejects it, §6.F).
+- Recover observations via embedding/similarity search (deterministic grep only, §6.A).
+- Fill the ≥3 bar with fabricated evidence (only real paper-slug/events, §6.E).
+The promotion targets are *structure, ordering, format, and working-method specs* only. Citations are not learned.
 </Citation_Safety>

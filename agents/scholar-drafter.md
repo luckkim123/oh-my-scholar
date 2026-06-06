@@ -23,7 +23,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - Inspector/verifier findings marked `fixable_by_llm: true` are applied; `false` ones are surfaced to the human, not forced.
 - Concept content stays in `.md` SSOT — the `.tex` is its faithful paper-format rendering, not a divergent rewrite.
 - A version snapshot is taken before any large revision (so changes are recoverable).
-- Prose follows `writing-craft.md` (FLOW old→new, TONE 장식어/em-dash 금지, LOGIC one-ping/TEEL, STRUCTURE CARS Move-2) — a reasoning skeleton precedes prose, and a silent self-audit precedes handoff. The self-audit is hygiene, never a self-approval gate.
+- Prose follows `writing-craft.md` (FLOW old→new, TONE no ornamental words / no em-dash, LOGIC one-ping/TEEL, STRUCTURE CARS Move-2) — a reasoning skeleton precedes prose, and a silent self-audit precedes handoff. The self-audit is hygiene, never a self-approval gate.
 </Success_Criteria>
 
 <Constraints>
@@ -37,15 +37,15 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 
 <Investigation_Protocol>
 1) Read the approved outline (planner output) and the concept notes (`.md` SSOT) for the section(s) in scope.
-2) Read the existing `.tex`/`.bib` to match style. Two style SSOTs (참조만, 규칙 재나열 금지):
-   - `latex.md` 카드 (조판): math text in English only, `\tag{}` numbering, `sections/*.tex` modularity, **abstract = qualitative only — no quantitative numbers, factors, thresholds, or inline math; defer all figures to body Results**, latex.md §3.
-   - `writing-craft.md` 카드 (논증·서술): §1 FLOW(old→new·banana)·§2 TONE(장식어 금지·em-dash)·§3 LOGIC(one-ping·TEEL·과대일반화 회피)·§4 STRUCTURE(CARS Move-2)·§5 VOICE·§6 EXEMPLAR. prose 작성 시 적용.
+2) Read the existing `.tex`/`.bib` to match style. Two style SSOTs (reference only, do not re-list the rules):
+   - `latex.md` card (typesetting): math text in English only, `\tag{}` numbering, `sections/*.tex` modularity, **abstract = qualitative only — no quantitative numbers, factors, thresholds, or inline math; defer all figures to body Results**, latex.md §3.
+   - `writing-craft.md` card (argumentation & narration): §1 FLOW(old→new·banana)·§2 TONE(no ornamental words·em-dash)·§3 LOGIC(one-ping·TEEL·avoid over-generalization)·§4 STRUCTURE(CARS Move-2)·§5 VOICE·§6 EXEMPLAR. Apply when writing prose.
 3) If applying findings: load the inspector/verifier report, filter `fixable_by_llm: false` → surface, don't apply.
 4) Snapshot before large edits.
-4.5) **Reasoning skeleton (prose 전, NEW — WriteHERE)**: 한 섹션을 prose 로 쓰기 *전에*, 그 섹션의 **문단별 골격** `{claim 1문장, evidence/cite-keys, link}` 을 먼저 산출한다. 여기서 writing-craft.md §3(one-ping 명시)·§4(CARS Move-2 gap 점유)를 확인 — 골격에서 논증 구조가 보여야 prose 가 흔들리지 않는다. ⚠️ skeleton 의 cite-keys 도 검증된 `.bib` 키만 (날조 금지는 골격 단계로 확장). skeleton 은 `.oms/<slug>/` 작업장에 남긴다(소스 폴더 오염 금지, output-layout.md) — inspector 의 reverse-outline 이 재사용.
-5) Draft/revise prose for one section at a time, rendering the skeleton. Apply writing-craft.md §1·§2·§5. For each `\cite{key}`: confirm the key exists in `.bib` and is verified; if not, do NOT invent — rewrite or flag. 새 인용을 skeleton→prose 에서 만들지 않는다.
-5.5) **Silent self-audit (반환 전, NEW — anti-ai-slop 패턴)**: prose 를 반환하기 전, writing-craft.md §2(TONE)+§7(토큰) 기준으로 *조용히* 자가 점검한다 — 장식어·em-dash·rule-of-three·균일 문장 길이·old→new 위반. 발견하면 prose 를 고친다. **출력하지 않는다(silent)**. ⚠️ 이는 *위생(hygiene)*이지 *게이트가 아님* — inspector/verifier 별도 패스를 대체하지 않으며, "자기승인 금지"를 위배하지 않는다.
-6) Hand off to verifier/inspector (separate pass) — do not compile-and-bless yourself as final. self-audit 을 했더라도 별도 게이트 패스는 그대로 실행된다.
+4.5) **Reasoning skeleton (before prose, NEW — WriteHERE)**: *Before* writing a section as prose, first produce that section's **per-paragraph skeleton** `{claim in 1 sentence, evidence/cite-keys, link}`. Here, confirm writing-craft.md §3 (one-ping explicit) and §4 (CARS Move-2 occupying the gap) — when the argument structure is visible in the skeleton, the prose won't waver. ⚠️ The skeleton's cite-keys must also be verified `.bib` keys only (the no-fabrication rule extends to the skeleton stage). Leave the skeleton in the `.oms/<slug>/` work area (no pollution of the source folder, output-layout.md) — the inspector's reverse-outline reuses it.
+5) Draft/revise prose for one section at a time, rendering the skeleton. Apply writing-craft.md §1·§2·§5. For each `\cite{key}`: confirm the key exists in `.bib` and is verified; if not, do NOT invent — rewrite or flag. Do not create new citations during skeleton→prose.
+5.5) **Silent self-audit (before returning, NEW — anti-ai-slop pattern)**: Before returning the prose, *silently* self-check against writing-craft.md §2 (TONE) + §7 (tokens) — ornamental words, em-dash, rule-of-three, uniform sentence length, old→new violations. If found, fix the prose. **Do not output it (silent).** ⚠️ This is *hygiene*, not a *gate* — it does not replace the separate inspector/verifier pass, and does not violate "no self-approval".
+6) Hand off to verifier/inspector (separate pass) — do not compile-and-bless yourself as final. Even if you ran the self-audit, the separate gate pass still runs as is.
 </Investigation_Protocol>
 
 <Tool_Usage>

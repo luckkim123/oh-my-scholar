@@ -1,58 +1,58 @@
 ---
 name: scholar-revise
 description: |
-  논문을 verify PASS 받을 때까지 수정-검증 루프 — ralph의 논문판. 결함목록을 PRD처럼 두고
-  passes:true 게이트까지 drafter(수정)·verifier(검증) 반복. 같은 결함 3회면 멈추고 보고.
-  ⚠️ "내용 생성" 결함은 자동수정 금지(단일 신중). Triggers: 통과까지 고쳐, 다 잡아줘,
+  A revise-verify loop on a paper until verify gives a PASS — the paper-edition of ralph. Treats the defect list like a PRD and
+  repeats drafter (revise) and verifier (verify) until the `passes:true` gate. Stops and reports if the same defect recurs 3 times.
+  ⚠️ "Content generation" defects must NOT be auto-fixed (single, careful pass). Triggers: 통과까지 고쳐, 다 잡아줘,
   검증 통과할 때까지, revise until pass, fix until verified, 수정 루프, 리비전 돌려
 ---
 
-# scholar-revise — 수정-검증 루프 (ralph 논문판)
+# scholar-revise — revise-verify loop (paper-edition of ralph)
 
 <Purpose>
-논문을 scholar-verify가 PASS 줄 때까지 수정한다. OMC ralph의 논문판: 결함을 PRD(acceptance criteria)처럼 두고 `passes:true` 게이트까지 drafter(수정)·verifier(검증)를 fresh 증거로 반복. "do your best"가 아니라 *게이트 통과 보장*.
+Revise the paper until scholar-verify gives a PASS. The paper-edition of OMC ralph: treat defects like a PRD (acceptance criteria) and repeat drafter (revise) and verifier (verify) on fresh evidence until the `passes:true` gate. Not "do your best" but *guaranteed gate passage*.
 </Purpose>
 
 <Use_When>
-- draft/inspect/verify가 끝났고 FAIL 항목을 자동 루프로 해소하고 싶을 때
-- "통과까지 알아서 고쳐줘", "다 잡아줘" 류
+- draft/inspect/verify are done and you want to clear the FAIL items in an automatic loop
+- "fix it until it passes on its own", "catch them all" type requests
 </Use_When>
 
 <Do_Not_Use_When>
-- 새 초안이면 → scholar-draft
-- 조언만 원하면 → scholar-inspect (수정 안 함)
-- ⚠️ 인용·기여 같은 **내용 생성 결함**은 자동 루프로 돌리지 말 것 — drafter가 단일 신중으로, 사람 확인 거쳐. revise 루프는 fixable_by_llm=true(텍스트 재구성·컴파일 오류·참조 정합) 결함에만.
+- If it's a new draft → scholar-draft
+- If you only want advice → scholar-inspect (does not revise)
+- ⚠️ **Content generation defects** like citations and contributions must NOT be run through the automatic loop — have the drafter handle them in a single, careful pass, with human confirmation. The revise loop is only for fixable_by_llm=true (text restructuring, compile errors, reference consistency) defects.
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- 결함목록을 PRD처럼: 각 결함이 acceptance criterion, `passes:true`는 verifier가 그 항목을 PASS 줄 때.
-- 각 반복: drafter 수정(fixable_by_llm=true만) → verifier가 **fresh 증거**로 재검증 (이전 검증 재사용 금지).
-- **scope 축소·placeholder·검사 우회로 PASS 만들지 말 것** (ralph: no scope reduction, no deleting tests, no faking).
-- drafter와 verifier는 **다른 lane** — self-approval 금지.
-- **같은 결함 3회 반복 → 멈추고 "fundamental issue" 보고** (무한 루프 차단).
-- 최대 반복(venue max_review_rounds, 기본 5) 초과 시 멈추고 현황 보고.
-- ⚠️ fixable_by_llm=false(실험·그림 누락·기여 범위·미검증 인용)는 루프에 안 넣음 → 사람에게.
-- ⚠️ **PASS 직후 구조-regression 전수 재verify**: 한 회차가 전부 passes:true가 되면, 곧장 종료하지 말고 *이번 수정이 다른 섹션의 전역 정합을 깼는지* 한 번 더 전수 검증한다 — `\ref`↔`\label`·`\cite`↔.bib·본문↔표/그림 수치가 *수정한 섹션 밖에서* 깨졌는지. 한 곳을 고치면 다른 \ref 번호·인용 정합·수치 합이 어긋날 수 있다(국소 수정의 전역 부작용). 깨진 게 있으면 그 항목을 새 결함으로 루프에 되넣는다.
-  - ==기존 score-regression과 별개 축(혼동 방지)==: 아래 Steps 3c의 `score-regression(품질 점수 하락 > venue regression_threshold)`은 **품질 점수 하락** 축(루프를 *멈추는* 가드)이다. 이 신설 조항은 **구조 정합 regression**(참조·인용·수치 전역 정합 깨짐) 축으로 *다른 종류* — 점수가 아니라 기계적 정합이고, 멈추는 게 아니라 깨진 항목을 루프로 되돌린다. 두 축은 독립적으로 검사한다.
+- Treat the defect list like a PRD: each defect is an acceptance criterion, `passes:true` is when the verifier gives that item a PASS.
+- Each iteration: drafter revises (fixable_by_llm=true only) → verifier re-verifies on **fresh evidence** (no reuse of a prior verification).
+- **Do not manufacture a PASS by reducing scope, inserting placeholders, or bypassing checks** (ralph: no scope reduction, no deleting tests, no faking).
+- drafter and verifier are **different lanes** — no self-approval.
+- **Same defect recurs 3 times → stop and report a "fundamental issue"** (block infinite loops).
+- When the max iterations (venue max_review_rounds, default 5) are exceeded, stop and report the current state.
+- ⚠️ fixable_by_llm=false (missing experiments/figures, contribution scope, unverified citations) are not put in the loop → escalate to a human.
+- ⚠️ **Full structure-regression re-verify right after a PASS**: when one round makes everything passes:true, do not terminate immediately — verify once more, in full, *whether this revision broke the global consistency of other sections* — i.e. whether `\ref`↔`\label`, `\cite`↔.bib, body↔table/figure numbers broke *outside the section you revised*. Fixing one place can throw off other \ref numbers, citation consistency, or numeric sums (global side effects of a local fix). If anything broke, put that item back into the loop as a new defect.
+  - ==A distinct axis from the existing score-regression (avoid confusion)==: the `score-regression (quality-score drop > venue regression_threshold)` in Steps 3c below is the **quality-score drop** axis (a guard that *stops* the loop). This new clause is the **structural-consistency regression** axis (broken global consistency of references, citations, numbers) — a *different kind*: mechanical consistency rather than a score, and it does not stop but puts the broken item back into the loop. The two axes are checked independently.
 </Execution_Policy>
 
 <Steps>
-1. 현재 상태: `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` → FAIL 항목 목록 = PRD.
-2. fixable_by_llm으로 분류: true → 루프 대상, false → 사람 escalation 목록.
-3. **루프** (각 회차):
-   a. 수정: `Task(subagent_type="oh-my-scholar:scholar-drafter", ...)` — fixable=true 항목만, 단일 신중, 큰 수정 전 스냅샷.
-   b. 재검증: `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` — fresh 증거 전수.
-   c. 전부 passes:true → **구조-regression 전수 재verify**(\ref/\cite/수치 전역 정합이 수정 섹션 밖에서 깨졌는지). 깨진 항목 있으면 새 결함으로 (a)에 되넣음, 없으면 종료. 아니면 같은 결함 반복 여부:
-      - 같은 결함 3회째 → 멈추고 "fundamental issue" 보고.
-      - score-regression(품질 점수 하락 > venue regression_threshold) → 멈추고 보고. (구조-regression과 별개 축)
-      - 아니면 (a)로.
-4. PASS(+구조-regression 통과) 또는 stop 조건에서 종료. GATE 2(리뷰 결과 확인 — human) 제시.
+1. Current state: `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` → list of FAIL items = PRD.
+2. Classify by fixable_by_llm: true → loop targets, false → human-escalation list.
+3. **Loop** (each round):
+   a. Revise: `Task(subagent_type="oh-my-scholar:scholar-drafter", ...)` — fixable=true items only, single careful pass, snapshot before a large revision.
+   b. Re-verify: `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)` — fresh evidence, in full.
+   c. All passes:true → **full structure-regression re-verify** (whether \ref/\cite/numeric global consistency broke outside the revised section). If any item broke, put it back into (a) as a new defect; if none, terminate. Otherwise, check whether the same defect recurs:
+      - Same defect for the 3rd time → stop and report a "fundamental issue".
+      - score-regression (quality-score drop > venue regression_threshold) → stop and report. (a distinct axis from structure-regression)
+      - Otherwise → go to (a).
+4. Terminate on PASS (+ passing the structure-regression) or a stop condition. Present GATE 2 (confirm the review result — human).
 </Steps>
 
 <Output>
-PASS 받은 .tex/.bib + 반복 이력(각 회차 FAIL→수정 요지) + 최종 verify 증거표 + 사람 escalation 목록(fixable=false·미검증 인용).
+The PASSed .tex/.bib + iteration history (each round's FAIL→revision summary) + final verify evidence table + human-escalation list (fixable=false, unverified citations).
 
-⚠️ **완료조건 — .tex↔.oms 동기화 (`references/learning-protocol.md` §8)**: revise 루프가 outline 대비 **구조에 영향 주는 변경**(섹션 이동·통합·분리, 제목 변경, 주요 수식 교체, \cite 추가)을 만들었으면 — revise 루프 중엔 섹션 통합·분리가 흔하다 — PASS 후 **같은 작업 안에서** `.oms/<slug>/outline/outline.md`와 관련 `.oms/<slug>/methodology/*.md`, 그리고 결정기록(`.oms/<slug>/outline/SECTION_REVIEW_DECISIONS.md`류가 있으면 거기에 무엇을 왜 바꿨는지 한 블록)을 현 .tex와 일치시킨다. 이 동기화가 끝나야 "revise PASS" 인정. 빠뜨리면 .oms가 stale되어 다음 세션의 draft/inspect가 옛 구조 기준으로 오판한다 — drift 금지.
+⚠️ **Completion condition — .tex↔.oms synchronization (`references/learning-protocol.md` §8)**: if the revise loop made **changes that affect structure** relative to the outline (section moves, merges, splits, title changes, major equation replacements, \cite additions) — section merges and splits are common during a revise loop — then after the PASS, **within the same task**, bring `.oms/<slug>/outline/outline.md` and the relevant `.oms/<slug>/methodology/*.md`, plus the decision record (if something like `.oms/<slug>/outline/SECTION_REVIEW_DECISIONS.md` exists, a block there on what changed and why), into agreement with the current .tex. "revise PASS" is only granted once this synchronization is done. Skipping it leaves .oms stale, so the next session's draft/inspect will misjudge against the old structure — no drift.
 
-또는 stop 보고(같은 결함 3회 / regression / 최대 반복 초과 + 남은 결함).
+Or a stop report (same defect 3 times / regression / max iterations exceeded + remaining defects).
 </Output>

@@ -1,76 +1,76 @@
 ---
 name: scholar-pilot
 description: |
-  논문 전체 파이프라인 오케스트레이션 — research→ideate→outline(GATE1)→draft→inspect→verify
-  →revise(GATE2)→제출(GATE3). OMC autopilot의 논문판. citation 안전 3원칙 강제.
+  Full paper pipeline orchestration — research→ideate→outline(GATE1)→draft→inspect→verify
+  →revise(GATE2)→submission(GATE3). The paper-domain version of OMC autopilot. Enforces the 3 citation-safety principles.
   Triggers: 논문 만들어줘, 논문 써줘, 처음부터 끝까지, 논문 파이프라인, paper from scratch,
   write a paper, 논문 자동, 전체 논문 작업, oms pilot
 ---
 
-# scholar-pilot — 논문 전체 오케스트레이션 (autopilot 논문판)
+# scholar-pilot — Full paper orchestration (paper-domain autopilot)
 
 <Purpose>
-research question부터 제출 준비까지 논문 전 단계를 조율한다. OMC autopilot의 논문판이되, citation-bound 안전을 위해 **생성은 단일·읽기는 병렬**로 제한하고 사람 GATE 3개를 끼운다.
+Orchestrates every paper stage from research question to submission readiness. It is the paper-domain version of OMC autopilot, but for citation-bound safety it restricts to **single generation, parallel reading** and inserts 3 human GATEs.
 </Purpose>
 
 <Use_When>
-- "논문 처음부터 끝까지 만들어줘" — 짧은 brief에서 전체 파이프라인
-- 어느 단계부터 시작할지 명확하면 그 단계부터 (--from)
+- "Build the whole paper from scratch for me" — full pipeline from a short brief
+- When it's clear which stage to start from, start at that stage (--from)
 </Use_When>
 
 <Do_Not_Use_When>
-- 한 단계만 필요하면 → 해당 scholar-* skill 직접
-- citation-bound 논문이라 **완전 무인 자동은 금지** — GATE 3개는 사람이 반드시 끊는다
+- If only one stage is needed → use the corresponding scholar-* skill directly
+- Because this is a citation-bound paper, **fully unattended automation is forbidden** — the 3 GATEs must always be broken by a human
 </Do_Not_Use_When>
 
 <Execution_Policy>
-- ⚠️ **citation 안전 3원칙 강제**:
-  1. 읽기(research·inspect·verify)는 병렬 OK, **생성(draft)은 단일 신중 절대 병렬 금지**.
-  2. verifier가 인용 결함 감지해도 **자동 수정 금지** — 사람 확인.
-  3. draft(.tex) 전 ideate(.md)에서 개념·출처 선확정.
-- GATE 3개는 사람 결정점 — 자동 통과 금지.
-- 각 단계는 전용 skill에 위임 (재구현 금지).
-- 단계 산출은 `.oms/state/`에 기록 (OMC state 패턴) — 중단 후 재개 가능.
-- **진입 시 priority 컨텍스트 기록 (압축 생존)**: 파이프라인 시작 시 `.oms/notepad.md`의 `## Priority Context` 섹션에 치명 제약을 적는다 — "citation 날조 금지 / draft 병렬 금지 / .bib 수정 전 사람 확인 + 현재 GATE n/3 + 미검증 인용 목록". 긴 파이프라인에서 컨텍스트가 압축돼도 인용 안전 3원칙과 GATE 위치가 항상 복원되도록.
-  - **.md가 기본**: 직접 `.oms/notepad.md`에 write/append(원본 notepad가 단일 .md + 섹션 파싱이라 .md 재현 손해 ≈ 0). notepad MCP가 가용하면 `notepad_write_priority(...)`로 미러 가능(같은 .md 대상, 선택 가속) — 부재해도 .md write로 동일 동작, 에러 아님.
-- 단계 산출 경로는 **`.oms/state/`** 고정 (검증된 실재 경로; `.oms/specs`·`sessions/{sid}` 같은 미검증 하위 세그먼트는 박지 않는다).
-  - ⚠️ **30s 트랩 (향후 state MCP 도입 시에만 — 지금은 미적용)**: state MCP를 쓰게 되면 단계 핸드오프 *직전*에 `state_clear`를 호출하지 말 것(30s간 모든 모드의 stop-hook이 비활성화돼 루프가 조용히 끊긴다). 비종료 핸드오프는 `state_write(active=false)`로, `state_clear`는 *terminal(파이프라인 완전 종료)에서만*. **현재는 state MCP를 실호출하지 않으므로(.md/`.oms/state/` 파일이 기본) 순수 미래 대비 메모.**
+- ⚠️ **The 3 citation-safety principles are enforced**:
+  1. Reading (research·inspect·verify) may be parallel, but **generation (draft) is single and careful — absolutely no parallelism**.
+  2. Even if the verifier detects a citation defect, **no automatic fix** — human confirmation.
+  3. Before draft (.tex), lock down concepts·sources in ideate (.md) first.
+- The 3 GATEs are human decision points — no automatic pass-through.
+- Each stage is delegated to its dedicated skill (no re-implementation).
+- Stage outputs are recorded in `.oms/state/` (OMC state pattern) — resumable after interruption.
+- **Record priority context on entry (survives compaction)**: at pipeline start, write the critical constraints into the `## Priority Context` section of `.oms/notepad.md` — "no citation fabrication / no parallel draft / human confirmation before editing .bib + current GATE n/3 + list of unverified citations". So that even if context is compacted during a long pipeline, the 3 citation-safety principles and the GATE position are always recoverable.
+  - **.md is the default**: write/append directly to `.oms/notepad.md` (since the original notepad is a single .md + section parsing, the loss of reproducing it as .md ≈ 0). If notepad MCP is available, you can mirror via `notepad_write_priority(...)` (same .md target, optional acceleration) — even when absent, a .md write produces identical behavior, not an error.
+- The stage-output path is fixed at **`.oms/state/`** (a verified real path; do not nail down unverified sub-segments like `.oms/specs`·`sessions/{sid}`).
+  - ⚠️ **30s trap (only when state MCP is adopted in the future — not applied now)**: if you start using state MCP, do not call `state_clear` *right before* a stage handoff (it disables every mode's stop-hook for 30s, silently breaking the loop). For a non-terminal handoff use `state_write(active=false)`, and use `state_clear` *only at terminal (full pipeline shutdown)*. **Since state MCP is not actually called at present (the .md/`.oms/state/` files are the default), this is purely a future-proofing note.**
 </Execution_Policy>
 
 <Steps>
-0. **init 흡수 (부트스트랩 — `.oms/<slug>/` 부재 시)**: 논문 폴더에 `.oms/<slug>/`·`meta.md`가 없으면, research로 곧장 들어가지 말고 먼저 `scholar-init`을 **권유**한다 — "이 논문 폴더가 아직 셋업 안 됐어요. 폴더 위치·venue·주제를 잡고 디렉토리를 만들까요?(scholar-init)". 사용자가 OK하면 init이 scaffold + `.oms/`를 만들고(상위 `.oms/` 전역 씨앗 참조), 종료 후 pilot이 1단계 research로 이어간다. 이미 `.oms/<slug>/`가 있으면 이 단계 skip(재init 안 함 — 멱등). ⚠️ 자동 진입이 아니라 권유 — 사용자 모르게 폴더를 만들지 않는다.
-1. **research**: scholar-research → 연구맵·gap·검증된 인용 (.md)
-2. **deepen**: scholar-deepen → 주장 모호성 게이트 (정성). research 다음, ideate 앞.
-   - fresh subagent dispatch (컨트롤러 컨텍스트 오염 방지).
-   - **skip 조건**: deepen 4차원(contribution/method-evidence/comparison/reproducibility)이 자명하게 전부 "명확"이거나, 사용자가 `--skip-deepen`을 명시하면 통과.
-   - deepen 통과(사람 승인)는 **GATE 1 전의 내부 승인** — 별도 사용자 게이트를 신설하지 않는다 (deepen 자체의 "사람 승인"으로 충분).
-3. **ideate**: scholar-ideate → 개념노트 methodology/*.md (개념 SSOT 확정)
-4. **outline**: scholar-outline → 섹션구조·story arc
-   - **모드 분기**: Deliberate 트리거(top-tier venue / breaking method 주장 / 비교군 변경)면 `scholar-outline --consensus`(RALPLAN-DR 4-agent 순차), 아니면 `--direct`. 자동 판정 + 사용자 override.
-   ━━━ **GATE 1**: outline 승인 (human) — proceed/revise/abort. consensus면 plan.md+outline 둘 다 제시 ━━━
-5. **draft**: scholar-draft → .tex (drafter 단일 신중)
-6. **inspect**: scholar-inspect → formative 비평 (병렬 OK, 읽기전용)
-7. **verify**: scholar-verify → summative 자동 게이트
-   ━━━ **GATE 2**: 리뷰 결과 확인 (human) — proceed/another round/address/abort ━━━
-8. **revise**: scholar-revise → verify PASS까지 루프 (필요 시)
-   ━━━ **GATE 3**: 제출 확인 (human) — confirm/revise/abort ━━━
-9. 제출 준비물 정리 (PDF·소스·체크리스트).
-10. **wiki capture (자동 특화 — 쓸수록 이 프로젝트에 맞춰짐)**: inspect/verify가 이번 세션에 *발견한* 재사용 가능한 패턴을 **작업 대상 프로젝트의 `.oms/wiki/<category>/*.md`**(plugin이 아니라 프로젝트 작업장; `.oms/`는 gitignore)에 **자동 append**한다 (승인 불필요 — 가벼운 채널). 이것이 다음 세션 inspector의 pre-commitment `wiki_query(category)`가 읽는 데이터 — 쓰기와 읽기가 닫혀 하네스를 쓸수록 이 venue/이 논문 프로젝트에 특화된다. (작업장이라 plugin 배포물·다른 프로젝트를 오염시키지 않고, marketplace update에도 안 날아간다.)
-    - **무엇을 적재**: ① venue별 반복 reject 패턴 → `convention/<venue>-reject-patterns.md` ② 이번에 택한 baseline·비교군·구조의 근거 → `decision/<slug>.md` ③ 발견한 외부 자원 포인터 → `reference/*.md`. inspector/verifier가 실제로 본 것만 — 추측 적재 금지.
-    - **결론 + 근거 동반 (라벨-only 금지)**: 각 적재는 *결론(라벨)*만 적지 말고 그것을 떠받친 *구체 근거*(어느 사례·대조군·어느 paper-slug/섹션을 다시 보면 되는지 = 내부 포인터)를 같은 줄/항목에 함께 적는다. "X는 stage축" 대신 "X는 두 독립 기여를 stage 횡단 병치 — `<slug>` §목차". 라벨만 적으면 다음 세션이 원본을 재독해야 한다. ⚠️ 내부 포인터는 *재방문 내비게이션*이지 `.bib` citation 아님(아래 citation-safe·`references/wiki/README.md` 참조). 권고지 게이트 아님(light 채널).
-    - **append 형식**: 기존 .md 끝에 한 줄(또는 짧은 항목) 추가. 같은 패턴이 이미 있으면 중복 안 적음(grep 선확인). 새 category 파일은 자유 형식 .md(머신 스키마 없음).
-    - **전역 승급 후보 hint (terminal에서만)**: 파이프라인 종료 시, 이번에 로컬 `.oms/wiki/`에 쌓인 것 중 *다음 논문에도 재사용각*인 자산(성향·venue 양식·재사용 결정·history)이 보이면 "이건 상위 `.oms/`(전역)로 올려둘까요?"를 사용자에게 권유 — 실제 승급은 `scholar-learn`의 로컬→전역 경로(사람 게이트). ⚠️ citation/.bib는 전역 승급 영구 금지. 자동 승급 없음.
-    - ⚠️ **citation-safe (필수 — 위반 시 OMS 정체성 붕괴)**: wiki는 **2차 메모**만. 인용·주장·수치 *내용*은 절대 적재 안 함(예측을 돕는 reject 사유·양식 규칙만). .bib는 scholar-research 검증 1차 출처로만 갱신 — wiki 발췌를 인용으로 끌어오지 않는다. 적재·조회 모두 **결정론적 텍스트만, 임베딩 금지**. 계약·경계는 `references/wiki/README.md` 참조.
-    - **자동이되 비파괴**: append-only(기존 줄 안 지움), 부재 디렉토리는 생성, 적재할 게 없으면 그냥 통과(빈 세션 OK). 사용자가 `--no-wiki`면 skip.
-11. **terminal cleanup** (GATE 3 confirm 후, 또는 사용자가 "정리해줘"/"작업 끝" 명시 시):
-    - `.oms/<slug>/`의 정리 대상 **집계**(크기·개수): `renders/`·`gen-image/`·`tmp/` 전부 + `versions/`의 최신 1개·사용자 지정 이정표를 **제외한** 구버전. 이정표 선택을 위해 versions 목록을 사용자에게 보여준다.
-    - **AskUserQuestion [정리 / 유지]** — 자동 삭제 절대 없음, 기본값 보수적(유지).
-    - "정리" 선택 시 → **복구 가능 경로로 삭제**(영구 `rm` 금지): macOS `trash`(없으면 `~/.Trash`) / Linux `gio trash`·`trash-cli` / Windows PowerShell 휴지통 이동(`Shell.Application` ParseName+InvokeVerb('delete'), 영구 `Remove-Item` 금지 — documented, unverified) / 휴지통 없는 환경(CI·컨테이너)은 "영구 삭제" 사용자 재확인 후에만.
-    - ⚠️ `outputs/<slug>/<slug>.pdf`(사용자 자산)와 **프로젝트 소스 폴더의 .tex/.bib(citation-bound 자산)**는 집계·삭제 대상에서 **완전 제외** — 언급만. 상세 절차는 `references/output-layout.md` §5.
+0. **init absorption (bootstrap — when `.oms/<slug>/` is absent)**: if the paper folder has no `.oms/<slug>/`·`meta.md`, do not jump straight into research; first **recommend** `scholar-init` — "This paper folder isn't set up yet. Shall we set the folder location·venue·topic and create the directory? (scholar-init)". If the user agrees, init creates the scaffold + `.oms/` (referencing the parent `.oms/` global seed), and after it finishes pilot continues to stage 1, research. If `.oms/<slug>/` already exists, skip this stage (no re-init — idempotent). ⚠️ This is a recommendation, not automatic entry — never create folders without the user's knowledge.
+1. **research**: scholar-research → research map·gap·verified citations (.md)
+2. **deepen**: scholar-deepen → claim-ambiguity gate (qualitative). After research, before ideate.
+   - fresh subagent dispatch (prevents controller context contamination).
+   - **skip condition**: pass if all 4 deepen dimensions (contribution/method-evidence/comparison/reproducibility) are self-evidently "clear", or if the user specifies `--skip-deepen`.
+   - Passing deepen (human approval) is an **internal approval before GATE 1** — do not create a separate user gate (deepen's own "human approval" is sufficient).
+3. **ideate**: scholar-ideate → concept notes methodology/*.md (lock concept SSOT)
+4. **outline**: scholar-outline → section structure·story arc
+   - **mode branching**: if a Deliberate trigger fires (top-tier venue / breaking-method claim / changed comparison group), use `scholar-outline --consensus` (RALPLAN-DR 4-agent sequential); otherwise `--direct`. Auto-decision + user override.
+   ━━━ **GATE 1**: outline approval (human) — proceed/revise/abort. If consensus, present both plan.md+outline ━━━
+5. **draft**: scholar-draft → .tex (drafter single·careful)
+6. **inspect**: scholar-inspect → formative critique (parallel OK, read-only)
+7. **verify**: scholar-verify → summative automatic gate
+   ━━━ **GATE 2**: review-result confirmation (human) — proceed/another round/address/abort ━━━
+8. **revise**: scholar-revise → loop until verify PASS (if needed)
+   ━━━ **GATE 3**: submission confirmation (human) — confirm/revise/abort ━━━
+9. Assemble submission deliverables (PDF·source·checklist).
+10. **wiki capture (auto-specialization — the more you use it, the more it adapts to this project)**: patterns that inspect/verify *discovered* this session and that are reusable are **automatically appended** to the **target project's `.oms/wiki/<category>/*.md`** (the project workspace, not the plugin; `.oms/` is gitignored) (no approval needed — light channel). This is the data that the next session's inspector's pre-commitment `wiki_query(category)` reads — with writing and reading forming a closed loop, the more you use the harness, the more it specializes to this venue/this paper project. (Being a workspace, it does not pollute plugin distributions·other projects, and it isn't blown away by a marketplace update.)
+    - **What to load**: ① per-venue recurring reject patterns → `convention/<venue>-reject-patterns.md` ② the rationale for the baseline·comparison group·structure chosen this time → `decision/<slug>.md` ③ discovered external-resource pointers → `reference/*.md`. Only what the inspector/verifier actually saw — no speculative loading.
+    - **conclusion + rationale together (no label-only)**: each entry should not record only the *conclusion (label)* but also the *concrete rationale* that supports it (which case·control group·which paper-slug/section to re-read = internal pointer) on the same line/item. Instead of "X is the stage axis", write "X juxtaposes two independent contributions across stages — `<slug>` §toc". If you record only the label, the next session has to re-read the original. ⚠️ The internal pointer is *re-visit navigation*, not a `.bib` citation (see citation-safe below·`references/wiki/README.md`). Recommended, not a gate (light channel).
+    - **append format**: add one line (or a short item) to the end of the existing .md. If the same pattern already exists, don't record a duplicate (grep first). A new category file is free-form .md (no machine schema).
+    - **global promotion candidate hint (terminal only)**: at pipeline shutdown, if among what accumulated locally in `.oms/wiki/` this time there are assets *reusable for the next paper too* (tendencies·venue formats·reusable decisions·history), recommend to the user "Shall we promote this to the parent `.oms/` (global)?" — actual promotion goes through `scholar-learn`'s local→global path (human gate). ⚠️ citation/.bib is permanently forbidden from global promotion. No automatic promotion.
+    - ⚠️ **citation-safe (mandatory — violation collapses OMS identity)**: the wiki is **secondary memo only**. The *content* of citations·claims·numbers is never loaded (only reject reasons·format rules that aid prediction). The .bib is updated only from scholar-research-verified primary sources — wiki excerpts are not pulled in as citations. Both loading·querying use **deterministic text only, no embeddings**. For the contract·boundary see `references/wiki/README.md`.
+    - **automatic but non-destructive**: append-only (never erases existing lines), creates absent directories, and if there's nothing to load it just passes (empty session OK). If the user passes `--no-wiki`, skip.
+11. **terminal cleanup** (after GATE 3 confirm, or when the user explicitly says "clean up"/"work done"):
+    - **Aggregate** the cleanup targets in `.oms/<slug>/` (size·count): all of `renders/`·`gen-image/`·`tmp/` + the old versions in `versions/` **excluding** the latest 1·user-designated milestones. To let the user pick milestones, show them the versions list.
+    - **AskUserQuestion [clean up / keep]** — never auto-delete, default conservative (keep).
+    - On "clean up" → **delete via a recoverable path** (no permanent `rm`): macOS `trash` (if absent `~/.Trash`) / Linux `gio trash`·`trash-cli` / Windows PowerShell move-to-recycle-bin (`Shell.Application` ParseName+InvokeVerb('delete'), no permanent `Remove-Item` — documented, unverified) / in environments without a trash (CI·container) only after the user re-confirms "permanent deletion".
+    - ⚠️ `outputs/<slug>/<slug>.pdf` (user asset) and the **project source folder's .tex/.bib (citation-bound assets)** are **fully excluded** from aggregation·deletion — mention only. For detailed procedure see `references/output-layout.md` §5.
 
-> **`--from <stage>` 진입점**: 중간 단계부터 시작 가능 — `research|deepen|ideate|outline|draft|inspect|verify|revise`. 예: `--from deepen`이면 기존 research 노트를 입력으로 deepen부터.
+> **`--from <stage>` entry point**: can start from an intermediate stage — `research|deepen|ideate|outline|draft|inspect|verify|revise`. e.g.: `--from deepen` means start from deepen using the existing research notes as input.
 </Steps>
 
 <Output>
-각 단계 산출물 경로 + GATE 3개 결정 이력 + 최종 PASS 논문 — 사용자가 보는 최종본은 `outputs/<slug>/<slug>.pdf`(컴파일 산출물). .tex/.bib **소스 원본은 프로젝트 소스 폴더에 유지**(citation-bound 자산 보호, `.oms/`로 옮기지 않음); 버전 스냅샷·컴파일 중간물만 `.oms/<slug>/`(`versions/`·`renders/`·`tmp/`). 경로 규약은 `references/output-layout.md`가 SSOT. + 사람 확인 필요 잔여(미검증 인용·fixable=false) + `.oms/state` 진행 기록.
+Each stage's output path + the 3-GATE decision history + the final PASS paper — the final version the user sees is `outputs/<slug>/<slug>.pdf` (the compiled output). The .tex/.bib **source originals are kept in the project source folder** (protecting citation-bound assets, not moved into `.oms/`); only version snapshots·compile intermediates go to `.oms/<slug>/` (`versions/`·`renders/`·`tmp/`). The path convention is SSOT in `references/output-layout.md`. + residual items needing human confirmation (unverified citations·fixable=false) + the `.oms/state` progress record.
 </Output>
