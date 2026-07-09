@@ -73,7 +73,7 @@ def test_v040_structure_model_regression():
 def test_planner_has_no_project_specific_proper_nouns():
     """⑦ 범용성 가드 — planner(배포 파일)에 프로젝트 고유명사 없음."""
     body = PLANNER.read_text(encoding="utf-8")
-    bad = re.compile(r"유선철|POSTECH|kimseungmin|ASV-ROV|형산강|hyeongsan|KHNP|KIRO", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X", re.I)
     hits = [
         f"  scholar-planner.md:{i}: {ln.strip()[:80]}"
         for i, ln in enumerate(body.splitlines(), 1)

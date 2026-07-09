@@ -80,9 +80,9 @@ def test_rubric_and_skill_reference_latex_card_ssot():
 def test_no_project_specific_proper_nouns_leaked():
     """⑤ 범용성: 배포물에 특정 논문 고유명사가 새지 않았다 (universal rule only).
 
-    이 abstract 규율은 모든 논문에 적용되는 범용 규율 — '316' 같은 이 논문 고유 수치나
-    제목·플랫폼명(ASV·ROV·PKRC·형산강·유선철 등)이 배포 카드·agent 에 들어가면 안 된다."""
-    leaked_tokens = ["316", "PKRC", "형산강", "유선철", "ASV-ROV", "Son-Cheol", "20242327"]
+    이 abstract 규율은 모든 논문에 적용되는 범용 규율 — 이 논문 고유 수치나
+    제목·플랫폼명·지도교수명 등이 배포 카드·agent 에 들어가면 안 된다."""
+    leaked_tokens = ["ROOM_X", "ORG_X", "SITE_X", "ADVISOR_X", "PROJ_TITLE_X", "ADVISOR_X_EN", "STUDENT_ID_X"]
     for path in (LATEX_CARD, RUBRIC, VERIFIER, DRAFTER, VERIFY_SKILL):
         body = path.read_text(encoding="utf-8")
         for tok in leaked_tokens:

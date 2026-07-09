@@ -1,6 +1,6 @@
 r"""Tests for two harness-mechanism fixes — SSOT reading priority + .tex↔.oms sync.
 
-배경(2026-06-02): ASV-ROV 석사논문 §2.3.3 사실검증 중 두 결함이 드러났다.
+배경(2026-06-02): 특정 석사논문 §2.3.3 사실검증 중 두 결함이 드러났다.
 
 결함 A — SSOT 우선순위 미강제. 사실검증(scholar-inspect 맥락)이 1차 SSOT
 (`.oms/<slug>/outline/outline.md` + `methodology/*.md`)가 아니라 2차 자료

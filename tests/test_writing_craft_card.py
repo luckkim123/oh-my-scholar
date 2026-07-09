@@ -115,7 +115,7 @@ def test_no_project_specific_proper_nouns():
 
     writing-craft.md 는 모든 사용자에게 배포되므로 이 논문 고유명사 박히면 오염."""
     body = CARD.read_text(encoding="utf-8")
-    bad = re.compile(r"유선철|POSTECH|kimseungmin|ASV-ROV|형산강|hyeongsan|KHNP|KIRO|316|PKRC", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X|ROOM_X", re.I)
     hits = [
         f"  writing-craft.md:{i}: {ln.strip()[:80]}"
         for i, ln in enumerate(body.splitlines(), 1)

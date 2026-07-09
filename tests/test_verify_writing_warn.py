@@ -74,7 +74,7 @@ def test_abstract_warn_regression_intact():
 def test_verifier_has_no_project_specific_proper_nouns():
     """⑦ 범용성 가드."""
     body = VERIFIER.read_text(encoding="utf-8")
-    bad = re.compile(r"유선철|POSTECH|kimseungmin|ASV-ROV|형산강|316|PKRC", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X|ROOM_X", re.I)
     hits = [
         f"  scholar-verifier.md:{i}: {ln.strip()[:80]}"
         for i, ln in enumerate(body.splitlines(), 1)

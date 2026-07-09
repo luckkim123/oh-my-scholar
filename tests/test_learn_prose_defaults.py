@@ -71,7 +71,7 @@ def test_venues_prose_defaults_not_relisting_rules():
 
 def test_no_project_specific_proper_nouns():
     """⑦ 범용성 가드 — 두 배포 파일."""
-    bad = re.compile(r"유선철|kimseungmin|ASV-ROV|형산강|316|PKRC", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X|ROOM_X", re.I)
     for path in (PROTOCOL, VENUES):
         body = path.read_text(encoding="utf-8")
         hits = [

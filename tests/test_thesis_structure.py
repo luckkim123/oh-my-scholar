@@ -68,9 +68,9 @@ def test_planner_has_no_project_specific_proper_nouns():
     """⑥ 범용성 가드 — planner(배포 파일)에 특정 사용자/논문/교수 고유명사가 없다.
 
     배포 repo는 모든 사용자에게 가므로 이 논문 고유명사가 박히면 오염
-    (한때 '유선철 랩'을 박았다가 제거 — 이 테스트가 재발 방지)."""
+    (한때 특정 지도교수 랩명을 박았다가 제거 — 이 테스트가 재발 방지)."""
     body = PLANNER.read_text(encoding="utf-8")
-    bad = re.compile(r"유선철|POSTECH|kimseungmin|ASV-ROV|형산강|hyeongsan|KHNP|KIRO", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X", re.I)
     hits = [
         f"  scholar-planner.md:{i}: {ln.strip()[:80]}"
         for i, ln in enumerate(body.splitlines(), 1)

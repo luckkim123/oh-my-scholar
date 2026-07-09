@@ -72,7 +72,7 @@ def test_inspector_two_lens_regression():
 def test_inspector_has_no_project_specific_proper_nouns():
     """⑥ 범용성 가드."""
     body = INSPECTOR.read_text(encoding="utf-8")
-    bad = re.compile(r"유선철|POSTECH|kimseungmin|ASV-ROV|형산강|316|PKRC", re.I)
+    bad = re.compile(r"ADVISOR_X|kimseungmin|PROJ_TITLE_X|SITE_X|ORG_X|ROOM_X", re.I)
     hits = [
         f"  scholar-inspector.md:{i}: {ln.strip()[:80]}"
         for i, ln in enumerate(body.splitlines(), 1)

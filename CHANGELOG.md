@@ -94,7 +94,7 @@ All notable changes to oh-my-scholar (oms).
 - **Blocked the "technical white paper" anti-pattern** — the previous planner had only a flat (short-paper) structure
   model, so even given a dissertation·multi-contribution system paper, it would outline in a conference-style
   flat structure that listed methods across multiple sections + **piled all experiments into one place at the end**
-  (occurred in the real ASV-ROV dissertation). Now, at any scale, it mandates "experiments stay inside the unit where the method
+  (occurred in a real dissertation). Now, at any scale, it mandates "experiments stay inside the unit where the method
   was proposed". Investigation_Protocol·Success_Criteria alignment + regression guard
   `tests/test_thesis_structure.py` (6 cases — common skeleton·three variations·technical-white-paper anti-pattern·monograph/by-papers
   distinction·structure_type field·generality proper-noun-0). 39→48 passed.
