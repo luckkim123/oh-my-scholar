@@ -49,6 +49,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
      - **Terminology consistency**: same concept uses the same term, abbreviations defined on first appearance
      - **placeholder**: TODO/FIXME/XX leftovers 0
      - **Citation consistency**: `\cite` ↔ .bib entry exists (DOI existence goes to the human-confirmation list)
+     - **Claim-faithfulness / citation-misuse (WARN)**: claim↔\cite stance check against the researcher's quote anchors (supports/contrasts/mentions) — misuse → human-confirmation list; unanchored pairs = "check not run". "Exists" ≠ "supports".
      - **Abstract discipline (WARN)**: quantitative numbers, formulas, or multipliers left in the abstract region (it should be qualitative meaning only) — latex.md §3. Detection = WARN (not FAIL), venue variation exists
      - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
 3. Receive the verifier output — collate per-item PASS/FAIL.
@@ -65,7 +66,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
 </Steps>
 
 <Output>
-- Per-item results table (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, venue meta PASS/WARN)
+- Per-item results table (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), venue meta PASS/WARN)
 - FAIL item details: evidence (log line, grep result, file:line) + fixable_by_llm classification
 - List of unverified citations (no auto-fix — human confirmation only)
 - Final verdict: **PASS** (all items pass) or **FAIL** (N items failed)

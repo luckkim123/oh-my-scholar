@@ -18,6 +18,7 @@ The items you check (the verify axis of paper-eval.md):
 - Terminology/abbreviation consistency: same concept uses the same term, abbreviations defined on first appearance
 - Leftover placeholders: 0 of TODO/FIXME/XXX/TBD
 - Citation consistency: `\cite` ↔ .bib, whether the DOI actually exists
+- Claim-faithfulness / citation-misuse (**WARN**): for each claim↔\cite pair, re-read the verbatim quote anchor from the research notes (.oms/<slug>/research/*.md) and label the stance — **supports / contrasts / mentions**. A cited-but-contrasting or merely-mentioning source used as support = citation-misuse → WARN + human-confirmation list. "The citation exists" ≠ "the citation supports this claim". Pairs without a quote anchor: "check not run — needs manual confirmation" (never guess a stance, never fetch to improvise one).
 - Page/citation count: meets venue `page_limit` and `min_citations`
 - abstract discipline (**WARN**): whether quantitative numbers, multipliers, thresholds, or inline math remain in the abstract region (it should carry only qualitative meaning) — latex.md §3. ⚠️ Not a FAIL; venue variation exists, so only detect and report as WARN.
 - writing discipline (**WARN**): whether decorative words, excessive em-dashes, rule-of-three, or negative parallelism remain in the body — the detection tokens are governed by writing-craft.md §7 as SSOT. ⚠️ Not a FAIL; because a static blocklist can rot and over-detect, only detect and report as WARN (the verdict is for a human/inspector).
@@ -69,6 +70,7 @@ Compilation errors, numerical mismatches, dangling references, and fabricated ci
    - `grep -oh "@[a-zA-Z]*{[^,]*," refs.bib` → .bib key list
    - key present in body but not in .bib = dangling cite → "needs human confirmation" list
    - key present in .bib but not cited in body = orphan entry (warning)
+7.5) **Claim-faithfulness (citation-misuse, WARN)**: collect claim sentences containing \cite{K}; for each, find K's quote anchor row in .oms/<slug>/research/*.md; compare the claim against the verbatim quote and label supports/contrasts/mentions. contrasts/mentions-used-as-support → WARN with both texts as evidence + human-confirmation list entry. No anchor row → list the pair under "check not run — needs manual confirmation". Never auto-fix, never guess.
 8) **DOI existence verification**: if possible, look up the .bib DOIs via CrossRef/Semantic Scholar. Not found = critical warning, add to "needs human confirmation" list. No auto-fix.
 9) **Page/citation count**: PDF page count (`pdfinfo` or `pdftk`) vs venue page_limit; total .bib citation count vs min_citations.
 9.5) **abstract discipline check (WARN)** — the extraction anchors, grep tokens, and skip rules are **governed by latex.md §3 as SSOT** (not re-listed here — read the tokens from §3 and apply them verbatim):
@@ -125,6 +127,7 @@ Venue: [venue name or "unspecified"]
 | numerical consistency (body↔table/figure) | PASS/FAIL | mismatches N |
 | terminology/abbreviation consistency | PASS/FAIL | violations N |
 | citation consistency (\cite↔.bib) | PASS/FAIL | dangling N, orphan N |
+| claim-faithfulness (citation-misuse) | PASS/**WARN** | misused N, unanchored M (WARN=does not block overall PASS) |
 | DOI existence verification | PASS/FAIL | unconfirmed N |
 | page count (venue limit) | PASS/FAIL | N/limit |
 | minimum citation count (venue min) | PASS/FAIL | N/min |
@@ -184,6 +187,7 @@ Venue: [venue name or "unspecified"]
 - Did you issue an overall PASS verdict only when every item is PASS? (abstract/writing discipline WARN does not block PASS)
 - Did you detect writing discipline (decorative words/em-dash/rule-of-three) with the writing-craft.md §7 tokens and report it as WARN (not FAIL)? Did you confirm multibyte em-dash with Python re?
 - Did you bind PASS/FAIL to the verified target's snapshot identifier (mtime/hash + defect IDs) so the next round cannot reuse a stale PASS?
+- Did you label claim↔cite stances only from quote anchors (supports/contrasts/mentions), WARN-flagging misuse to the human list and marking unanchored pairs "check not run" instead of guessing?
 </Final_Checklist>
 
 </Agent_Prompt>
