@@ -41,7 +41,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
 <Steps>
 1. Confirm the target .tex/.bib file paths and venue info (page_limit·min_citations).
 2. Delegate via `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)`:
-   - Input: .tex/.bib paths, paper-eval.md rubric (verify axis), latex.md card, bibtex.md card, venues.md
+   - Input: .tex/.bib paths, paper-eval.md rubric (verify axis), latex.md card, bibtex.md card, venues.md, scripts/verify_bib_entry.py (mechanical DOI/retraction lookup for the DOI-existence item)
    - Instruction: output PASS/FAIL + evidence for each of the 6 items below. No advice or critique. Citation defects as a list only.
      - **Compilation**: latexmk exit 0, undefined ref/cite 0
      - **Numerical consistency**: body numbers ↔ tables/figures match

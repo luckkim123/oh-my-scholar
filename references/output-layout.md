@@ -110,6 +110,9 @@ outputs/<slug>/
     *.aux *.log *.out *.blg …         # LaTeX compile intermediates — disposable anytime
   compile-notes.md                    # (optional) compile notes — for Claude's analysis
 
+.oms/state/                           # cross-slug mechanism state (NOT per-job)
+  verified-citations.json             # cite-guard allowlist — written ONLY by scripts/verify_bib_entry.py --record (atomic, oms_atomic)
+
 .oms/wiki/                            # project-wide accrual — NOT per-job (sibling of <slug>/, carries across sessions)
   convention/  decision/  reference/  # auto-appended reject patterns / decisions (see references/wiki/README.md)
 ```
