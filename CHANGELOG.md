@@ -12,7 +12,7 @@ All notable changes to oh-my-scholar (oms).
   sibling `.bib`. Fail-open, stdlib only. Human escape hatch `OMS_CITE_GUARD=off` (env; deliberately not advertised
   in deny reasons). Registered as a third hook in `.claude-plugin/plugin.json`.
 - **Mechanical DOI/retraction pre-gate** (`scripts/verify_bib_entry.py`) — verifies DOI existence + retraction status
-  against Crossref (Retraction Watch data via `update-to`) with OpenAlex fallback. Verdicts VERIFIED/MISMATCH/RETRACTED/NOT_FOUND/NETWORK_ERROR
+  via publisher-registered retraction notices in Crossref `update-to` relations, plus OpenAlex's `is_retracted` flag. Verdicts VERIFIED/MISMATCH/RETRACTED/NOT_FOUND/NETWORK_ERROR
   (exit 0/1/1/1/2). `--record` writes only VERIFIED keys into the allowlist via `oms_atomic` (never touches `.bib`).
   Polite-pool mailto via `OMS_CROSSREF_MAILTO` env.
 - **Claim-faithfulness (`citation-misuse`) WARN check** (scholar-verifier / scholar-verify) — stance labels

@@ -58,7 +58,7 @@ A paper is citation-bound, so hallucinations are not caught as compile errors. T
 - Across 13 models / 40 domains / 375K citations, fabrication runs **14–95%** by model and domain ([GhostCite, arXiv:2602.06718](https://arxiv.org/abs/2602.06718)).
 - Human review does not catch it: ~**100 confirmed hallucinated citations in accepted NeurIPS 2025 papers** (GPTZero), each missed by 3–5 reviewers; 77% of reviewers admit not checking references thoroughly.
 
-Since v0.6.0 principle 2 is **enforced, not just stated**: a PreToolUse interlock (`hooks/scholar_cite_guard.py`) denies unverified new `.bib` entries and dangling `\cite` keys before they land, and `scripts/verify_bib_entry.py` verifies DOI existence + retraction status against Crossref (Retraction Watch data included) with OpenAlex fallback, recording human-gated VERIFIED keys into the `.oms/state/verified-citations.json` allowlist.
+Since v0.6.0 principle 2 is **enforced, not just stated**: a PreToolUse interlock (`hooks/scholar_cite_guard.py`) denies unverified new `.bib` entries and dangling `\cite` keys before they land, and `scripts/verify_bib_entry.py` verifies DOI existence + retraction status via publisher-registered retraction notices in Crossref `update-to` relations, plus OpenAlex's `is_retracted` flag, recording human-gated VERIFIED keys into the `.oms/state/verified-citations.json` allowlist.
 
 ## Agents
 
