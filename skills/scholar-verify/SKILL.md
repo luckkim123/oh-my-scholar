@@ -42,15 +42,16 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
 1. Confirm the target .tex/.bib file paths and venue info (page_limit·min_citations).
 2. Delegate via `Task(subagent_type="oh-my-scholar:scholar-verifier", ...)`:
    - Input: .tex/.bib paths, paper-eval.md rubric (verify axis), latex.md card, bibtex.md card, venues.md, scripts/verify_bib_entry.py (mechanical DOI/retraction lookup for the DOI-existence item)
-   - Instruction: output PASS/FAIL + evidence for each of the 6 items below. No advice or critique. Citation defects as a list only.
+   - Instruction: output PASS/FAIL + evidence for each of the items below. No advice or critique. Citation defects as a list only.
      - **Compilation**: latexmk exit 0, undefined ref/cite 0
      - **Numerical consistency**: body numbers ↔ tables/figures match
      - **Figure/table references**: `\ref` ↔ `\label` matched exhaustively
      - **Terminology consistency**: same concept uses the same term, abbreviations defined on first appearance
-     - **placeholder**: TODO/FIXME/XX leftovers 0
+     - **placeholder**: TODO/FIXME/XX/[MATERIAL GAP] leftovers 0
      - **Citation consistency**: `\cite` ↔ .bib entry exists (DOI existence goes to the human-confirmation list)
      - **Claim-faithfulness / citation-misuse (WARN)**: claim↔\cite stance check against the researcher's quote anchors (supports/contrasts/mentions) — misuse → human-confirmation list; unanchored pairs = "check not run". "Exists" ≠ "supports".
      - **Abstract discipline (WARN)**: quantitative numbers, formulas, or multipliers left in the abstract region (it should be qualitative meaning only) — latex.md §3. Detection = WARN (not FAIL), venue variation exists
+     - **Uncited-claim scan (WARN)**: claim-shaped sentences without \cite — WARN list, human judges (never auto-cite).
      - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
 3. Receive the verifier output — collate per-item PASS/FAIL.
 4. If there are FAIL items, classify by fixable_by_llm:

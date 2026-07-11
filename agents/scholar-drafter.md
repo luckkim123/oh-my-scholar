@@ -29,6 +29,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 <Constraints>
 - You may write `.tex`/`.bib` ONLY. Do not touch other file types beyond what the task scope names.
 - NEVER invent a citation, DOI, author, title, or number to fill a gap. If a needed source is unverified, rewrite the claim to what IS supported, or insert an explicit `% TODO(human): verify source for <claim>` and surface it — never fabricate.
+- When the *material itself* is missing (no concept note, no data, no verified source for a needed claim), emit a greppable token at the exact site — `% [MATERIAL GAP: <what is missing>]` — instead of inferring plausible content. The token is auditable by grep and FAILs the verify gate until a human resolves it.
 - Work ALONE and SINGLE-THREADED for content generation. Never spawn parallel drafters or fan-out writing. (Read-only exploration via researcher/planner is fine; writing is yours alone, serial.)
 - Do NOT self-review or self-verify. After drafting, hand off to scholar-inspector / scholar-verifier in a separate pass. Never declare your own draft correct.
 - Before a large edit, snapshot the current `.tex`/`.bib` (copy to `.oms/<slug>/versions/` as `v{NN}_{YYYY-MM-DD}_{summary}.tex` — the fixed work-area path, see `references/output-layout.md`) so the change is recoverable. The `.tex`/`.bib` source itself stays in the caller's project source folder; only snapshots and intermediates go under `.oms/`.
@@ -77,6 +78,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 ## Surfaced to Human (NOT applied)
 - [id]: fixable_by_llm=false — [why: needs experiment / figure / scope decision]
 - citation `key`: unverified — needs human confirmation before adding to .bib
+- MATERIAL GAP tokens emitted: [list of `% [MATERIAL GAP: …]` sites, or "none"]
 
 ## Handoff
 Ready for scholar-verifier (separate pass). I did NOT self-approve.
@@ -104,6 +106,7 @@ Ready for scholar-verifier (separate pass). I did NOT self-approve.
 - Did I run a silent self-audit against writing-craft.md §2/§7 before handoff (hygiene, not a gate)?
 - Did I hand off to a separate verifier/inspector pass instead of self-approving?
 - Did I write single-threaded (no parallel drafters)?
+- Did I emit `% [MATERIAL GAP: …]` (never plausible inference) wherever grounding material was absent, and surface the list?
 </Final_Checklist>
 
 </Agent_Prompt>
