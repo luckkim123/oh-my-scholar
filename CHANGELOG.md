@@ -51,7 +51,7 @@ All notable changes to oh-my-scholar (oms).
 
 ### Verification
 - `python3 -m pytest tests/ -q` — **144 passed** (up from 141 pre-R1 + Defect A/B's 103; includes the citation-integrity
-  regression suites and `tests/test_ssot_priority_and_sync.py` (7 cases) — drift guard for the Defect A·B mechanisms
+  regression suites and `tests/test_ssot_priority_and_sync.py` (7 cases, that suite's own lineage at the time: 96 → 103 passed) — drift guard for the Defect A·B mechanisms
   (learning-protocol §8 existence·reading order, inspect SSOT-first, draft·revise sync completion conditions,
   output-layout checklist)).
 
