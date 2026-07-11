@@ -24,6 +24,7 @@ A paper's contribution is only defensible against a correct map of prior work. F
 - Related work is grouped by theme, each group noting why it matters to this paper.
 - Self-citation and over-claiming are flagged, not hidden.
 - Output is structured enough that scholar-planner can build an outline directly from it.
+- Every claim row carries a **verbatim quote** from the source (≤3 sentences, copied exactly — never reconstructed from memory) plus a locator (section/page/paragraph). If only the abstract was accessible, the row is marked `quote-missing (abstract-only)` — passage-level grounding beats abstract-only.
 </Success_Criteria>
 
 <Constraints>
@@ -37,7 +38,7 @@ A paper's contribution is only defensible against a correct map of prior work. F
 <Investigation_Protocol>
 1) Ground the topic: read any existing project notes (`research/`, `notes/`, prior `.md`) and the user's stated contribution.
 2) Map prior work: search for the closest existing methods/results. Group by theme.
-3) For each candidate citation: verify it exists (DOI/CrossRef/Semantic Scholar lookup when network available; otherwise mark unverified). Record title/authors/venue/year.
+3) For each candidate citation: verify it exists (DOI/CrossRef/Semantic Scholar lookup when network available; otherwise mark unverified). Record title/authors/venue/year. Record a verbatim supporting quote + locator for each claim you will report (the quote is the anchor scholar-verify's claim-faithfulness check re-reads).
 4) Locate the gap: what do the closest works fail to do that this paper does? State it as a one-sentence necessity chain.
 5) Flag risks: over-claimed novelty, missing baselines, self-citation ratio.
 6) Synthesize into the Output Format. Mark every inference vs evidence.
@@ -64,6 +65,7 @@ A paper's contribution is only defensible against a correct map of prior work. F
 ## Related Work (grouped)
 ### [Theme A]
 - `key2024` — Title (Venue Year). **verified** [DOI]. Relevance: [why it matters here].
+  Quote: "…verbatim source sentence(s)…" (§2.1 / p.4). [or: quote-missing (abstract-only)]
 - ...
 
 ## Citation Verification
@@ -93,6 +95,7 @@ A paper's contribution is only defensible against a correct map of prior work. F
 - Did I avoid inventing any citation?
 - Did I separate evidence from inference?
 - Did I avoid writing any paper prose?
+- Does every claim row carry a verbatim quote + locator (or an explicit quote-missing mark)?
 </Final_Checklist>
 
 </Agent_Prompt>

@@ -29,6 +29,7 @@ Systematically survey the related-work landscape before writing a paper and iden
 - ⚠️ **No citation fabrication** — enforced by the researcher agent. Never generate non-existent papers, authors, or years. Leave unverified sources as flags and ask a human to confirm.
 - ⚠️ **Parallel reading is OK, but parallel citation generation is prohibited** — reading and analyzing multiple sources at once is allowed. However, if multiple agents generate the citation entries themselves in parallel, hallucination is amplified.
 - ⚠️ **passage-level grounding** — do not build citations from the abstract alone; ground them in the cited text span (the full passage). The abstract-only condition produces more hallucination than passage-level ([arXiv:2309.06365](https://arxiv.org/abs/2309.06365), self-verified). The structural reason that separating research (search) → draft (generation) reduces knowledge-hallucination ([arXiv:2510.24476](https://arxiv.org/abs/2510.24476)). Full external landscape: global wiki `reference/llm-paper-writing-landscape.md`.
+- Quote anchors are the mechanical substrate of verify's claim-faithfulness (citation-misuse) check — a claim row without its quote can only be checked by a human.
 - The deliverable is a .md research note — do not write .tex directly. The note becomes the input for ideate/outline/draft.
 - The researcher must not self-approve — human review after producing the note is recommended.
 </Execution_Policy>
@@ -37,7 +38,7 @@ Systematically survey the related-work landscape before writing a paper and iden
 1. Confirm the survey topic and scope (paper topic, target venue, prior work you already know).
 2. Delegate via `Task(subagent_type="oh-my-scholar:scholar-researcher", ...)`:
    - Input: paper topic, survey scope, list of references you already have (if any), paths to relevant reference notes (if any)
-   - Instructions: cluster related work, identify the limitations/gaps of each method, cite only verified items (flag the unverified), parallel reading is OK
+   - Instructions: cluster related work, identify the limitations/gaps of each method, cite only verified items (flag the unverified), parallel reading is OK, per-claim verbatim quote + locator anchoring (quote rows feed scholar-verify's claim-faithfulness check)
 3. Receive the researcher's output:
    - Research landscape map (classified by method family)
    - List of verified citations (those with confirmed author/year/title)
