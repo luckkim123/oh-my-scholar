@@ -37,25 +37,26 @@ def test_latex_card_defines_abstract_rule_and_detection():
     # 유니코드 부등호 글리프
     assert "≤" in body or "≥" in body, "유니코드 부등호 글리프(≤/≥) 검출 누락"
     # no-anchor fallback — abstract 못 찾으면 전체 grep 금지 (reviewer MEDIUM 반영)
-    assert re.search(r"(skip|N/A|건너).*전체 문서 grep 금지|전체 문서 grep 금지", body), \
+    assert re.search(r"(skip|N/A|건너).*전체 문서 grep 금지|전체 문서 grep 금지|do not grep the whole document", body), \
         "no-anchor fallback(검사 skip, 전체 문서 grep 금지) 명문화 누락"
 
 
 def test_verifier_checks_abstract_as_warn_not_fail():
     """② scholar-verifier 가 abstract 규율을 WARN 으로 검사(FAIL 아님)."""
     body = VERIFIER.read_text(encoding="utf-8")
-    assert "abstract 규율" in body, "verifier 검사 항목에 abstract 규율 누락"
+    assert "abstract 규율" in body or "abstract discipline" in body, "verifier 검사 항목에 abstract 규율 누락"
     assert "WARN" in body, "verifier 가 abstract 를 WARN 으로 다룸 누락"
     # WARN ≠ FAIL: 전체 PASS 를 막지 않음이 명시돼야
-    assert re.search(r"WARN.*FAIL 아님|FAIL 아님.*WARN|전체 PASS", body), \
+    assert re.search(r"WARN.*FAIL 아님|FAIL 아님.*WARN|전체 PASS|[Nn]ot a FAIL|does not block overall PASS", body), \
         "abstract WARN 이 전체 PASS 를 막지 않음(WARN≠FAIL) 명시 누락"
     # 검출 단계가 Investigation_Protocol 에 있어야
-    assert re.search(r"abstract 규율 검사|abstract 영역 추출", body), \
+    assert re.search(r"abstract 규율 검사|abstract 영역 추출|abstract discipline check|extract the abstract region", body), \
         "verifier Investigation_Protocol 에 abstract 검출 단계 누락"
     # 토큰 SSOT 참조 — verifier 는 토큰을 재나열하지 않고 latex.md §3 를 가리킨다 (drift 방지)
     assert "latex.md §3" in body, "verifier 가 검출 토큰 SSOT(latex.md §3)를 참조하지 않음"
     # no-anchor fallback — anchor 없으면 전체 grep 금지
-    assert "전체 문서 grep 금지" in body, "verifier 에 no-anchor 전체 grep 금지 규약 누락"
+    assert "전체 문서 grep 금지" in body or "do not grep the whole document" in body, \
+        "verifier 에 no-anchor 전체 grep 금지 규약 누락"
 
 
 def test_drafter_prevents_abstract_numbers_at_generation():
@@ -71,9 +72,10 @@ def test_rubric_and_skill_reference_latex_card_ssot():
     """④ 정합성: rubric·verify skill 이 SSOT(latex.md §3)를 가리킨다 (중복 정의 금지)."""
     rubric = RUBRIC.read_text(encoding="utf-8")
     skill = VERIFY_SKILL.read_text(encoding="utf-8")
-    assert "abstract 규율" in rubric, "paper-eval rubric verify 축에 abstract 규율 행 누락"
+    assert "abstract 규율" in rubric or "abstract discipline" in rubric, "paper-eval rubric verify 축에 abstract 규율 행 누락"
     assert "latex.md §3" in rubric, "rubric 이 SSOT(latex.md §3)를 참조하지 않음"
-    assert "abstract 규율" in skill, "verify SKILL 위임 항목에 abstract 규율 누락"
+    assert "abstract 규율" in skill or "Abstract discipline" in skill or "abstract discipline" in skill, \
+        "verify SKILL 위임 항목에 abstract 규율 누락"
     assert "latex.md §3" in skill, "verify SKILL 이 SSOT(latex.md §3)를 참조하지 않음"
 
 

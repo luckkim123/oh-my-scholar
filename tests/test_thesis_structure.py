@@ -20,7 +20,7 @@ def test_planner_defines_common_skeleton_and_scale_variants():
     """① planner가 공통 골격 + 세 규모 변주(flat·system·thesis)를 정의한다."""
     body = PLANNER.read_text(encoding="utf-8")
     assert "<Structure_Types>" in body, "planner에 <Structure_Types> 섹션 누락"
-    assert "공통 골격" in body, "planner에 '공통 골격' 개념 누락"
+    assert "공통 골격" in body or "common skeleton" in body, "planner에 '공통 골격' 개념 누락"
     for variant in ("flat", "system", "thesis"):
         assert re.search(rf"`{variant}`", body), f"planner에 규모 변주 '{variant}' 누락"
 
@@ -30,8 +30,9 @@ def test_planner_forbids_technical_report_antipattern():
 
     이번 버그의 핵심 — 어느 규모에서도 실험은 그 방법이 제안된 단위 안에."""
     body = PLANNER.read_text(encoding="utf-8")
-    assert "기술 백서" in body, "기술 백서 안티패턴 경고 누락"
-    assert re.search(r"실험.*(몰지|끝.*한)", body), "실험을 끝에 몰지 말라는 규약 누락"
+    assert "기술 백서" in body or "technical whitepaper" in body, "기술 백서 안티패턴 경고 누락"
+    assert re.search(r"실험.*(몰지|끝.*한)", body) or re.search(r"pile.{0,15}experiments|experiments.{0,15}pile", body, re.I), \
+        "실험을 끝에 몰지 말라는 규약 누락"
     # 각 method/기여 단위가 자체 실험을 갖는다는 공통 골격 규약
     assert re.search(r"Overview.*Proposed.*(실험|Experiment)", body), \
         "공통 골격(Overview→Proposed→그 단위 실험) 규약 누락"
