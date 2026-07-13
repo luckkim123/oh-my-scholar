@@ -208,6 +208,8 @@ def test_research_log_footprint_limited_to_output_layout_pilot_and_tests():
         "skill-bodies/scholar-discuss/SKILL.md",  # R5 T3 (#29): research-log append, context `discuss`
         "tests/",
         "docs/",  # planning docs (roadmap, execution plan) — not shipped plugin surface
+        "CHANGELOG.md",  # R5 T9: release notes document the shipped feature
+        "README.md",  # R5 T9: Status paragraph names the research-log.md substrate
     )
     stray = [h for h in hits if not h.startswith(allowed_prefixes)]
     assert not stray, f"research-log leaked outside its allowed footprint: {stray}"

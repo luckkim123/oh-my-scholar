@@ -114,6 +114,8 @@ def test_moderator_footprint_limited_to_pilot_agent_and_tests():
         "skill-bodies/scholar-pilot/SKILL.md",
         "tests/",
         "docs/",  # planning docs — not shipped plugin surface
+        "CHANGELOG.md",  # R5 T9: release notes document the shipped feature
+        "README.md",  # R5 T9: agents table + Status paragraph name mode=moderator
     )
     stray = [h for h in hits if not h.startswith(allowed_prefixes)]
     assert not stray, f"mode=moderator leaked outside its allowed footprint: {stray}"

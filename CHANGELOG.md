@@ -4,6 +4,106 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-07-14
+
+### Added
+- **Research-log substrate** (#30, `references/output-layout.md`, `skill-bodies/scholar-pilot/SKILL.md`,
+  `tests/test_scholar_pilot_skill.py`) — `.oms/<slug>/research-log.md`: durable, dated, append-only project
+  narrative memory ("tried / decided / dropped — and why"), sibling of `reviews-log.md`. New §2.4
+  entry-format contract in the output-layout SSOT (+ tree/§2.1 invariance bullet/§5 **KEEP** fate/§6
+  checklist); wired into `scholar-pilot` Step 10 as an unnumbered sub-bullet (D10 — no renumbering) with a
+  `--no-log` opt-out mirroring `--no-wiki`. Written only by the calling session; never a `.bib` source or
+  citation authority (invariant 2).
+- **`scholar-read` — external-paper deep-read (13th skill)** (#28, `skill-bodies/scholar-read/SKILL.md`,
+  `skills/scholar-read/SKILL.md`, `agents/scholar-researcher.md`, `references/output-layout.md` §2.5,
+  `tests/test_scholar_read_skill.py`, `tests/test_researcher_quote_anchor.py`) — turns "read this paper for
+  me" into a structured, citation-safe note at `.oms/reading/<citekey>.md` (D1, sibling of `.oms/wiki/`,
+  **NEVER** a `.bib` source — mandatory `NOT CITABLE` header). Single dispatch (invariant 1) to
+  `scholar-researcher`'s new `mode=deep-read`; `mode=gap-research` stays the default with its output contract
+  unchanged verbatim. Identity pre-check via `scripts/verify_bib_entry.py` runs without `--record`; a
+  `RETRACTED` verdict is surfaced loudly. Wires into the research-log (context `read`).
+- **`scholar-discuss` — standing Socratic discussion partner (14th skill)** (#29,
+  `skill-bodies/scholar-discuss/SKILL.md`, `skills/scholar-discuss/SKILL.md`, `hooks/scholar_route_emit.py`,
+  `tests/test_scholar_discuss_skill.py`, `tests/test_scholar_route_emit.py`) — on-demand debate partner
+  (Contrarian / Simplifier / Ontologist stances, self-contained restatement per D3, provenance to
+  `scholar-deepen` Round 4/6/8 without touching that file) with a Co-STORM-style moderator move over an
+  in-session gap list of retrieved-but-unused evidence; exit appends to `.oms/wiki/decision/<slug>.md`
+  (confidence/sightings frontmatter, pointerless → `confidence: low` per #24) and the research-log (context
+  `discuss`). Zero `.tex`/`.bib` surface, no subagent dispatch (invariant 1 untouched); outline deltas are
+  proposed at a human gate, never auto-applied (D9). Route hook STAGE enum grows to include `read|discuss`
+  (D7 — same PR as `scholar-read`), gated on multi-word Trigger phrases only, never the bare tokens
+  `read`/`discuss` (regression-tested against false-positive injection on ordinary prompts).
+- **Mock-review rebuttal-and-reconsider round** (`--with-rebuttal`, #31,
+  `skill-bodies/scholar-mock-review/SKILL.md`, `agents/scholar-reviewer.md`,
+  `tests/test_scholar_mock_review_skill.py`) — lettered sub-steps 4(a)–4(e) inside the existing mock-review
+  Step 4 (D10 — no renumbering): lock pre-rebuttal verdicts verbatim; author rebuttal at a human gate (D8);
+  re-dispatch the same 3 lens roles to reconsider with an anchoring-aware under-adjustment guard (AgentReview
+  finding); Area-Chair delta report capped at one venue-scale band per axis (LLM-sycophancy countermeasure)
+  with per-weakness fixable/fundamental classification; the rebuttal flag + delta summary fold into the
+  existing reviews-log field list rather than a second append step. Default path (no `--with-rebuttal`) is
+  byte-unchanged.
+- **Reviewer realism pack** (#32, `agents/scholar-reviewer.md`, `references/rubrics/venue-review-forms.md`,
+  `references/venues.md`, `references/wiki/README.md`, `skill-bodies/scholar-mock-review/SKILL.md`,
+  `tests/test_scholar_reviewer_realism.py`) — lens mode gains an aspect-checklist-first step (Reviewer2
+  pattern: judge each venue-form aspect `strong|adequate|weak|n/a` before deriving strengths/weaknesses, never
+  the reverse) plus a 2-tier `wiki_query` read of a private `reference/venue-review-examples-<venue>.md`
+  few-shot note when present. AC mode gains a concession-threshold rule (severity/score moves only on
+  concrete anchored evidence — a quote, a number, an experiment — never rhetorical concession) and an
+  optional, off-by-default ensemble-variance move (N=2 resample of one borderline lens, reporting
+  agreement/divergence instead of silently averaging). `venue-review-forms.md` gains a per-form empty
+  "Score bands" template (band/meaning/source, "never guess") with a one-line pointer from `venues.md`; zero
+  numeric calibration data is prefilled anywhere (D4).
+- **Moderator pass before GATE 1** (#33, `skill-bodies/scholar-pilot/SKILL.md`, `agents/scholar-inspector.md`,
+  `tests/test_scholar_pilot_moderator.py`) — unnumbered read-only sub-step in `scholar-pilot` Step 4
+  (outline), between the mode-branching bullet and the GATE 1 line (D10 — GATE 1 line byte-unchanged):
+  dispatches `scholar-inspector`'s new `mode=moderator` with the proposed outline + research/reading notes,
+  printing a retrieved-but-unused evidence list + 1–2 pointed questions alongside the GATE 1 prompt for the
+  human to weigh. `--skip-moderator` opts out; a dispatch failure fails open (GATE 1 is never blocked).
+  `scholar-inspector` gains a Modes section (`mode=draft-critique` default, unchanged contract /
+  `mode=moderator`, no verdict, no severity taxonomy — explicitly not a gate).
+- **Preflight-style categorized verify report** (#34, `agents/scholar-verifier.md`,
+  `skill-bodies/scholar-verify/SKILL.md`, `tests/test_scholar_verify_skill.py`) — `scholar-verifier`'s
+  Output_Format regrouped under 5 fixed submission-checklist categories (`language` / `citations` /
+  `formatting-metadata` / `tables-figures` / `declarations`), each showing a worst-severity roll-up;
+  presentation-only regrouping — no pre-existing check added, removed, or reweighted. One new check: blind-
+  review anonymization (WARN, double-blind venues only, never auto-edits).
+- **Wiki-audit carry-overs — R4 follow-ups** (`scripts/oms_wiki_audit.py`, `references/wiki/audit.md`,
+  `tests/test_oms_wiki_audit.py`) — frontmatter WARN split into "no frontmatter" (absent opening fence) vs
+  "malformed frontmatter" (opening fence, no closing fence), both remain WARN (#24 non-blocking contract
+  unchanged); regression test proving a content file mentioned ONLY by generated `INDEX.md` still clears the
+  orphan WARN (already correct via `META_FILENAMES` — no script fix needed there); the ambiguous-stem token
+  grammar's boundary behavior documented (`H.` vs `H-contrast.`, `F1` vs `F1b` non-collisions); the
+  hyphen-adjacency regression guard was confirmed already present, so no new test was added. Detection-only
+  discipline preserved — `--write-index` remains the sole write path.
+
+### Notes
+- **Carried over from R4's still-deferred list** — the do-not-touch list (`hooks/scholar_cite_guard.py`,
+  `hooks/scholar_stop_guard.py`, `hooks/oms_atomic.py`, `scripts/oms_state.py`,
+  `skill-bodies/scholar-deepen/SKILL.md`) kept R5 out of these, so they remain open: hooks' nearest-root
+  ascent asymmetry (unify or intent-comment); `oms_state.py`'s slug error-string duplication (6 sites) plus
+  its 4 deferred tests; the empty-Priority-Context drop path comment; the compact-time SessionStart "6 fires"
+  investigation; `oms doctor` PASS-row suppression (cosmetic); `sync_version.py` row() wording coupling; a
+  basename ceiling comment; live-corpus wiki migration (frontmatter backfill + INDEX generation on the actual
+  workspace wiki — iCloud-synced, not git).
+- GROBID intake for `scholar-read` is deferred to R6 (#36) — named in the skill body as a one-line future
+  accelerator only, not implemented here.
+- **omha card follow-up**: after this PR merges, the `oh-my-heroacademia` routing card (`cards/oms.json`)
+  needs a separate PR adding `scholar-read`/`scholar-discuss` to `triggers.skills` and bumping its version —
+  out of this repo's scope; the card correctly shows DRIFT below until that PR lands.
+- **Out of scope this round** (unchanged §6 deferrals from the roadmap): Elo tournament, multi-model discuss,
+  blunt Stop-loop, embeddings, fine-tuned reviewer artifacts. P5 (#35–#37) is R6.
+
+### Verification
+- `python3 -m pytest tests/ -q` — **518 passed** (up from 382 at the R4 merge-base; R5 added 136 tests across
+  `test_scholar_read_skill.py`, `test_scholar_discuss_skill.py`, `test_scholar_reviewer_realism.py`,
+  `test_scholar_pilot_moderator.py`, `test_scholar_verify_skill.py`, and extensions to
+  `test_scholar_pilot_skill.py`, `test_scholar_mock_review_skill.py`, `test_researcher_quote_anchor.py`,
+  `test_scholar_route_emit.py`, `test_oms_wiki_audit.py`).
+- `python3 scripts/sync_version.py` — exit 1, exactly one drift line (`card:` — the foreign omha
+  `cards/oms.json` still reads 0.8.0 until its separate PR lands; `plugin`/`changelog`/`tag` rows PASS via
+  the pre-tag window). `oms_doctor.py` routes `card:` to WARN, so the doctor run stays clean — same pattern
+  as the R4 (0.9.0) release.
+
 ## [0.9.0] — 2026-07-14
 
 ### Added
