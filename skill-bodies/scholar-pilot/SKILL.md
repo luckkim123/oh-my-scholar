@@ -47,6 +47,7 @@ Orchestrates every paper stage from research question to submission readiness. I
 3. **ideate**: scholar-ideate → concept notes methodology/*.md (lock concept SSOT)
 4. **outline**: scholar-outline → section structure·story arc
    - **mode branching**: if a Deliberate trigger fires (top-tier venue / breaking-method claim / changed comparison group), use `scholar-outline --consensus` (RALPLAN-DR 4-agent sequential); otherwise `--direct`. Auto-decision + user override.
+   - **moderator pass (anti-groupthink, read-only)**: before presenting GATE 1, dispatch `Task(subagent_type="oh-my-scholar:scholar-inspector", mode="moderator")` with the proposed outline + paths to `.oms/<slug>/research/*.md` (and `.oms/reading/` when relevant). Output: (a) a retrieved-but-unused evidence list (evidence rows present in the notes but absent from the outline), (b) 1-2 pointed questions. The calling session prints both verbatim alongside the GATE 1 prompt — the human decides what, if anything, to do with them; the moderator issues no verdict. `--skip-moderator` opts out. On dispatch failure, proceed to GATE 1 with a one-line notice (fail-open — the moderator never blocks the gate).
    ━━━ **GATE 1**: outline approval (human) — proceed/revise/abort. If consensus, present both plan.md+outline ━━━
 5. **draft**: scholar-draft → .tex (drafter single·careful)
 6. **inspect**: scholar-inspect → formative critique (parallel OK, read-only)
