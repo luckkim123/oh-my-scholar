@@ -82,7 +82,8 @@ def test_draft_output_requires_oms_sync():
     assert "동기화" in text or "sync" in text.lower(), "draft <Output> 에 동기화 완료조건 누락"
     assert "outline" in text and "methodology" in text, \
         "draft <Output> 에 outline·methodology 갱신 대상 누락"
-    assert "구조" in text, "draft <Output> 에 '구조 변경 시' 조건 누락(단순 교정은 제외돼야)"
+    assert "구조" in text or "structure" in text.lower(), \
+        "draft <Output> 에 '구조 변경 시' 조건 누락(단순 교정은 제외돼야)"
 
 
 def test_revise_output_requires_oms_sync():

@@ -4,7 +4,28 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-07-11
+
+### Added
+- **PreToolUse citation-write interlock** (`hooks/scholar_cite_guard.py`) — denies (a) new `.bib` entry keys with no
+  record in the `.oms/state/verified-citations.json` allowlist and (b) new `\cite{K}` in `.tex` with no entry in any
+  sibling `.bib`. Fail-open, stdlib only. Human escape hatch `OMS_CITE_GUARD=off` (env; deliberately not advertised
+  in deny reasons). Registered as a third hook in `.claude-plugin/plugin.json`.
+- **Mechanical DOI/retraction pre-gate** (`scripts/verify_bib_entry.py`) — verifies DOI existence + retraction status
+  via publisher-registered retraction notices in Crossref `update-to` relations, plus OpenAlex's `is_retracted` flag. Verdicts VERIFIED/MISMATCH/RETRACTED/NOT_FOUND/NETWORK_ERROR
+  (exit 0/1/1/1/2). `--record` writes only VERIFIED keys into the allowlist via `oms_atomic` (never touches `.bib`).
+  Polite-pool mailto via `OMS_CROSSREF_MAILTO` env.
+- **Claim-faithfulness (`citation-misuse`) WARN check** (scholar-verifier / scholar-verify) — stance labels
+  supports/contrasts/mentions judged only from research-note quote anchors; mismatches surface as a human-confirmation
+  list; unanchored pairs are reported as "check not run".
+- **`% [MATERIAL GAP: …]` drafter token** + uncited-claim WARN scan in the verifier — missing material becomes a
+  greppable token instead of a plausible inference, and FAILs the verify gate like TODO.
+- **Per-claim verbatim quote anchoring** (`Quote: "…" (locator)` / `quote-missing (abstract-only)`) in the
+  scholar-researcher output contract — the substrate the claim-faithfulness check reads from.
+
 ### Fixed
+- **22 (+1 latent) regression-guard assertions realigned with the English corpus** (1940cc6 drift) — suite was red
+  at 84/106 before this branch.
 - **Enforced SSOT reading priority (Defect A)** — fact-checking/writing skills had no
   mechanism forcing them to read the primary SSOT
   (`.oms/<slug>/outline/outline.md` + `methodology/*.md`) first when starting work,
@@ -23,10 +44,16 @@ All notable changes to oh-my-scholar (oms).
   of the `SECTION_REVIEW_DECISIONS` type) + a `references/output-layout.md` §6 checklist item.
   Simple prose corrections (no structural change) are exempt. Forcing a verify re-run was excluded as too heavy.
 
-### Added
-- **Regression tests** `tests/test_ssot_priority_and_sync.py` (7 cases) — drift guard for the Defect A·B mechanisms
+### Docs
+- `docs/2026-07-11-oms-advancement-plan.md` — roadmap #0–#37 (P0 citation interlock through P5 MCP swap-points +
+  scholar-read/discuss).
+- `docs/2026-07-11-r1-citation-integrity-execution.md` — R1 execution plan.
+
+### Verification
+- `python3 -m pytest tests/ -q` — **144 passed** (up from 141 pre-R1 + Defect A/B's 103; includes the citation-integrity
+  regression suites and `tests/test_ssot_priority_and_sync.py` (7 cases, that suite's own lineage at the time: 96 → 103 passed) — drift guard for the Defect A·B mechanisms
   (learning-protocol §8 existence·reading order, inspect SSOT-first, draft·revise sync completion conditions,
-  output-layout checklist). 96 → 103 passed.
+  output-layout checklist)).
 
 ## [0.5.0] — 2026-06-01
 

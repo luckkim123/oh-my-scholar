@@ -30,8 +30,8 @@ def test_planner_has_ocar_and_hourglass():
     body = PLANNER.read_text(encoding="utf-8")
     assert "OCAR" in body, "planner 에 OCAR 아크 누락"
     # 모래시계: Opening 폭 = Resolution 폭
-    assert re.search(r"모래시계|hourglass", body), "모래시계 개념 누락"
-    assert re.search(r"독자 인내심|audience patience|인내심", body), \
+    assert re.search(r"모래시계|hourglass", body, re.I), "모래시계 개념 누락"
+    assert re.search(r"독자 인내심|audience patience|인내심|reader patience", body), \
         "아크를 독자 인내심으로 선택(OCAR↔LD) 누락"
 
 
@@ -60,12 +60,13 @@ def test_v040_structure_model_regression():
     """⑥ 회귀: v0.4.0 섹션-순서 모델(flat/system/thesis + 공통 골격)이 그대로다."""
     body = PLANNER.read_text(encoding="utf-8")
     assert "<Structure_Types>" in body, "회귀: <Structure_Types> 섹션 사라짐"
-    assert "공통 골격" in body, "회귀: '공통 골격' 개념 사라짐"
+    assert "공통 골격" in body or "common skeleton" in body, "회귀: '공통 골격' 개념 사라짐"
     for variant in ("flat", "system", "thesis"):
         assert re.search(rf"`{variant}`", body), f"회귀: 규모 변주 '{variant}' 사라짐"
     # 기술 백서 안티패턴 가드 잔존
-    assert "기술 백서" in body, "회귀: 기술 백서 안티패턴 경고 사라짐"
-    assert re.search(r"실험.*(몰지|끝.*한)", body), "회귀: 실험 끝-몰이 금지 규약 사라짐"
+    assert "기술 백서" in body or "technical whitepaper" in body, "회귀: 기술 백서 안티패턴 경고 사라짐"
+    assert re.search(r"실험.*(몰지|끝.*한)", body) or re.search(r"pile.{0,15}experiments|experiments.{0,15}pile", body, re.I), \
+        "회귀: 실험 끝-몰이 금지 규약 사라짐"
     # 폐기 용어 재유입 차단
     assert "thesis-by-contribution" not in body, "폐기 용어 'thesis-by-contribution' 재유입"
 

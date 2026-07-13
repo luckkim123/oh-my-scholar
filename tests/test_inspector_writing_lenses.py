@@ -49,7 +49,7 @@ def test_overgeneralization_is_formative_only():
     """④ 과대일반화는 formative flag 만 — citation-safe 경계(자동 FAIL 아님)."""
     body = INSPECTOR.read_text(encoding="utf-8")
     # 인용 근거보다 넓은 주장 = formative flag, FAIL 아님 (verifier 영역 아님)
-    assert re.search(r"근거보다 넓|broader than|인용 근거", body), \
+    assert re.search(r"근거보다 넓|broader than|인용 근거|wider than.{0,15}(cited|citation) basis|wider than.{0,15}basis", body), \
         "과대일반화 정의(인용 근거보다 넓은 주장) 누락"
     # formative — assumption FRAGILE 의 형제, 자동 FAIL 금지
     assert re.search(r"FRAGILE|formative|판정 아님|FAIL 아님", body), \
@@ -59,12 +59,14 @@ def test_overgeneralization_is_formative_only():
 def test_inspector_two_lens_regression():
     """⑤ 회귀: logic⊥prose 2-lens 구조·formative(PASS/FAIL 금지)·evidence 날조 금지 유지."""
     body = INSPECTOR.read_text(encoding="utf-8")
-    assert "logic 렌즈" in body and "prose 렌즈" in body, "회귀: 2-lens 구조 사라짐"
+    assert ("logic 렌즈" in body and "prose 렌즈" in body) or ("logic lens" in body and "prose lens" in body), \
+        "회귀: 2-lens 구조 사라짐"
     # formative — PASS/FAIL 판정 금지
-    assert re.search(r"pass/fail이 아니|PASS.{0,3}FAIL.{0,6}(아니|금지)", body), \
+    assert re.search(r"pass/fail이 아니|PASS.{0,3}FAIL.{0,6}(아니|금지)|critique, not pass/fail|not pass/fail", body), \
         "회귀: formative(pass/fail 아님) 규약 사라짐"
     # evidence 날조 금지
-    assert re.search(r"evidence 날조 금지|날조하지", body), "회귀: evidence 날조 금지 규약 사라짐"
+    assert re.search(r"evidence 날조 금지|날조하지|[Nn]o evidence fabrication", body), \
+        "회귀: evidence 날조 금지 규약 사라짐"
     # assumption FRAGILE 라벨 유지
     assert "FRAGILE" in body, "회귀: assumption FRAGILE 라벨 사라짐"
 

@@ -47,7 +47,7 @@ def test_tone_anchor_rules_present():
     """④ TONE — 장식어 금지 원리 + em-dash 캡."""
     body = CARD.read_text(encoding="utf-8")
     # 장식 동사/형용사 ban (원리 + 씨앗 단어)
-    assert re.search(r"장식|ornamental", body), "TONE 장식 동사·형용사 금지 원리 누락"
+    assert re.search(r"장식|ornamental|decorative", body), "TONE 장식 동사·형용사 금지 원리 누락"
     for seed in ("delve", "underscore", "showcase"):
         assert seed in body, f"TONE 장식어 씨앗 토큰 '{seed}' 누락"
     # em-dash 캡 — 유니코드 글리프 명시 (멀티바이트)
@@ -90,7 +90,7 @@ def test_section7_tokens_parseable_with_multibyte_caveat():
 def test_venue_variance_not_hardcoded():
     """⑧ venue 변주 명시 — related-work 위치·아크 선택은 하드코딩 금지."""
     body = CARD.read_text(encoding="utf-8")
-    assert re.search(r"하드코딩 (금지|하지)|not hardcoded|venue.{0,4}(변주|파라미터|parameter)", body), \
+    assert re.search(r"하드코딩 (금지|하지)|not hardcoded|no hardcoding|do not hardcode|venue.{0,4}(변주|파라미터|parameter)|venue variation", body), \
         "venue 변주(related-work 위치/아크 선택 하드코딩 금지) 명시 누락"
 
 

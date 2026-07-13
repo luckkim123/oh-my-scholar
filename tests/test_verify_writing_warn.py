@@ -29,7 +29,7 @@ def test_writing_check_is_warn_not_fail():
     assert re.search(r"writing[^\n]*WARN|글쓰기[^\n]*WARN", body), \
         "writing 검사가 WARN 으로 분류 안 됨"
     # WARN≠FAIL 규약 (전체 PASS 막지 않음) — abstract WARN 과 같은 처리
-    assert re.search(r"WARN.*FAIL 아님|FAIL 아님.*WARN|전체 PASS", body), \
+    assert re.search(r"WARN.*FAIL 아님|FAIL 아님.*WARN|전체 PASS|[Nn]ot a FAIL|does not block overall PASS", body), \
         "writing WARN 이 전체 PASS 를 막지 않음(WARN≠FAIL) 명시 누락"
 
 
@@ -53,12 +53,13 @@ def test_multibyte_detection_via_python_re():
 def test_rubric_verify_axis_has_writing_row():
     """⑤ paper-eval verify 축에 writing 규율 행 추가 + SSOT 참조."""
     body = RUBRIC.read_text(encoding="utf-8")
-    assert re.search(r"writing 규율|글쓰기 규율", body), \
+    assert re.search(r"writing 규율|글쓰기 규율|writing discipline", body), \
         "paper-eval verify 축에 writing 규율 행 누락"
     assert "writing-craft.md" in body, \
         "paper-eval 이 writing SSOT(writing-craft.md)를 참조 안 함"
     # WARN 임을 명시
-    assert re.search(r"writing 규율[^\n|]*\(?WARN", body) or re.search(r"글쓰기 규율[^\n|]*WARN", body), \
+    assert re.search(r"writing 규율[^\n|]*\(?WARN", body) or re.search(r"글쓰기 규율[^\n|]*WARN", body) or \
+        re.search(r"writing discipline[^\n|]*\(?WARN", body), \
         "paper-eval writing 행이 WARN 으로 표기 안 됨"
 
 
@@ -66,8 +67,8 @@ def test_abstract_warn_regression_intact():
     """⑥ 회귀: 기존 abstract 규율 WARN 이 그대로다 (새 writing WARN 과 별개)."""
     vbody = VERIFIER.read_text(encoding="utf-8")
     rbody = RUBRIC.read_text(encoding="utf-8")
-    assert "abstract 규율" in vbody, "회귀: verifier abstract 규율 WARN 사라짐"
-    assert "abstract 규율" in rbody, "회귀: paper-eval abstract 규율 행 사라짐"
+    assert "abstract 규율" in vbody or "abstract discipline" in vbody, "회귀: verifier abstract 규율 WARN 사라짐"
+    assert "abstract 규율" in rbody or "abstract discipline" in rbody, "회귀: paper-eval abstract 규율 행 사라짐"
     assert "latex.md §3" in vbody, "회귀: verifier 의 latex.md §3 SSOT 참조 사라짐"
 
 

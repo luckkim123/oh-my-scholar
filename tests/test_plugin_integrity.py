@@ -63,3 +63,10 @@ def test_route_hook_registered():
     hooks = load_plugin()["hooks"]
     ups = json.dumps(hooks.get("UserPromptSubmit", []))
     assert "scholar_route_emit.py" in ups
+
+
+def test_cite_guard_registered():
+    """⑤ scholar_cite_guard hook 이 PreToolUse 에 등록돼 있다 (R1 #1)."""
+    hooks = load_plugin()["hooks"]
+    pre = json.dumps(hooks.get("PreToolUse", []))
+    assert "scholar_cite_guard.py" in pre
