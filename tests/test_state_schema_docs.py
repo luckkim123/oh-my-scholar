@@ -59,7 +59,9 @@ def test_pilot_execution_policy_points_to_layout_tiers():
     idx = PILOT.index("Priority Context")
     assert re.search(r"references/output-layout\.md §2\.3", PILOT[idx:idx + 600])
     # Task 6: assert that pilot SKILL explicitly instructs the prune duty
-    assert re.search(r"prune.{0,120}Working Notes|Working Notes.{0,120}prune", PILOT, re.I | re.S), \
-        "pilot SKILL must contain an imperative to prune Working Notes (not just a citation)"
-    assert re.search(r"7[\s-]?day", PILOT, re.I), \
-        "pilot SKILL must mention the 7-day TTL (not only in the layout file)"
+    # Discriminating assertion: "also prune" only appears in the imperative sentence,
+    # not in the §2.3 pointer parenthetical, so this anchor proves the imperative exists
+    assert re.search(r"\balso\s+prune\b", PILOT, re.I), \
+        "pilot SKILL must contain the imperative 'also prune' to prune Working Notes (not just a citation of the layout)"
+    assert re.search(r"\bprune\b.{0,100}Working Notes.{0,60}(older than|entries)", PILOT, re.I | re.S), \
+        "pilot SKILL must specify 7-day prune on Working Notes entries, with prune preceding the details"
