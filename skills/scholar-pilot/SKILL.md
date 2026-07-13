@@ -15,7 +15,7 @@ Orchestrates every paper stage from research question to submission readiness. I
 
 <Use_When>
 - "Build the whole paper from scratch for me" — full pipeline from a short brief
-- When it's clear which stage to start from, start at that stage (--from)
+- When it's clear which stage to start from, start at that stage (--from reads `pilot-<slug>.json` via `oms_state.py read` — see the `--from` entry point note below)
 </Use_When>
 
 <Do_Not_Use_When>
@@ -30,8 +30,8 @@ Orchestrates every paper stage from research question to submission readiness. I
   3. Before draft (.tex), lock down concepts·sources in ideate (.md) first.
 - The 3 GATEs are human decision points — no automatic pass-through.
 - Each stage is delegated to its dedicated skill (no re-implementation).
-- Stage outputs are recorded in `.oms/state/` (OMC state pattern) — resumable after interruption.
-- **Record priority context on entry (survives compaction)**: at pipeline start, write the critical constraints into the `## Priority Context` section of `.oms/notepad.md` — "no citation fabrication / no parallel draft / human confirmation before editing .bib + current GATE n/3 + list of unverified citations". So that even if context is compacted during a long pipeline, the 3 citation-safety principles and the GATE position are always recoverable.
+- At **every stage boundary and every GATE decision**, run `python3 <plugin>/scripts/oms_state.py write --slug <slug> --stage <stage> --gate-status <status> [--open-fail-ids …]` — the schema (documented in `references/output-layout.md` §2.2) is what `--from` resume, the Stop guard, and the SessionStart advisory read; a stage that skips the write is invisible to all three.
+- **Record priority context on entry (survives compaction)**: at pipeline start, write the critical constraints into the `## Priority Context` section of `.oms/notepad.md` — "no citation fabrication / no parallel draft / human confirmation before editing .bib + current GATE n/3 + list of unverified citations". So that even if context is compacted during a long pipeline, the 3 citation-safety principles and the GATE position are always recoverable. (tiers: references/output-layout.md §2.3 — Priority Context replace-on-write / Working Notes dated-append, 7-day prune at pilot entry / Manual never touched) At pipeline entry, also prune `## Working Notes` entries older than 7 days (dated `### YYYY-MM-DD` sub-headings; the only automated deletion — `## Manual` is never touched).
   - **.md is the default**: write/append directly to `.oms/notepad.md` (since the original notepad is a single .md + section parsing, the loss of reproducing it as .md ≈ 0). If notepad MCP is available, you can mirror via `notepad_write_priority(...)` (same .md target, optional acceleration) — even when absent, a .md write produces identical behavior, not an error.
 - The stage-output path is fixed at **`.oms/state/`** (a verified real path; do not nail down unverified sub-segments like `.oms/specs`·`sessions/{sid}`).
   - ⚠️ **30s trap (only when state MCP is adopted in the future — not applied now)**: if you start using state MCP, do not call `state_clear` *right before* a stage handoff (it disables every mode's stop-hook for 30s, silently breaking the loop). For a non-terminal handoff use `state_write(active=false)`, and use `state_clear` *only at terminal (full pipeline shutdown)*. **Since state MCP is not actually called at present (the .md/`.oms/state/` files are the default), this is purely a future-proofing note.**
@@ -68,8 +68,15 @@ Orchestrates every paper stage from research question to submission readiness. I
     - On "clean up" → **delete via a recoverable path** (no permanent `rm`): macOS `trash` (if absent `~/.Trash`) / Linux `gio trash`·`trash-cli` / Windows PowerShell move-to-recycle-bin (`Shell.Application` ParseName+InvokeVerb('delete'), no permanent `Remove-Item` — documented, unverified) / in environments without a trash (CI·container) only after the user re-confirms "permanent deletion".
     - ⚠️ `outputs/<slug>/<slug>.pdf` (user asset) and the **project source folder's .tex/.bib (citation-bound assets)** are **fully excluded** from aggregation·deletion — mention only. For detailed procedure see `references/output-layout.md` §5.
 
-> **`--from <stage>` entry point**: can start from an intermediate stage — `research|deepen|ideate|outline|draft|inspect|verify|revise`. e.g.: `--from deepen` means start from deepen using the existing research notes as input.
+> **`--from <stage>` entry point**: can start from an intermediate stage — `research|deepen|ideate|outline|draft|inspect|verify|revise`. e.g.: `--from deepen` means start from deepen using the existing research notes as input. `--from` now *reads* `pilot-<slug>.json` (via `python3 <plugin>/scripts/oms_state.py read --slug <slug>`) and, when invoked without an explicit stage, proposes the recorded `stage` as the resume point.
 </Steps>
+
+<Interruption_And_Resume>
+- **On entry**: before starting any stage, run `python3 <plugin>/scripts/oms_state.py read --slug <slug>`. If a non-terminal `pilot-<slug>.json` exists for this paper, surface it first — "A pipeline marker exists (stage X, gate_status Y, updated_at Z) — resume from X / restart from an earlier stage / discard?" (use AskUserQuestion when available). **Never silently restart from stage 1 over a live marker.**
+- **Abort semantics**: choosing "discard" writes `gate_status=abort` (`oms_state.py write --slug <slug> --gate-status abort`), plus `revise-end --slug <slug> --status abort` if a live revise marker also exists. `abort` is **terminal**: the SessionStart resume advisory stops reporting the marker, the Stop guard stops honoring it, and the state files become cleanup-eligible (`references/output-layout.md` §5).
+- **Stale-marker rule**: if `updated_at` is older than 14 days, present the marker as *stale* — "probably an abandoned run — discard unless you recognize it." Still the human's call; never auto-discard.
+- **Mid-stage interruption**: if the user interrupts mid-stage, the last boundary write is the resume point — the marker is always at most one stage behind reality. This is exactly why every stage boundary writes state (see `<Execution_Policy>`).
+</Interruption_And_Resume>
 
 <Output>
 Each stage's output path + the 3-GATE decision history + the final PASS paper — the final version the user sees is `outputs/<slug>/<slug>.pdf` (the compiled output). The .tex/.bib **source originals are kept in the project source folder** (protecting citation-bound assets, not moved into `.oms/`); only version snapshots·compile intermediates go to `.oms/<slug>/` (`versions/`·`renders/`·`tmp/`). The path convention is SSOT in `references/output-layout.md`. + residual items needing human confirmation (unverified citations·fixable=false) + the `.oms/state` progress record.

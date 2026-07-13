@@ -4,6 +4,73 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-07-13
+
+### Added
+- **`.oms/state/` pipeline schema + `scripts/oms_state.py` CLI** (`references/output-layout.md` §2.2) — two
+  state shapes, both written *only* through this CLI (atomic via `oms_atomic`, strict enum validation, slug
+  regex, `paper_root` recorded on create): `pilot-<slug>.json` (`write` — stage/gate_status/open_fail_ids/
+  paper_root) and `revise-<slug>.json` (the round/strike ledger, below). `scholar-pilot` now writes state at
+  every stage boundary and GATE decision, and `--from` reads it (`oms_state.py read`) to propose a resume
+  stage instead of guessing.
+- **Revise marker + mechanical strike/round ledger** (`scripts/oms_state.py`, `skills/scholar-revise/SKILL.md`)
+  — `revise-start` is idempotent on resume (a crash/compaction resume never zeroes the counters or extends
+  the TTL clock), takes `--force-restart` for an intentional reset, and clamps `--max-rounds` to 1–20 /
+  `--ttl-hours` to 1–168; `revise-round` mints a fresh `round_id` each round and flags `"exceeded": true` past
+  max-rounds (the CLI never blocks — the skill decides to stop); `strike --defect-id` counts recurrences and
+  flags `third_strike: true` at 3 — replacing self-reported "recurs 3 times" with a grep-countable signal;
+  `revise-end` closes the marker (`done|stopped|abort`) on every loop exit path.
+- **Scoped Stop guard for the revise loop** (`hooks/scholar_stop_guard.py`) — blocks a stop attempt only while
+  a `revise-<slug>.json` marker is live, scoped by nearest-first ascent to `.oms/state/` and containment
+  against the marker's `paper_root` (never guesses scope); the slug is derived from the marker filename, never
+  from trusted JSON content. Six independent exemptions let the guard step aside: inactive/non-live marker,
+  any strike ≥3, round ≥ max_rounds, TTL expiry (skew-safe — a negative age never extends the guard), a
+  sibling pilot marker's `gate_status == "abort"`, and a durable `stop_blocks` cap of `max(10, 2×max_rounds)`.
+  On block, `stop_blocks` is incremented via atomic write *before* the block reason is printed — a failed
+  increment allows the stop instead of risking a wedge. Human escape hatch `OMS_STOP_GUARD` in
+  `{off,0,false}` (env, never advertised in the reason); the `revise-end` exit path *is* advertised in the
+  block reason (unlike cite-guard's hidden hatch — ending the loop and reporting to the human is the desired
+  behavior here); the platform's own turn-ender after 8 consecutive blocks is documented as the structural
+  backstop underneath all of this.
+- **Verifier round-id echo** (`agents/scholar-verifier.md`) — when `scholar-revise` hands the verifier a
+  `round_id`, the verdict's `Round ID` line must echo it verbatim; a missing or mismatched echo voids that
+  verdict, and `scholar-revise` discards it and re-verifies rather than counting the round.
+- **SessionStart resume advisory + post-compaction re-injection** (`hooks/scholar_resume_emit.py`, matcher
+  `startup|resume|clear|compact`) — on any session start, ascends to the nearest `.oms/` and, for each
+  in-scope non-terminal pilot, prints a one-line advisory (stage/gate_status/open_fail_ids, plus round/strikes
+  if a live revise marker exists); silent when there is nothing to advise, so a plain non-paper session pays
+  zero injection tax. When `source == "compact"`, additionally re-injects the notepad's `## Priority Context`
+  section verbatim (bounded to 2,000 chars) — implemented as `SessionStart(source: "compact")`, not
+  `PreCompact` (see Notes). Read-only — the hook never writes a file.
+- **`<Interruption_And_Resume>` abort/resume spec** (`skills/scholar-pilot/SKILL.md`) — on entry, a
+  non-terminal `pilot-<slug>.json` is surfaced before any stage starts (resume / restart-from-earlier-stage /
+  discard, never a silent restart from stage 1); choosing "discard" writes `gate_status=abort` (plus
+  `revise-end --status abort` if a revise loop is also live), and `abort` is terminal — the resume advisory
+  stops reporting the marker and the Stop guard stops honoring it; markers older than 14 days are flagged
+  stale (still the human's call, never auto-discarded); mid-stage interruption resumes from the last
+  stage-boundary write.
+- **Notepad 3-tier convention** (`references/output-layout.md` §2.3) — `## Priority Context` (replace-on-write,
+  bounded to 2,000 chars, owned by scholar-pilot), `## Working Notes` (dated append under `### YYYY-MM-DD`,
+  7-day auto-prune at pilot entry — prune duty explicitly assigned to scholar-pilot), `## Manual` (human-owned,
+  never written or pruned by automation).
+
+### Notes
+- #13 (post-compaction re-injection) is implemented via `SessionStart(source: "compact")`, not `PreCompact` —
+  verified against the hooks documentation: `PreCompact`'s JSON-output contract has no context-injection
+  channel (`additionalContext` is only available from `Stop`/`SubagentStop`/`SessionStart`), so a `PreCompact`
+  hook's output cannot survive compaction.
+- #14 (session envelope + `O_EXCL` lock) is deliberately deferred, pending an observed multi-session collision
+  (plan §5, conditional) — not implemented in this release.
+- This branch is stacked on the unmerged R1 branch (`feat/r1-citation-integrity`, CHANGELOG `[0.6.0]`); tag
+  `v0.7.0` only after both PRs merge. Version-SSOT sync across `plugin.json`/README/CHANGELOG remains open as
+  P2 #15.
+
+### Verification
+- `python3 -m pytest tests/ -q` — **213 passed** (baseline at the R1 merge-base was 144; R2 added 69 tests
+  across 7 new/extended test files: `test_oms_state.py`, `test_revise_ledger_contract.py`,
+  `test_round_id_contract.py`, `test_scholar_stop_guard.py`, `test_scholar_resume_emit.py`,
+  `test_state_schema_docs.py`, and an extension to `test_plugin_integrity.py`).
+
 ## [0.6.0] — 2026-07-11
 
 ### Added

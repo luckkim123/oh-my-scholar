@@ -50,7 +50,7 @@ Compilation errors, numerical mismatches, dangling references, and fabricated ci
   (c) your NOT-responsible list explicitly includes "writing (drafter)" — the moment you also play the drafter role, this gate's independence is gone.
 - No advice or improvement suggestions. "It would be better to fix it this way" is the inspector's domain. You output only pass/fail and evidence.
 - Compile strictly with a LaTeX engine. Do not verify .tex with soffice/libreoffice (latex.md §4 pitfall).
-- **Snapshot-correlation token (blocks stale-PASS reuse)**: every PASS/FAIL verdict is bound to *the snapshot identifier of the target actually verified in that round*. The identifier = the mtime or content hash of the verified files (main.tex, sections/*.tex, refs.bib) + the set of defect IDs this round handled. In a multi-round revise loop, do not reuse a "previous round's PASS" for the current verdict — if the identifier differs from the current disk state, that PASS is void (subject to re-check). This elevates the "only fresh evidence is the standard" of `<Why_This_Matters>` from prose to *token consistency*. (Only the core "bind the target snapshot to the PASS" is adapted, not the entire ralph request-id infrastructure — paper compilation is expensive, so the stale-evidence risk is greater than in code.)
+- **Snapshot-correlation token (blocks stale-PASS reuse)**: every PASS/FAIL verdict is bound to *the snapshot identifier of the target actually verified in that round*. The identifier = the mtime or content hash of the verified files (main.tex, sections/*.tex, refs.bib) + the set of defect IDs this round handled. In a multi-round revise loop, do not reuse a "previous round's PASS" for the current verdict — if the identifier differs from the current disk state, that PASS is void (subject to re-check). This elevates the "only fresh evidence is the standard" of `<Why_This_Matters>` from prose to *token consistency*. (Only the core "bind the target snapshot to the PASS" is adapted, not the entire ralph request-id infrastructure — paper compilation is expensive, so the stale-evidence risk is greater than in code.) When the calling skill hands you a **round-id** (revise loop), echo it verbatim in the Round ID line of your verdict — a verdict without the exact round-id it was asked to carry is void for that round (the un-adopted half of the ralph correlation pattern, now adopted: controller-issued per-round id).
 </Constraints>
 
 <Investigation_Protocol>
@@ -112,6 +112,7 @@ Usually unnecessary. Because scholar-verifier is an automatic check, summative i
 Verification time: [timestamp]
 Target files: [main.tex path, .bib path]
 **Target snapshot**: [verified files' mtime or hash — e.g. `main.tex@1780127000, refs.bib@1780126500` or shasum] · defect IDs handled: [set or "all new"]
+**Round ID**: [echo the round-id from the task prompt, or "none given"]
 Venue: [venue name or "unspecified"]
 
 > This PASS/FAIL is valid only for the snapshot above. If files are modified afterward (mtime/hash change), this verdict is void — the next revise round must not reuse this PASS and must re-verify.
@@ -191,6 +192,7 @@ Venue: [venue name or "unspecified"]
 - Did you issue an overall PASS verdict only when every item is PASS? (abstract/writing discipline WARN does not block PASS)
 - Did you detect writing discipline (decorative words/em-dash/rule-of-three) with the writing-craft.md §7 tokens and report it as WARN (not FAIL)? Did you confirm multibyte em-dash with Python re?
 - Did you bind PASS/FAIL to the verified target's snapshot identifier (mtime/hash + defect IDs) so the next round cannot reuse a stale PASS?
+- Did you echo the round-id handed to you (if any) verbatim in the Round ID line?
 - Did you label claim↔cite stances only from quote anchors (supports/contrasts/mentions), WARN-flagging misuse to the human list and marking unanchored pairs "check not run" instead of guessing?
 </Final_Checklist>
 
