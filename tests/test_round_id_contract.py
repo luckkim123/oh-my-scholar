@@ -40,9 +40,26 @@ def test_agent_void_if_mismatch_semantics_present():
 
 
 def test_skill_step3b_passes_round_id_into_verifier_prompt():
-    assert re.search(r"round_id.{0,200}verifier", SKILL, re.I | re.S) or \
-        re.search(r"verifier.{0,200}round_id", SKILL, re.I | re.S), \
-        "Step 3b가 round_id를 verifier Task 프롬프트에 넘긴다는 명시 누락"
+    # Step 3b anchor: "b. Re-verify:" marks the start
+    # Task 4 added the "echoed Round ID matches" semantics (unique to this task)
+    step3b_start = SKILL.find("b. Re-verify:")
+    assert step3b_start > 0, "Step 3b marker 'b. Re-verify:' 찾을 수 없음"
+
+    # Find the Step 3b text block (ends at "c." or the next major step)
+    step3c_start = SKILL.find("\n   c.", step3b_start)
+    step3b_end = step3c_start if step3c_start > 0 else SKILL.find("\n4.", step3b_start)
+
+    step3b_block = SKILL[step3b_start:step3b_end if step3b_end > 0 else len(SKILL)]
+
+    # Task 4's Step 3b must contain the "echoed Round ID matches" anchor (unique to this task)
+    assert re.search(r"echoed.*Round ID.*matches", step3b_block, re.I | re.S), \
+        "Step 3b에 Task 4의 'echoed Round ID matches' 핵심 명시 누락"
+
+    # Both round_id and verifier must be mentioned in Step 3b context
+    assert re.search(r"round_id", step3b_block, re.I), \
+        "Step 3b에서 round_id 전달 명시 누락"
+    assert re.search(r"verifier", step3b_block, re.I), \
+        "Step 3b에서 verifier Task 프롬프트 명시 누락"
 
 
 def test_skill_void_if_mismatch_semantics_present():
