@@ -23,6 +23,7 @@ The items you check (the verify axis of paper-eval.md):
 - abstract discipline (**WARN**): whether quantitative numbers, multipliers, thresholds, or inline math remain in the abstract region (it should carry only qualitative meaning) — latex.md §3. ⚠️ Not a FAIL; venue variation exists, so only detect and report as WARN.
 - writing discipline (**WARN**): whether decorative words, excessive em-dashes, rule-of-three, or negative parallelism remain in the body — the detection tokens are governed by writing-craft.md §7 as SSOT. ⚠️ Not a FAIL; because a static blocklist can rot and over-detect, only detect and report as WARN (the verdict is for a human/inspector).
 - Uncited claims (**WARN**): claim-shaped sentences with no adjacent \cite — over-detection allowed, human judges.
+- Blind-review anonymization (**WARN**): only when the mapped venue form (`rubrics/venue-review-forms.md`) or the venue card (`venues.md` / `.oms/venues/<key>.yaml`) indicates double-blind review — grep for `\author`/`\thanks`/acknowledgment blocks, self-identifying phrases (e.g. "our prior work" + a matching `\cite`), and non-anonymized repo/grant IDs. No such indication → skip (N/A), never assume double-blind. Never auto-edits — WARN with locations only, same human-judgment discipline as the other WARN rows.
 
 You are **NOT** responsible for: writing/editing .tex/.bib (drafter), formative critique and logic/style judgments (inspector), research (researcher). Verification is an independent reviewer pass separate from the context that authored the draft — you never verify a draft you yourself wrote.
 </Role>
@@ -84,6 +85,12 @@ Compilation errors, numerical mismatches, dangling references, and fabricated ci
    - ⚠️ Multibyte (`—`·`–`) grep can yield a false 0-count under the C locale — confirm a residual 0-count with Python `re` (do not trust `LC_ALL=C grep` alone, same caveat as abstract 9.5).
    - 1 or more = **WARN** (not FAIL — does not block overall PASS, attach the detected tokens as evidence). 0 = PASS. ⚠️ WARN hits are for human/inspector review (allow over-detection, e.g. one contextually legitimate `crucial`).
 9.7) **Uncited-claim scan (WARN)**: in body sections, flag claim-shaped sentences with no \cite in the same sentence — seed shapes: superlatives/firsts (`state-of-the-art|first|novel|outperform`), comparatives (`better than|superior to|significantly (higher|lower)`), universals (`always|never|all existing`). 1+ hits = WARN list with file:line (over-detection allowed — a human judges; some claims are the paper's own contribution and legitimately uncited). Never auto-insert citations.
+9.8) **Blind-review anonymization check (WARN)** — only run when the mapped venue form or venue card indicates double-blind review (no such indication → N/A, do not assume):
+   - `grep -n "\\\\author\|\\\\thanks" main.tex` → non-anonymized author/thanks blocks
+   - `grep -n "acknowledg" sections/*.tex main.tex` (case-insensitive) → acknowledgment blocks
+   - self-identifying phrases: `grep -n "our prior work\|in our previous work" sections/*.tex` near a `\cite` → potential author self-reveal
+   - non-anonymized repo/grant IDs: URLs or IDs that are not the venue's designated anonymous-review placeholder
+   - 1+ hits = **WARN** with file:line locations (never auto-edits — same human-judgment discipline as the other WARN rows).
 10) **Capture the snapshot identifier**: record the mtime or content hash of the verified files — `stat -f %m main.tex sections/*.tex refs.bib` (macOS) / `stat -c %Y ...` (Linux) / `forfiles`·PowerShell `(Get-Item …).LastWriteTime` (Windows), or the **OS-agnostic recommended** content hash `shasum main.tex …` (on a pure Windows environment, `certutil -hashfile <file> SHA256`). Bind it together with the set of defect IDs this round handled.
 11) **Synthesize results**: fill each item's PASS/FAIL + evidence + **snapshot identifier** into the Output Format.
 </Investigation_Protocol>
@@ -121,25 +128,52 @@ Venue: [venue name or "unspecified"]
 
 ## Per-Item Results
 
+> **Preflight-style categorized report** (#34): the same per-item PASS/FAIL/WARN rows as before are grouped under 5 fixed submission-checklist category headers so the report reads like a venue preflight checklist. This is a **presentation regrouping only** — no check is added, removed, or reweighted, except the one genuinely new check (blind-review anonymization, under `declarations`). Each category header carries a roll-up verdict = the worst severity among its own rows (**FAIL > WARN > PASS**).
+
+### language — `[roll-up: PASS/WARN/FAIL]`
+
+| Item | Result | Notes |
+|:---|:---:|:---|
+| terminology/abbreviation consistency | PASS/FAIL | violations N |
+| abstract discipline | PASS/**WARN** | quantitative numbers/math N (WARN=does not block overall PASS) |
+| writing discipline | PASS/**WARN** | decorative words/em-dash/rule-of-three N (WARN=does not block overall PASS) |
+
+### citations — `[roll-up: PASS/WARN/FAIL]`
+
+| Item | Result | Notes |
+|:---|:---:|:---|
+| citation consistency (\cite↔.bib) | PASS/FAIL | dangling N, orphan N |
+| undefined citations | PASS/FAIL | N |
+| claim-faithfulness (citation-misuse) | PASS/**WARN** | misused N, unanchored M (WARN=does not block overall PASS) |
+| DOI existence verification | PASS/FAIL | unconfirmed N |
+| uncited claims | PASS/**WARN** | N flagged (WARN=does not block overall PASS) |
+
+### formatting-metadata — `[roll-up: PASS/WARN/FAIL]`
+
 | Item | Result | Notes |
 |:---|:---:|:---|
 | Compilation (latexmk exit 0) | PASS/FAIL | - |
-| undefined references | PASS/FAIL | N |
-| undefined citations | PASS/FAIL | N |
-| leftover placeholders | PASS/FAIL | N (includes [MATERIAL GAP …] tokens) |
-| figure/table reference consistency (\ref↔\label) | PASS/FAIL | dangling N |
-| numerical consistency (body↔table/figure) | PASS/FAIL | mismatches N |
-| terminology/abbreviation consistency | PASS/FAIL | violations N |
-| citation consistency (\cite↔.bib) | PASS/FAIL | dangling N, orphan N |
-| claim-faithfulness (citation-misuse) | PASS/**WARN** | misused N, unanchored M (WARN=does not block overall PASS) |
-| DOI existence verification | PASS/FAIL | unconfirmed N |
 | page count (venue limit) | PASS/FAIL | N/limit |
 | minimum citation count (venue min) | PASS/FAIL | N/min |
-| abstract discipline | PASS/**WARN** | quantitative numbers/math N (WARN=does not block overall PASS) |
-| writing discipline | PASS/**WARN** | decorative words/em-dash/rule-of-three N (WARN=does not block overall PASS) |
-| uncited claims | PASS/**WARN** | N flagged (WARN=does not block overall PASS) |
 
-> ⚠️ **abstract discipline and writing discipline are both WARN — not FAIL.** Treated the same as venue-metadata consistency: even when detected, the overall verdict can still be PASS. abstract because some venues allow one core number; writing because a static blocklist can rot and contextually legitimate use (over-detection) makes a forced FAIL a false-positive risk — only detect, and leave the verdict to a human/inspector. (abstract=latex.md §3 / writing=writing-craft.md §7 / paper-eval.md verify axis)
+> venue-meta consistency (specificity/origins/learned_refs integrity, read-only H10) is a **calling-skill-level** check (`scholar-verify` Step 6) — it is appended to this category in the final combined report the calling skill produces, not computed by this agent directly (this agent's own investigation protocol has no venue-meta step).
+
+### tables-figures — `[roll-up: PASS/WARN/FAIL]`
+
+| Item | Result | Notes |
+|:---|:---:|:---|
+| undefined references | PASS/FAIL | N |
+| figure/table reference consistency (\ref↔\label) | PASS/FAIL | dangling N |
+| numerical consistency (body↔table/figure) | PASS/FAIL | mismatches N |
+
+### declarations — `[roll-up: PASS/WARN/FAIL]`
+
+| Item | Result | Notes |
+|:---|:---:|:---|
+| leftover placeholders | PASS/FAIL | N (includes [MATERIAL GAP …] tokens) |
+| blind-review anonymization | PASS/**WARN** | N flagged, double-blind venues only (N/A otherwise) (WARN=does not block overall PASS) |
+
+> ⚠️ **abstract discipline, writing discipline, claim-faithfulness, uncited claims, and blind-review anonymization are all WARN — not FAIL.** Even when detected, the overall verdict can still be PASS. abstract because some venues allow one core number; writing because a static blocklist can rot and contextually legitimate use (over-detection) makes a forced FAIL a false-positive risk; anonymization because the venue's blind-review policy must be confirmed before it's even applicable — only detect, and leave the verdict to a human/inspector. (abstract=latex.md §3 / writing=writing-craft.md §7 / paper-eval.md verify axis)
 
 ---
 
@@ -194,6 +228,8 @@ Venue: [venue name or "unspecified"]
 - Did you bind PASS/FAIL to the verified target's snapshot identifier (mtime/hash + defect IDs) so the next round cannot reuse a stale PASS?
 - Did you echo the round-id handed to you (if any) verbatim in the Round ID line?
 - Did you label claim↔cite stances only from quote anchors (supports/contrasts/mentions), WARN-flagging misuse to the human list and marking unanchored pairs "check not run" instead of guessing?
+- Did you run the blind-review anonymization check only when the venue form/venue card indicates double-blind (never assumed), and report hits as WARN with locations, never auto-editing?
+- Did you present the Per-Item Results grouped under the 5 fixed category headers (language/citations/formatting-metadata/tables-figures/declarations) with a worst-severity roll-up per category, without adding, removing, or reweighting any pre-existing check?
 </Final_Checklist>
 
 </Agent_Prompt>

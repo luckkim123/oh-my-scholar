@@ -52,6 +52,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
      - **Claim-faithfulness / citation-misuse (WARN)**: claim↔\cite stance check against the researcher's quote anchors (supports/contrasts/mentions) — misuse → human-confirmation list; unanchored pairs = "check not run". "Exists" ≠ "supports".
      - **Abstract discipline (WARN)**: quantitative numbers, formulas, or multipliers left in the abstract region (it should be qualitative meaning only) — latex.md §3. Detection = WARN (not FAIL), venue variation exists
      - **Uncited-claim scan (WARN)**: claim-shaped sentences without \cite — WARN list, human judges (never auto-cite).
+     - **Blind-review anonymization (WARN)**: only when the mapped venue form/venues.md indicates double-blind — grep for `\author`/`\thanks`/acknowledgment blocks, self-identifying phrases, non-anonymized repo/grant IDs. No such indication → N/A. WARN with locations, never auto-edits.
      - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
 3. Receive the verifier output — collate per-item PASS/FAIL.
 4. If there are FAIL items, classify by fixable_by_llm:
@@ -64,10 +65,12 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
    - on mismatch, **WARN only** — not FAIL. ⚠️ verify only **reads** the meta, never repairs it
      (meta repair is `scholar-learn`'s human-gate job). Same as the auto-fix-forbidden principle.
 7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline) does not count toward FAIL** — reported only, human judgment).
+
+**Categorized report (#34 preflight-style)**: scholar-verifier's per-item report reads as a submission checklist — the same PASS/FAIL/WARN rows are grouped under 5 fixed category headers (language / citations / formatting-metadata / tables-figures / declarations), each showing the worst severity among its rows. Presentation only — no check is added, removed, or reweighted, except the new blind-review anonymization (WARN) check, which lands under `declarations` and only runs for venues the mapped venue form/venues.md marks double-blind.
 </Steps>
 
 <Output>
-- Per-item results table (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), venue meta PASS/WARN)
+- Per-item results, grouped under 5 categories (language / citations / formatting-metadata / tables-figures / declarations) with a worst-severity roll-up per category (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), venue meta, blind-review anonymization (double-blind venues only) PASS/WARN)
 - FAIL item details: evidence (log line, grep result, file:line) + fixable_by_llm classification
 - List of unverified citations (no auto-fix — human confirmation only)
 - Final verdict: **PASS** (all items pass) or **FAIL** (N items failed)
