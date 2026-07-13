@@ -7,15 +7,17 @@ SKILL 본문에 박혀 있는지(드리프트 방지)와, oms 고유 불변(절�
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 SKILL = Path(__file__).parent.parent / "skills" / "scholar-init" / "SKILL.md"
 
 
 def read() -> str:
-    return SKILL.read_text(encoding="utf-8")
+    return skill_md("scholar-init")
 
 
 def test_skill_file_exists():
-    """① scholar-init/SKILL.md 가 실재한다."""
+    """① scholar-init/SKILL.md 가 실재한다 (shim — full body lives at skill-bodies/)."""
     assert SKILL.is_file(), f"missing {SKILL}"
 
 

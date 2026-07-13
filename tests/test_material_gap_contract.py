@@ -5,11 +5,13 @@ claim-shaped sentences with no adjacent \\cite."""
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 DRAFTER = (ROOT / "agents" / "scholar-drafter.md").read_text(encoding="utf-8")
 VERIFIER = (ROOT / "agents" / "scholar-verifier.md").read_text(encoding="utf-8")
-DRAFT_SKILL = (ROOT / "skills" / "scholar-draft" / "SKILL.md").read_text(encoding="utf-8")
-VERIFY_SKILL = (ROOT / "skills" / "scholar-verify" / "SKILL.md").read_text(encoding="utf-8")
+DRAFT_SKILL = skill_md("scholar-draft")
+VERIFY_SKILL = skill_md("scholar-verify")
 
 
 def test_drafter_material_gap_contract():

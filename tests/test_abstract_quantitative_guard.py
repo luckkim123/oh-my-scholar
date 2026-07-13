@@ -13,12 +13,14 @@ scholar-verifier 가 사후 WARN 으로 검출. WARN(FAIL 아님) — 일부 ven
 import re
 from pathlib import Path
 
+from conftest import SKILL_BODIES
+
 ROOT = Path(__file__).parent.parent
 LATEX_CARD = ROOT / "references" / "formats" / "latex.md"
 RUBRIC = ROOT / "references" / "rubrics" / "paper-eval.md"
 VERIFIER = ROOT / "agents" / "scholar-verifier.md"
 DRAFTER = ROOT / "agents" / "scholar-drafter.md"
-VERIFY_SKILL = ROOT / "skills" / "scholar-verify" / "SKILL.md"
+VERIFY_SKILL = SKILL_BODIES / "scholar-verify" / "SKILL.md"
 
 
 def test_latex_card_defines_abstract_rule_and_detection():

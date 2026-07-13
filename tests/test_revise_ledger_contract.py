@@ -1,9 +1,10 @@
 """R2 #7 — the 3-strike and max-rounds guards become countable artifacts:
 scholar-revise runs oms_state.py verbs instead of self-counting."""
 import re
-from pathlib import Path
 
-REVISE = (Path(__file__).parent.parent / "skills" / "scholar-revise" / "SKILL.md").read_text(encoding="utf-8")
+from conftest import skill_md
+
+REVISE = skill_md("scholar-revise")
 
 
 def test_loop_start_and_end_are_wired():

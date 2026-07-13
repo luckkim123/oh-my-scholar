@@ -6,9 +6,11 @@ R2 #11+#12 (Task 6): abort/interrupt spec on the pilot SKILL + the notepad
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 LAYOUT = (ROOT / "references" / "output-layout.md").read_text(encoding="utf-8")
-PILOT = (ROOT / "skills" / "scholar-pilot" / "SKILL.md").read_text(encoding="utf-8")
+PILOT = skill_md("scholar-pilot")
 
 
 def test_layout_documents_pilot_state():
