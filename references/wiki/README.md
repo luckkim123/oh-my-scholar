@@ -35,7 +35,7 @@ This is the current implementation target of the `wiki_query(category)` abstract
 ```
 
 - One file = one topic (e.g. `convention/neurips-reject-patterns.md`).
-- Each file is human-readable free-form .md. No machine-parsing schema (grep only).
+- A note's **body** is human-readable free-form .md — no machine-parsing schema there (grep only); the frontmatter fence above it is the one machine-parsable part (thin, stdlib-only — see "Frontmatter standard" below).
 - `category` maps 1:1 to the subdirectory names above (4 local + 5 for global including `history/`).
 - ⚠️ `.oms/wiki/` is a *project-wide* accumulation, so it sits **outside** the per-task `.oms/<slug>/` (output-layout) — not bound to a slug, it lives across sessions and tasks.
 - ⚠️ **Only "paper-agnostic reusable assets" go up to the global level** (tendencies, venue formats, history, reusable decisions). Paper-specific knowledge stays local to that paper, and **citation/.bib is permanently forbidden from global promotion** (hallucination risk). This is how it reconciles with oms's "no user-scope" anti-pattern — the global level is *the parent folder's `.oms/`* (still work-root relative), not distributed config, and what flows up is only reusable assets.
@@ -70,6 +70,7 @@ is less reusable than "X juxtaposes two independent contributions across stages 
 - ⚠️ **"Source pointer" = an internal paper-slug/section pointer, not a `.bib` citation** (§6.F · keeping the citation boundary
   invariant below). "Revisit such-and-such part of `<slug>` for this conclusion" is just *internal navigation*; it does not
   write a paper citation into the wiki.
+- ⚠️ **Append-time consequence (#24)**: `scholar-pilot/SKILL.md` Step 10 mechanically forces `confidence: low` (marked `evidence: none`) on an appended entry that carries neither pointer nor quote, and evidence-less re-observation never raises it — the entry is **still appended**, so this stays consistent with "not a reject gate" above. Procedure detail lives at that Step 10 bullet (not restated here); it remains a prompt-contract rule, no automated compliance check.
 
 Example (conclusion + evidence together):
 
@@ -84,6 +85,24 @@ sightings: 3
 - Evidence (revisit pointers): missing ablation flagged in `iros-2026-nav` §4 · `iros-2026-grasping` §5 → both added.
   (If re-verification is needed, look at the relevant sections of these two slugs — not a citation, internal navigation.)
 ```
+
+---
+
+## Frontmatter standard (thin, stdlib-parsable)
+
+This section is the SYNTAX contract for every wiki note's frontmatter — parsed by `scripts/oms_wiki_audit.py`'s stdlib-only splitter (no PyYAML). What `confidence` and `sightings` *mean*, and how confidence climbs on repeated observation, stays the SSOT of the confidence-frontmatter subsection above (§ confidence frontmatter) — this section only fixes the *shape*, not the semantics.
+
+- **Flat `key: value` only.** One `---`-fenced block at the top of the file; each line splits on the first colon. No nesting, no lists, no multi-line values.
+- **Required for new notes**: `confidence: high | med | low` and `sightings: <int>`.
+- **Optional**: `keywords: a, b, c` — one line, comma-separated. A recall aid only; it never becomes a machine query index (recall stays deterministic grep over the note body, per the `wiki_query` contract below).
+- **Body stays free-form.** Headings, dated sections, prose (§ "A note holds conclusion + evidence" above) — the frontmatter fence is the only structured part of a note.
+- Existing notes without frontmatter are not retroactively required to gain one — the audit's frontmatter check is WARN, never FAIL (`references/wiki/audit.md` §1) — but new notes should carry it from creation.
+
+### INDEX.md — generated, not a query surface
+
+Each wiki root (this paper's local `.oms/wiki/` and the ascent-discovered global `.oms/wiki/`) carries a generated `INDEX.md`, written only by `scripts/oms_wiki_audit.py --write-index` — never hand-edited. It is deterministic (same tree → same bytes: categories sorted, files sorted by relpath) and its own first line marks it as generated. Regenerate it with `--write-index` after adding or editing notes; if the tree drifts from the last-written `INDEX.md`, the audit's `index` dimension reports **WARN** (stale) — same non-blocking philosophy as the frontmatter check.
+
+⚠️ **INDEX.md is for humans and for drift detection — not a query surface.** Recall still runs `wiki_query`'s deterministic grep over the notes themselves (below); `INDEX.md` is a browsable summary, never a stage-queried index.
 
 ---
 
