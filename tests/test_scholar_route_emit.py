@@ -72,7 +72,7 @@ def test_init_stage_is_bootstrap_zero():
 
 def test_learn_stage_in_routing_token_line():
     """③-b learn 메타 단계가 STAGE 토큰 줄에 명시돼야 (H9)."""
-    out = context_of(run_hook({"prompt": "이 관찰 규칙으로 굳혀줘"}))
+    out = context_of(run_hook({"prompt": "이 관찰 venue 규칙으로 굳혀줘"}))
     assert "learn" in out
     # learn 은 메타 단계 — 자동 발동 아님(사람 게이트)이 명시돼야
     assert "사람 게이트" in out
@@ -80,7 +80,7 @@ def test_learn_stage_in_routing_token_line():
 
 def test_learn_routing_keeps_citation_guard():
     """③-c learn 추가가 citation 안전 가드를 깨지 않아야 (H9·§6.F)."""
-    out = context_of(run_hook({"prompt": "promote observation"}))
+    out = context_of(run_hook({"prompt": "promote observation to venue default"}))
     # citation/.bib 는 learn 승격 대상이 아님이 라우팅에 박혀야
     assert "citation" in out
     assert "영구 금지" in out or "승격 대상 아님" in out
@@ -161,3 +161,36 @@ def test_context_states_knowledge_ssot_first_rule():
     assert "references/" in out
     assert "먼저" in out   # 소스/일반론보다 wiki 를 '먼저'
     assert "결함" in out   # wiki 두고 일반론 단정 = 결함 명시
+
+
+# --- R3 #22: relevance gate (is_paper_related) ---------------------------
+
+def test_non_paper_prompt_is_silent():
+    """⑩ 논문과 무관한 프롬프트는 침묵 — injection tax 0."""
+    assert run_hook({"prompt": "hello"}).strip() == ""
+
+
+def test_git_housekeeping_is_silent():
+    """⑩-b git 정리 같은 일상 작업 요청도 무관하면 침묵."""
+    assert run_hook({"prompt": "git 커밋 정리해줘"}).strip() == ""
+
+
+def test_word_boundary_no_false_positive():
+    """⑩-c 단어 경계 오탐 금지 — "oms"/"tex" 가 "atoms"/"context" 안에서
+    발동하면 안 된다."""
+    assert run_hook({"prompt": "look at the atoms in this context"}).strip() == ""
+
+
+def test_missing_prompt_key_injects():
+    """⑩-d prompt 키 자체가 없으면 fail-toward-inject — 전체 CHECKPOINT 주입."""
+    out = context_of(run_hook({}))
+    assert "STAGE(paper) →" in out
+    assert "누락 금지" in out
+
+
+def test_paper_prompt_still_injects_full_checkpoint():
+    """⑩-e 논문 관련 프롬프트는 여전히 전체 CHECKPOINT 를 그대로 주입한다
+    (byte-identity 는 이 파일의 기존 literal-lock 스위트 전체가 증명)."""
+    out = context_of(run_hook({"prompt": "이 논문 introduction 초안 써줘"}))
+    assert "STAGE(paper) →" in out
+    assert "누락 금지" in out

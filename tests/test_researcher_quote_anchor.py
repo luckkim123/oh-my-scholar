@@ -4,9 +4,11 @@ check (#3) mechanically."""
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 AGENT = (ROOT / "agents" / "scholar-researcher.md").read_text(encoding="utf-8")
-SKILL = (ROOT / "skills" / "scholar-research" / "SKILL.md").read_text(encoding="utf-8")
+SKILL = skill_md("scholar-research")
 
 
 def test_agent_output_format_has_quote_anchor():

@@ -35,8 +35,13 @@ Read-only: this hook never writes anything (no atomic-write helper import, no
 file writes) — it only reads `.oms/state/*.json` and `.oms/notepad.md`.
 Fail-open everywhere: missing cwd, unreadable/corrupt state or notepad
 (including notepad-is-a-directory or undecodable bytes) contribute nothing.
+
+R3 #22: env DISABLE_OMS (1/true/on/yes) is the umbrella kill switch shared by
+all 5 registered oms hooks, checked first, before stdin -- never advertised
+in the injected advisory.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -155,7 +160,16 @@ def compose_context(pilot_lines, priority_body):
     return "<oms-resume>\n" + "\n".join(parts) + "\n</oms-resume>"
 
 
+def _disable_oms() -> bool:
+    try:
+        return os.environ.get("DISABLE_OMS", "").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+        return False  # env-read exception -> proceed as if unset
+
+
 def main() -> int:
+    if _disable_oms():
+        return 0
     try:
         payload = json.load(sys.stdin)
         cwd_raw = payload.get("cwd")

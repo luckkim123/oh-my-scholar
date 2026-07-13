@@ -11,9 +11,10 @@ outline)을 source 폴더(`paper/…`)에 두는 사고가 있었다. 원인 둘
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 LAYOUT = ROOT / "references" / "output-layout.md"
-SKILLS_DIR = ROOT / "skills"
 
 # `.md` 스테이지 스킬과 각자가 SSOT 로 가리켜야 하는 작업장 하위 폴더
 MD_STAGE = {
@@ -43,7 +44,7 @@ def test_md_stage_skills_have_no_source_folder_misdirection():
 
     자기모순(이번 버그의 직접 원인)의 *부재* 검증."""
     for skill in MD_STAGE:
-        body = (SKILLS_DIR / skill / "SKILL.md").read_text(encoding="utf-8")
+        body = skill_md(skill)
         hits = [
             f"  {skill}/SKILL.md:{i}: {ln.strip()[:80]}"
             for i, ln in enumerate(body.splitlines(), 1)
@@ -57,6 +58,6 @@ def test_md_stage_skills_point_to_work_area():
 
     올바른 경로의 *존재* 검증 — ②(나쁜 패턴 부재)와 짝."""
     for skill, folder in MD_STAGE.items():
-        body = (SKILLS_DIR / skill / "SKILL.md").read_text(encoding="utf-8")
+        body = skill_md(skill)
         assert re.search(rf"\.oms/<slug>/{folder}", body), \
             f"{skill} 이 작업장 경로 `.oms/<slug>/{folder}` 를 가리키지 않음"

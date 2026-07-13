@@ -96,6 +96,8 @@ outputs/<slug>/
     *.md                              # ideate stage: concept notes (one per method/contribution) — the draft's SSOT
   outline/
     *.md                              # outline stage: section tree, story arc, figure plan
+  consensus/
+    {stage}-{role}.md                 # per-run consensus handoff artifacts (`<stage>-<role>.md`) — written only in `--consensus` mode
   versions/
     v{NN}_{YYYY-MM-DD}_{summary}.tex     # .tex/.bib version snapshots (before a large edit)
     v{NN}_{YYYY-MM-DD}_{summary}.bib
@@ -280,6 +282,7 @@ order = version number order = sort order, always.
 | `.oms/<slug>/gen-image/` | ✅ all | except figures the user asks to keep |
 | `.oms/<slug>/tmp/` | ✅ all | LaTeX compile intermediates (.aux/.log/…) |
 | `.oms/<slug>/versions/` | ✅ **all but the latest 1 + user-designated milestones** | keep the near-final snapshot, prune the middle |
+| `.oms/<slug>/consensus/` | ✅ all | per-run `--consensus` mode handoff artifacts — a workspace, T18 cleanup target |
 | `.oms/state/pilot-*.json` / `revise-*.json` | ✅ clean | at terminal, after GATE 3 (mechanism state, not paper content) |
 | `outputs/<slug>/<slug>.pdf` | ❌ never | user asset — excluded from tally and deletion, mentioned only |
 | `<project>/…tex/.bib` source | ❌ never | citation-bound source asset — outside cleanup scope entirely |
@@ -312,6 +315,7 @@ order = version number order = sort order, always.
 - [ ] `scholar-research` / `scholar-ideate` / `scholar-outline` write their `.md` notes into
       `.oms/<slug>/research|methodology|outline/` — **never** into the project source folder (`paper/…`)
 - [ ] `scholar-draft` / `scholar-pilot` / `scholar-drafter` snapshot source into `.oms/<slug>/versions/`
+- [ ] `scholar-outline` writes per-run consensus handoff artifacts into `.oms/<slug>/consensus/` (`--consensus` mode only); T18 cleans them at terminal
 - [ ] the `.tex`/`.bib` source stays in the project source folder (never moved into `.oms/`)
 - [ ] `outputs/<slug>/<slug>.pdf` is the only compiled copy the user sees
 - [ ] page renders go under `.oms/<slug>/renders/`, compile temp under `.oms/<slug>/tmp/`

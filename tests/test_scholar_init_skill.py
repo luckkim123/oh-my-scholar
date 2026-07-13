@@ -7,15 +7,17 @@ SKILL 본문에 박혀 있는지(드리프트 방지)와, oms 고유 불변(절�
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 SKILL = Path(__file__).parent.parent / "skills" / "scholar-init" / "SKILL.md"
 
 
 def read() -> str:
-    return SKILL.read_text(encoding="utf-8")
+    return skill_md("scholar-init")
 
 
 def test_skill_file_exists():
-    """① scholar-init/SKILL.md 가 실재한다."""
+    """① scholar-init/SKILL.md 가 실재한다 (shim — full body lives at skill-bodies/)."""
     assert SKILL.is_file(), f"missing {SKILL}"
 
 
@@ -99,6 +101,13 @@ def test_min_questions_progressive_disclosure():
     body = read()
     assert "≤3" in body or "3개" in body
     assert "progressive disclosure" in body
+
+
+def test_venue_config_written_atomically():
+    """⑫ venue-config 는 atomic_write_text 로 쓰인다 — "yaml 은 plain write" 예외 폐기 (R3 #16)."""
+    body = read()
+    assert "atomic_write_text" in body
+    assert "for yaml use a plain write" not in body
 
 
 def test_pilot_absorb_and_history_category():

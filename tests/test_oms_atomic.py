@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from hooks.oms_atomic import atomic_write_json
+from hooks.oms_atomic import atomic_write_json, atomic_write_text
 
 
 def test_atomic_write_replaces_intact(tmp_path):
@@ -68,3 +68,43 @@ def test_atomic_write_stdlib_only():
     src = (Path(__file__).parent.parent / "hooks" / "oms_atomic.py").read_text()
     assert "import requests" not in src and "import yaml" not in src
     assert "os.replace" in src  # atomic rename 의 핵심 — 회귀 방지
+
+
+def test_atomic_write_text_roundtrip(tmp_path):
+    """atomic_write_text: 텍스트(한글 포함)가 그대로 다시 읽힌다."""
+    target = tmp_path / "venue-config.yaml"
+    atomic_write_text(target, "venue: IROS\ntopic: 수중 로봇 측위\n")
+    assert target.is_file()
+    raw = target.read_text(encoding="utf-8")
+    assert raw == "venue: IROS\ntopic: 수중 로봇 측위\n"
+    assert "수중 로봇 측위" in raw
+
+
+def test_atomic_write_text_creates_parents(tmp_path):
+    """.oms/venues/ 처럼 없는 상위 디렉토리도 만들어 쓴다."""
+    target = tmp_path / ".oms" / "venues" / "iros.yaml"
+    atomic_write_text(target, "venue: IROS\n")
+    assert target.is_file()
+    assert target.read_text(encoding="utf-8") == "venue: IROS\n"
+
+
+def test_atomic_write_text_no_temp_left_behind(tmp_path):
+    """성공 후 .oms-tmp-* 임시파일 잔재가 없다."""
+    target = tmp_path / "venue-config.yaml"
+    atomic_write_text(target, "venue: IROS\n")
+    leftovers = [p.name for p in tmp_path.iterdir() if p.name != "venue-config.yaml"]
+    assert leftovers == [], f"임시파일 잔재: {leftovers}"
+
+
+def test_text_and_json_share_atomic_core():
+    """리팩터 고정: os.replace 호출은 공유 코어에 딱 한 번만 존재하고,
+    atomic_write_json·atomic_write_text 둘 다 그 코어를 거친다 (API 뿐 아니라 구현 공유를 핀).
+    (os.replace(\\w — 실제 호출 형태만 세고, docstring 산문 속 `os.replace()` 언급은 제외)"""
+    import re
+
+    src = (Path(__file__).parent.parent / "hooks" / "oms_atomic.py").read_text()
+    assert len(re.findall(r"os\.replace\(\w", src)) == 1, "os.replace 호출이 공유 코어 밖에도 중복 존재"
+    json_body = src.split("def atomic_write_json")[1].split("def atomic_write_text")[0]
+    text_body = src.split("def atomic_write_text")[1]
+    assert "_atomic_write(" in json_body, "atomic_write_json 이 공유 헬퍼를 거치지 않음"
+    assert "_atomic_write(" in text_body, "atomic_write_text 가 공유 헬퍼를 거치지 않음"

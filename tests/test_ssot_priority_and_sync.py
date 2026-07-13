@@ -20,12 +20,14 @@ SSOT 먼저 읽기 강제(결함 A); scholar-draft·scholar-revise <Output> 에 
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 LEARNING_PROTOCOL = ROOT / "references" / "learning-protocol.md"
 OUTPUT_LAYOUT = ROOT / "references" / "output-layout.md"
-INSPECT_SKILL = ROOT / "skills" / "scholar-inspect" / "SKILL.md"
-DRAFT_SKILL = ROOT / "skills" / "scholar-draft" / "SKILL.md"
-REVISE_SKILL = ROOT / "skills" / "scholar-revise" / "SKILL.md"
+INSPECT_SKILL = "scholar-inspect"
+DRAFT_SKILL = "scholar-draft"
+REVISE_SKILL = "scholar-revise"
 
 
 # ----- 결함 A: SSOT 읽기 순서 -----
@@ -53,7 +55,7 @@ def test_learning_protocol_defines_ssot_reading_order():
 
 def test_inspect_skill_enforces_ssot_first():
     """scholar-inspect Steps §1 = SSOT(outline·methodology) 먼저 읽기 강제 + §8 참조."""
-    body = INSPECT_SKILL.read_text(encoding="utf-8")
+    body = skill_md(INSPECT_SKILL)
     steps = re.search(r"<Steps>.*?</Steps>", body, re.DOTALL)
     assert steps, "scholar-inspect 에 <Steps> 없음"
     text = steps.group(0)
@@ -69,10 +71,10 @@ def test_inspect_skill_enforces_ssot_first():
 
 # ----- 결함 B: .tex↔.oms 동기화 완료조건 -----
 
-def _output_block(skill_path):
-    body = skill_path.read_text(encoding="utf-8")
+def _output_block(skill_name):
+    body = skill_md(skill_name)
     m = re.search(r"<Output>.*?</Output>", body, re.DOTALL)
-    assert m, f"{skill_path.name} 에 <Output> 섹션 없음"
+    assert m, f"{skill_name} 에 <Output> 섹션 없음"
     return m.group(0)
 
 

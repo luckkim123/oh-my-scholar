@@ -10,7 +10,7 @@
 | **Code analogy** | code review | CI | mock reviewer |
 | **Stance** | on the author's side (fix this) | machine (pass/fail) | on the reviewer's side (my score is this) |
 | **Output** | list of improvements + severity | PASS / FAIL + evidence | venue-scale score + venue-native verdict (conference accept/reject/letter / journal minor/major revision) |
-| **agent** | scholar-inspector (opus, read-only) | scholar-verifier (opus, read-only) | scholar-reviewer (opus, read-only, 3 lenses + AC) |
+| **agent** | scholar-inspector (opus, read-only) | scholar-verifier (sonnet, read-only) | scholar-reviewer (opus, read-only, 3 lenses + AC) |
 | **Automation** | aids human judgment | can be auto-checked | mock — not a substitute for actual review |
 
 ## verify axis (summative — mechanical pass/fail)

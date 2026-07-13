@@ -5,8 +5,13 @@ This is the citation-SAFE variant of OMC's post-tool-verifier. OMC injects
 "fix before continuing" on write — for citation-bound paper work that would
 push the model to *auto-fix* (i.e. invent) citations. So this hook only
 REMINDS to verify; it never instructs an auto-fix, and explicitly forbids
-fabricating citations / editing .bib without human confirmation."""
+fabricating citations / editing .bib without human confirmation.
+
+R3 #22: env DISABLE_OMS (1/true/on/yes) is the umbrella kill switch shared by
+all 5 registered oms hooks, checked first, before stdin -- never advertised
+in the injected reminder."""
 import json
+import os
 import sys
 
 PAPER_EXTS = (".tex", ".bib")
@@ -28,7 +33,16 @@ def build_reminder(file_path: str) -> str:
     )
 
 
+def _disable_oms() -> bool:
+    try:
+        return os.environ.get("DISABLE_OMS", "").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+        return False  # env-read exception -> proceed as if unset
+
+
 def main() -> int:
+    if _disable_oms():
+        return 0
     try:
         payload = json.load(sys.stdin)
     except Exception:

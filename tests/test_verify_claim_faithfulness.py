@@ -5,9 +5,11 @@ without an anchor."""
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 AGENT = (ROOT / "agents" / "scholar-verifier.md").read_text(encoding="utf-8")
-SKILL = (ROOT / "skills" / "scholar-verify" / "SKILL.md").read_text(encoding="utf-8")
+SKILL = skill_md("scholar-verify")
 
 
 def test_agent_has_citation_misuse_check():

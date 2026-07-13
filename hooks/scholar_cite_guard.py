@@ -11,6 +11,9 @@ hook only reminds, after the fact). This hook denies, BEFORE the write:
 It never auto-fixes and never invents — deny-with-feedback only.
 Escape hatch for humans: env OMS_CITE_GUARD=off (deliberately not mentioned
 in the deny reason, so the model cannot talk itself past the interlock).
+R3 #22: env DISABLE_OMS (1/true/on/yes) is the umbrella kill switch shared by
+all 5 registered oms hooks, checked first, before OMS_CITE_GUARD and before
+stdin -- same silent-hatch convention (never mentioned in the deny reason).
 """
 import json
 import os
@@ -133,7 +136,16 @@ def check_tex(path: Path, new_text: str, old_text, cwd: str) -> int:
     )
 
 
+def _disable_oms() -> bool:
+    try:
+        return os.environ.get("DISABLE_OMS", "").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+        return False  # env-read exception -> proceed as if unset
+
+
 def main() -> int:
+    if _disable_oms():
+        return 0
     try:
         if os.environ.get("OMS_CITE_GUARD", "").lower() in ("off", "0", "false"):
             return 0

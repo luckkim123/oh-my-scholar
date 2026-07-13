@@ -5,9 +5,11 @@ contract — no code changes."""
 import re
 from pathlib import Path
 
+from conftest import skill_md
+
 ROOT = Path(__file__).parent.parent
 AGENT = (ROOT / "agents" / "scholar-verifier.md").read_text(encoding="utf-8")
-SKILL = (ROOT / "skills" / "scholar-revise" / "SKILL.md").read_text(encoding="utf-8")
+SKILL = skill_md("scholar-revise")
 
 VOID_RE = re.compile(
     r"(void|discard|stale).{0,120}(round[- _]?id)|round[- _]?id.{0,120}(void|discard|stale)",

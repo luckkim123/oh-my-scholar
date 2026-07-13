@@ -4,6 +4,72 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-07-13
+
+### Added
+- **Version SSOT + 4-surface sync checker** (`.claude-plugin/plugin.json` `"version"` field, `scripts/sync_version.py`)
+  — pure drift-checker comparing `plugin.json`/CHANGELOG-top/latest git tag/the foreign omha card
+  (`<OMHA_ROOT>/cards/oms.json`, skip-if-absent); tags parsed by exact `^v(\d+)\.(\d+)\.(\d+)$` match, a
+  pre-tag window (latest tag may equal the *previous* released version, since tags are cut by the human
+  after merge) is legal, and a non-object/malformed card degrades to `card: None` instead of crashing
+  (fail-open on this externally-controlled surface). Read-only CLI (`tests/test_version_sync.py`'s
+  `test_cli_read_only` pins this).
+- **`atomic_write_text` wired to venue config** (`hooks/oms_atomic.py`, `skills/scholar-init/SKILL.md`) —
+  the atomic writer (mkstemp + fsync + `os.replace`, shared core with `atomic_write_json`) is now used for
+  `.oms/venues/<key>.yaml` writes, replacing the stale "if json; for yaml use a plain write" scaffolding
+  sentence that had never been implemented against.
+- **`consensus/` documented in the output-layout SSOT** (`references/output-layout.md`) — `.oms/<slug>/consensus/{stage}-{role}.md`
+  per-run `--consensus`-mode handoff artifacts are now a named schema surface (workspace, cleaned at terminal),
+  closing a drift between what `scholar-outline` actually writes and what the layout doc specified.
+- **`oms doctor` — read-only packaging self-diagnosis** (`scripts/oms_doctor.py`) — categorized PASS/WARN/FAIL
+  report over `[version]` (reuses `sync_version`), `[hooks]`, `[agents]`, `[skills]`, and optional `[state]`
+  (with `--paper-root`); never writes anything. Card-absent and card-mismatched both map to WARN (foreign
+  surface, separate release process), every other version-drift surface maps to FAIL. Exit 1 iff any FAIL row.
+- **Agent cross-reference integrity tests** (`tests/test_agent_integrity.py`) — closes the silent-typo class
+  across agents/skills/rubrics cross-references (model field validity, permission declarations, doc↔code
+  tier agreement).
+- **`scholar-verifier` re-tiered opus → sonnet** (`agents/scholar-verifier.md`, `README.md`,
+  `references/rubrics/paper-eval.md`) — model field and both doc mentions reconciled together (closing the
+  drift `test_agent_integrity.py` now guards).
+- **Skill shim + `skill-bodies/` split** (`skills/<name>/SKILL.md` compact shims + `skill-bodies/<name>/SKILL.md`
+  full bodies for all 12 skills, `tests/conftest.py` skill-body-path helper) — the always-loaded skill corpus
+  (~92 KiB combined) is compacted under OMC's 64 KiB budget by moving full bodies to `skill-bodies/` and
+  leaving byte-identical-frontmatter shims (+ one additive `oms-full-body:` key) in `skills/`; every
+  pre-existing regression lock that reads skill text is repointed through the new conftest helper.
+  `tests/test_skill_shim.py::test_corpus_under_omc_budget` asserts the live `skills/*/SKILL.md` corpus
+  ≤ 48 KiB headroom (not just under the 64 KiB cliff itself).
+- **`DISABLE_OMS` kill switch + route-hook relevance gate** (`hooks/scholar_route_emit.py`,
+  `hooks/scholar_cite_guard.py`, `hooks/scholar_verify_emit.py`, `hooks/scholar_stop_guard.py`,
+  `hooks/scholar_resume_emit.py`) — a universal early-exit env switch (`1/true/on/yes`, case/whitespace-insensitive,
+  mirrors `DISABLE_OMC`) added to all 5 registered hooks, umbrella over the existing per-hook hatches
+  (`OMS_CITE_GUARD`, `OMS_STOP_GUARD`); plus a keyword relevance gate (`is_paper_related`) in
+  `scholar_route_emit.py` that skips the ~4.4 KB STAGE injection on clearly non-paper prompts
+  (fail-toward-inject: any parse error or ambiguity still injects). Neither hatch is ever advertised in
+  injected/deny/block text.
+
+### Notes
+- **omha card surface**: skip-if-absent by design (foreign repo, optional surface); present-but-mismatched
+  routes to WARN in `oms doctor`, never FAIL. The card's own version bump (`oh-my-heroacademia/cards/oms.json`)
+  rides a **separate `oh-my-heroacademia` PR**, never bundled into this repo's diff.
+- Tag `v0.8.0` is cut by the human **after** this PR merges — `sync_version.py`'s pre-tag window (latest tag
+  may equal the previous released version) covers the interim where `plugin.json`/CHANGELOG already say 0.8.0
+  but the tag still reads `v0.7.0`.
+- #16 deliberately chose `atomic_write_text` over a YAML→JSON migration — `references/venues.md`'s
+  `.oms/venues/<key>.yaml` schema surface is untouched; only the writer underneath it changed.
+- **Still-deferred R2 carry-overs** (excluded from R3 work, not silently forgotten): the two hooks' nearest-root
+  ascent asymmetry (unify or intent-comment); `oms_state.py`'s slug error-string duplication (6 sites) plus its
+  4 deferred tests (create-without-stage, garbage `started_at`, resume/clear negative gate, multi-marker cap
+  serialization doc) — both from PR #7's Notes; commenting the empty-Priority-Context drop path, also from
+  PR #7's Notes; and the compact-time SessionStart "6 fires" investigation, sourced from the R2 session record
+  rather than the PR body.
+
+### Verification
+- `python3 -m pytest tests/ -q` — **287 passed** (up from 213 at the R2 merge-base; R3 added 74 tests across
+  `test_version_sync.py`, `test_consensus_layout.py`, `test_oms_atomic.py` (extended), `test_oms_doctor.py`,
+  `test_agent_integrity.py`, `test_skill_shim.py`, `test_kill_switch.py`, and `test_scholar_route_emit.py`
+  (extended), plus repointing every pre-existing skill-body regression lock through the new `tests/conftest.py`
+  helper).
+
 ## [0.7.0] — 2026-07-13
 
 ### Added
