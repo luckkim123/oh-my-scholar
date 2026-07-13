@@ -117,6 +117,8 @@ outputs/<slug>/
 
 .oms/wiki/                            # project-wide accrual — NOT per-job (sibling of <slug>/, carries across sessions)
   convention/  decision/  reference/  # auto-appended reject patterns / decisions (see references/wiki/README.md)
+
+.oms/notepad.md                       # cross-slug workbench notepad (NOT per-job, like state/) — see §2.3
 ```
 
 ### 2.1 Invariance rules
@@ -188,6 +190,27 @@ the same Stop guard (a live marker means the loop is still running) and the revi
 
 **Cleanup fate**: both files are per-slug mechanism state, not paper content — at pilot terminal
 (GATE 3 confirm) they are removable together with the slug's work area (see §5 table).
+
+### 2.3 notepad tiers (`.oms/notepad.md`)
+
+`.oms/notepad.md` is a **cross-slug workbench notepad** (sibling of `.oms/state/`, not per-job —
+see §2). It is a single `.md` file with three fixed sections (`## <name>`), each with its own
+write/prune contract:
+
+| Tier | Write mode | Prune | Owner |
+|:---|:---|:---|:---|
+| `## Priority Context` | **replace-on-write** — pilot entry and every GATE transition rewrite the whole section | n/a (rewritten, not accumulated) | scholar-pilot |
+| `## Working Notes` | dated append — new entries under `### YYYY-MM-DD` sub-headings | entries older than **7 days** pruned automatically at pilot entry (the only automated deletion, and it is scoped to this tier only) | scholar-pilot |
+| `## Manual` | human-owned | **never** — automation never writes or prunes this section | human |
+
+- `## Priority Context` must stay short — bounded to **2,000 chars** — because it is what
+  `SessionStart(compact)` re-injects verbatim after context compaction (see
+  `hooks/scholar_resume_emit.py`). Replace-on-write (not append) keeps it current instead of
+  growing unbounded.
+- `## Working Notes` is where session-scoped observations accumulate across a pipeline run; the
+  7-day prune keeps it from becoming a permanent log while still surviving a single long pipeline.
+- `## Manual` is the human's own space in the same file — automation must not touch it, ever
+  (no write, no prune), regardless of age.
 
 ---
 

@@ -1,5 +1,8 @@
 """R2 #6/#11/#12 — the state schema and notepad tiers are documented in the
-layout SSOT and wired into scholar-pilot (literal locks, repo idiom)."""
+layout SSOT and wired into scholar-pilot (literal locks, repo idiom).
+
+R2 #11+#12 (Task 6): abort/interrupt spec on the pilot SKILL + the notepad
+3-tier convention on the layout SSOT."""
 import re
 from pathlib import Path
 
@@ -27,3 +30,31 @@ def test_pilot_from_reads_state():
     idx = PILOT.index("--from")
     assert re.search(r"oms_state\.py read|pilot-<slug>\.json", PILOT[idx:idx + 600]), \
         "--from must read the recorded state, not just advertise"
+
+
+def test_pilot_has_interruption_and_resume_section():
+    assert "Interruption_And_Resume" in PILOT
+    idx = PILOT.index("Interruption_And_Resume")
+    section = PILOT[idx:idx + 2500]
+    assert re.search(r"resume", section, re.I) and re.search(r"discard", section, re.I), \
+        "must offer a resume/discard choice, not just describe state"
+    assert re.search(r"\babort\b", section) and re.search(r"terminal", section, re.I), \
+        "abort must be documented as terminal"
+    assert re.search(r"\bstale\b", section, re.I)
+    assert "14 days" in section
+
+
+def test_layout_documents_notepad_tiers():
+    assert ".oms/notepad.md" in LAYOUT
+    idx = LAYOUT.index("notepad tiers")
+    section = LAYOUT[idx:idx + 2000]
+    for tier in ("Priority Context", "Working Notes", "Manual"):
+        assert tier in section, f"missing tier: {tier}"
+    assert "replace-on-write" in section
+    assert re.search(r"7[\s-]?day", section, re.I)
+    assert re.search(r"\bnever\b", section, re.I), "Manual must be documented as never auto-written/pruned"
+
+
+def test_pilot_execution_policy_points_to_layout_tiers():
+    idx = PILOT.index("Priority Context")
+    assert re.search(r"references/output-layout\.md §2\.3", PILOT[idx:idx + 600])
