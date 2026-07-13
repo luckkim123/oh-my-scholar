@@ -4,6 +4,70 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+### Added
+- **`citation_lookup()` MCP swap-point contract** (#35, `references/wiki/README.md`,
+  `skill-bodies/scholar-research/SKILL.md`, `tests/test_wiki_spec_docs.py`,
+  `tests/test_researcher_quote_anchor.py`) — abstract-function contract documented adjacent to
+  `wiki_query()` (E1): signature `citation_lookup(doi_or_title) → verdict + normalized metadata`,
+  the deterministic-lookup rule (P5-C), today's implementation target described precisely
+  (`scripts/verify_bib_entry.py`: DOI path = Crossref then OpenAlex only on `HTTPError`, a
+  `URLError` short-circuits to `NETWORK_ERROR`; title-only path = Crossref bibliographic search
+  only; WebSearch/WebFetch is a separate agent-level manual fallback, never code-chained off exit
+  codes), the Semantic Scholar/arXiv/Zotero MCP swap-points (opt-in citation sources, same human
+  gate), and the empirical tool-description validation rule (probe an MCP server before trusting
+  it). One pointer line in scholar-research's Execution_Policy naming the contract location.
+- **GROBID intake reference card** (#36, `references/grobid-intake.md`,
+  `skill-bodies/scholar-read/SKILL.md`, `skill-bodies/scholar-research/SKILL.md`,
+  `tests/test_grobid_card.py`) — optional, self-hosted PDF-intake accelerator (E2, same genre as
+  `references/wiki/audit.md`): flow (PDF → TEI → proposed BibTeX → human-confirm-every-entry →
+  `verify_bib_entry.py` → only then `.bib`), hedged accuracy/failure-mode reporting (F1 ≈ 0.87–0.90,
+  cited as externally reported, never asserted as settled fact), degrade path (absence = today's
+  manual path, unchanged), and the proposes-never-commits boundary (cite-guard unaffected, not a
+  citation authority). One pointer line each in `scholar-read` Step 1 and scholar-research's
+  Execution_Policy.
+- **Deep-research mechanics in `scholar-research` + `scripts/bib_coupling.py`** (#37,
+  `skill-bodies/scholar-research/SKILL.md`, `scripts/bib_coupling.py`,
+  `tests/test_bib_coupling.py`, `tests/test_researcher_quote_anchor.py`) — Step 2 reworked into
+  the 4-field delegation template (objective / output format / tool guidance / boundaries, Anthropic
+  pattern); fan-out sizing rule + hard cap (up to 3 concurrent read batches **inside** the single
+  `mode=gap-research` pass, anchored to mock-review's 3-lens precedent — never separate
+  citation-generating dispatches, E4); interleaved gap-check after each source batch; marginal-returns
+  stopping heuristic (Undermind lesson — stop after 2 consecutive batches add no new method family and
+  no new gap); optional `bib_coupling.py` clustering seed. `scripts/bib_coupling.py` (new, stdlib-only,
+  zero-network, zero-embeddings, E3): bibliographic coupling over per-paper `.bib` reference lists —
+  entry-key regex re-derived read-only from `hooks/scholar_cite_guard.py:25`, title normalization
+  reuses `verify_bib_entry.py`'s `_norm()` idiom, DOI/title field extraction is new parsing work,
+  connected components over pairwise shared-reference counts (`--min-shared`, default 2), `--json`
+  output, exit 0/2. Step numbering (1–5) and Execution_Policy's "parallel citation generation is
+  prohibited" sentence stay byte-unchanged (D10/E5); a new phrase-lock test pins that sentence since
+  U1/U2/U3 all edit the same region.
+
+### Notes
+- **Version bump deferred** — `plugin.json` stays `0.10.0` in this PR; `v0.10.0` is still untagged
+  (R6 is stacked on the unmerged `feat/r5-research-companion`). Two pre-existing live-repo locks
+  (`tests/test_version_sync.py::test_live_repo_surfaces_agree`,
+  `tests/test_oms_doctor.py::test_live_repo_is_healthy`) correctly hard-fail on a 2-deep untagged
+  release stack, so the bump waits rather than weakening those locks. **Post-merge procedure** (human,
+  documented in the PR body): after R5 squash-merges, `v0.10.0` is tagged, and R6 merges back onto
+  main (`git merge -X ours origin/main`) — one mechanical commit bumps `plugin.json` → `0.11.0` and
+  retitles this `## [Unreleased]` section to `## [0.11.0] — <date>` (with a fresh empty `[Unreleased]`
+  above it), then R6 merges and `v0.11.0` is tagged.
+- **Stacked-PR merge order**: this branch's base is `feat/r5-research-companion`; R5 merges first.
+- **omha card follow-up**: after this PR (eventually) merges, `oh-my-heroacademia`'s routing card
+  (`cards/oms.json`) needs a separate PR bumping to `0.11.0` — out of this repo's scope; `sync_version.py`
+  correctly shows `card:` DRIFT (routed to WARN by `oms_doctor.py`) until that PR lands.
+- **P5 (#35–#37) closes the 2026-07-11 roadmap** (`docs/2026-07-11-oms-advancement-plan.md`). §6
+  deferrals (Elo tournament, multi-model discuss, blunt Stop-loop, embeddings, fine-tuned reviewer
+  artifacts) remain out of scope, unchanged from R5's Notes.
+
+### Verification
+- `python3 -m pytest tests/ -q` — **553 passed** (up from 518 at the R5 merge-base; R6 added 35 tests
+  across `tests/test_bib_coupling.py` (new) and extensions to `tests/test_wiki_spec_docs.py`,
+  `tests/test_researcher_quote_anchor.py`, `tests/test_grobid_card.py` (new)).
+- `python3 scripts/sync_version.py` — exit 1, identical state to the R5 branch: `plugin`/`changelog`/`tag`
+  rows PASS (pre-tag window), `card:` DRIFT only (foreign `cards/oms.json` still reads 0.8.0).
+  `oms_doctor.py` routes `card:` to WARN, so the doctor run stays exit 0 — same pattern as R4/R5.
+
 ## [0.10.0] — 2026-07-14
 
 ### Added
