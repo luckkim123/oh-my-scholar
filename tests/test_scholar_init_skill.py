@@ -101,6 +101,13 @@ def test_min_questions_progressive_disclosure():
     assert "progressive disclosure" in body
 
 
+def test_venue_config_written_atomically():
+    """⑫ venue-config 는 atomic_write_text 로 쓰인다 — "yaml 은 plain write" 예외 폐기 (R3 #16)."""
+    body = read()
+    assert "atomic_write_text" in body
+    assert "for yaml use a plain write" not in body
+
+
 def test_pilot_absorb_and_history_category():
     """⑪ 확정 미해결값 반영 — pilot 흡수(권유) + history 카테고리 + Q7 부모 안내."""
     body = read()

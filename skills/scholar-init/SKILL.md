@@ -68,7 +68,7 @@ A bootstrap you run exactly once when first starting a paper. Through a short di
    - Paper source folder: `sections/` (NN_*.tex empty skeletons) · `figures/` · `refs/paper.bib` (empty) · `data/` · `preamble.tex` (a line that `\input`s the upper global macros — if the parent `.oms/` has macros) · `<slug>.tex` (minimal skeleton) · `meta.md` (venue·topic·contribution·material location = interview answers)
    - `.oms/<slug>/`: the output-layout workspace (versions/renders/gen-image/tmp left empty or omitted)
    - `.oms/wiki/`: per-paper wiki, empty 4-category (convention/pattern/decision/reference). ⚠️ `history/` is a **global-only** category (exists only in the parent `.oms/`) — do not create it locally. Step 3's `wiki_query('history')` reads only global via ascent, and is graceful even if absent locally (empty list, not an error).
-   - venue-config: `.oms/venues/<key>.yaml` (via oms_atomic's atomic write — if json; for yaml use a plain write)
+   - venue-config: `.oms/venues/<key>.yaml` written via `oms_atomic.atomic_write_text` (the YAML text is composed first, then written atomically — no plain-write carve-out)
    - `.gitignore`: exclude `.oms/`·`outputs/*`
    > ⚠️ Body·citations are not generated. The .tex is merely a compilable minimal skeleton (documentclass + empty section includes).
 
