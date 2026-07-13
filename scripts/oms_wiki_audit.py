@@ -40,12 +40,17 @@ _PROSE_SECTION_RE = re.compile(r'([A-Za-z0-9_\-./]+\.md)\s+§([A-Za-z0-9]+)')
 # ------------------------------------------------------------------- scan
 def _parse_frontmatter(text):
     """Thin, stdlib-only splitter (no PyYAML): lines between leading `---`
-    fences, `key: value` split on first colon. Absent/malformed -> ({}, False)."""
+    fences, `key: value` split on first colon. Returns `(fm, status)` where
+    status is `"ok"`, `"absent"` (no opening `---` fence at all), or
+    `"malformed"` (opening fence present but no closing `---` fence found —
+    the one malformation this splitter can actually distinguish; a
+    colon-less key line inside a well-fenced block is silently skipped, not
+    a new status, per T8 scope)."""
     if not text.startswith("---"):
-        return {}, False
+        return {}, "absent"
     end = text.find("\n---", 3)
     if end == -1:
-        return {}, False
+        return {}, "malformed"
     fm = {}
     for line in text[3:end].splitlines():
         line = line.strip()
@@ -53,7 +58,7 @@ def _parse_frontmatter(text):
             continue
         key, _, value = line.partition(":")
         fm[key.strip()] = value.strip()
-    return fm, True
+    return fm, "ok"
 
 
 def _extract_h1(text):
@@ -112,13 +117,13 @@ def scan(root) -> dict:
             fpath = Path(dirpath) / fname
             relpath = fpath.relative_to(root).as_posix()
             text = fpath.read_text(encoding="utf-8")
-            frontmatter, frontmatter_ok = _parse_frontmatter(text)
+            frontmatter, frontmatter_status = _parse_frontmatter(text)
             files.append({
                 "relpath": relpath,
                 "name": fname,
                 "text": text,
                 "frontmatter": frontmatter,
-                "frontmatter_ok": frontmatter_ok,
+                "frontmatter_status": frontmatter_status,
                 "h1": _extract_h1(text),
                 "tokens": _extract_tokens(text),
                 "refs": _extract_refs(text),
@@ -268,15 +273,25 @@ def check_empty_and_orphan(inv, root) -> list:
 
 # --------------------------------------------------------- check_frontmatter
 def check_frontmatter(inv) -> list:
-    """Content file with no frontmatter -> WARN; `confidence` outside
+    """Content file with no opening `---` fence -> WARN "no frontmatter";
+    opening fence with no closing fence -> WARN "malformed frontmatter"
+    (T8 #2 split — the two are distinguishable, unlike a colon-less key line
+    inside a well-fenced block, which is out of scope). `confidence` outside
     {high,med,low} or `sightings` non-integer -> WARN. Never FAIL (#24
     non-blocking philosophy). README.md/INDEX.md exempt."""
     rows = []
     for f in inv["files"]:
         if f["name"] in META_FILENAMES:
             continue
-        if not f["frontmatter_ok"]:
+        status = f["frontmatter_status"]
+        if status == "absent":
             rows.append({"status": "WARN", "message": f'{f["relpath"]}: no frontmatter'})
+            continue
+        if status == "malformed":
+            rows.append({
+                "status": "WARN",
+                "message": f'{f["relpath"]}: malformed frontmatter (opening --- fence with no closing --- fence)',
+            })
             continue
         fm = f["frontmatter"]
         if "confidence" in fm and fm["confidence"] not in CONFIDENCE_VALUES:
