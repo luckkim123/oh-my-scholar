@@ -43,7 +43,7 @@ Turn "let's argue this out" into a structured pressure-test of an idea — a dev
 
 3. **Moderator move (Co-STORM)**: maintain an in-session gap list — evidence rows that are present in `.oms/<slug>/research/*.md` or `.oms/reading/*.md` but absent from both the discussion transcript so far and the outline. When a round closes, or the discussion stalls, inject the single highest-information-gain unasked question drawn from that gap list before starting the next round. This list is transient (in-conversation only) — it is not written to disk as a separate artifact.
 
-4. **Exit**: summarize what was explored (stances taken, positions that moved, positions that held) and:
+4. **Exit**: summarize what was explored (stances taken, positions that moved, positions that held) and (both appends below are skipped when there is no active paper slug to attach them to — a bare-idea discussion ends with the in-session summary only):
    - append a dated entry to `.oms/wiki/decision/<slug>.md` (create-if-absent) — light channel, `confidence`/`sightings` frontmatter per Execution_Policy above
    - append one dated entry to `.oms/<slug>/research-log.md` (`## YYYY-MM-DD — discuss`, create-if-absent, append-only, `references/output-layout.md` §2.4) covering what was tried/decided/dropped in this discussion and why
    - if a structural change to the outline was surfaced, present it as a proposed numbered delta list at a human gate — never auto-applied (D9)
