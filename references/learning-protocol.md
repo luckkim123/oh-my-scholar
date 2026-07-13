@@ -346,6 +346,8 @@ the light-channel echo of omp's `evidence_count`, and it is what feeds the heavy
 hit `evidence_count ≥ 3` and is worth a `scholar-learn` look. confidence is qualitative (3
 levels + sighting count) — **no numeric weighted sum, no threshold magic** (omp §exclude).
 
+> **Syntax SSOT**: the frontmatter's exact shape (flat `key: value`, required `confidence`+`sightings` for new notes, optional one-line `keywords`) is specified in `references/wiki/README.md` § Frontmatter standard — this section covers only what `confidence` means and how it climbs.
+
 **Wiki notes are append-only.** A revisited topic deepens (old note + new dated `## <ISO> —
 <one-line>` section coexist); whole-file overwrite is reserved for paired SSOT docs, never a
 wiki note. The light channel accrues, never replaces — same discipline as `learned.md` (§2).
