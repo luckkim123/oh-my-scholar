@@ -5,7 +5,7 @@
 
 ## §1. What it is, and when it applies
 
-[GROBID](https://github.com/kermitt2/grobid) is a self-hosted, optional machine-learning service that extracts structured metadata (title, authors, references, sections) from PDF documents and emits TEI-XML. It is one of the MCP swap-point candidates named in `references/wiki/README.md`'s `citation_lookup()` contract table — here it plays a different role: not a citation *lookup*, but a citation *proposal* source for PDFs already on disk.
+[GROBID](https://github.com/kermitt2/grobid) is a self-hosted, optional machine-learning service that extracts structured metadata (title, authors, references, sections) from PDF documents and emits TEI-XML. Unlike the MCP swap-points named in `references/wiki/README.md`'s `citation_lookup()` contract table, GROBID is not an MCP; it is a separate self-hosted service that plays an adjacent role: not a citation *lookup*, but a citation *proposal* source for PDFs already on disk.
 
 Two intake shapes it can accelerate:
 - **`scholar-read` single-paper intake** — Step 1's PDF resolution (today manual/Read-based).
