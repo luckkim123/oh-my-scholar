@@ -70,6 +70,7 @@ is less reusable than "X juxtaposes two independent contributions across stages 
 - ⚠️ **"Source pointer" = an internal paper-slug/section pointer, not a `.bib` citation** (§6.F · keeping the citation boundary
   invariant below). "Revisit such-and-such part of `<slug>` for this conclusion" is just *internal navigation*; it does not
   write a paper citation into the wiki.
+- ⚠️ **Append-time consequence (#24)**: `scholar-pilot/SKILL.md` Step 10 mechanically forces `confidence: low` (marked `evidence: none`) on an appended entry that carries neither pointer nor quote, and evidence-less re-observation never raises it — the entry is **still appended**, so this stays consistent with "not a reject gate" above. Procedure detail lives at that Step 10 bullet (not restated here); it remains a prompt-contract rule, no automated compliance check.
 
 Example (conclusion + evidence together):
 
