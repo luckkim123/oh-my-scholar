@@ -71,7 +71,11 @@ def gather(repo_root) -> dict:
     omha_root = Path(os.environ.get("OMHA_ROOT", "~/oh-my-heroacademia")).expanduser()
     card = None
     try:
-        card = json.loads((omha_root / "cards" / "oms.json").read_text(encoding="utf-8")).get("version")
+        data = json.loads((omha_root / "cards" / "oms.json").read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            version = data.get("version")
+            if isinstance(version, str):
+                card = version
     except (OSError, ValueError):
         pass
 
@@ -116,20 +120,24 @@ def main(argv=None) -> int:
     s = gather(repo_root)
     drift = check(s["plugin"], s["changelog_top"], s["changelog_prev"], s["latest_tag"], s["card"])
 
+    # Rows below read PASS/DRIFT off `drift` (check()'s output) by surface
+    # prefix rather than re-deriving the comparison — one rule source only.
+    def row(prefix, drift_value):
+        hit = next((d for d in drift if d.startswith(prefix)), None)
+        return f"DRIFT: {drift_value}" if hit else "PASS"
+
     print(f"plugin.json version:    {s['plugin']} (anchor)")
-    print(f"CHANGELOG top released: {'PASS' if s['plugin'] == s['changelog_top'] else 'DRIFT: ' + str(s['changelog_top'])}")
+    print(f"CHANGELOG top released: {row('plugin.json version', s['changelog_top'])}")
 
     if s["latest_tag"] is None:
         print("latest git tag:         SKIP (no v* tags found)")
     else:
-        tag_version = s["latest_tag"][1:] if s["latest_tag"].startswith("v") else s["latest_tag"]
-        ok = tag_version in (s["plugin"], s["changelog_prev"])
-        print(f"latest git tag:         {'PASS' if ok else 'DRIFT: ' + s['latest_tag']}")
+        print(f"latest git tag:         {row('latest tag', s['latest_tag'])}")
 
     if s["card"] is None:
         print("omha card version:      SKIP (card not found)")
     else:
-        print(f"omha card version:      {'PASS' if s['card'] == s['plugin'] else 'DRIFT: card:' + s['card']}")
+        print(f"omha card version:      {row('card:', 'card:' + s['card'])}")
 
     if drift:
         print("\nDrift detected:")

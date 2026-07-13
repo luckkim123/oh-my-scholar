@@ -50,6 +50,17 @@ def test_card_mismatch_is_drift():
     assert any(d.startswith("card:") and "0.1.0" in d for d in drift)
 
 
+def test_card_non_object_json_degrades_to_none(tmp_path, monkeypatch):
+    cards_dir = tmp_path / "cards"
+    cards_dir.mkdir()
+    monkeypatch.setenv("OMHA_ROOT", str(tmp_path))
+    card_path = cards_dir / "oms.json"
+    for payload in ("null", "[]", '"foo"', "42", '{"version": 42}'):
+        card_path.write_text(payload, encoding="utf-8")
+        surfaces = sv.gather(ROOT)  # must not raise, must degrade to None
+        assert surfaces["card"] is None
+
+
 def test_changelog_parser_skips_unreleased(tmp_path):
     p = tmp_path / "CHANGELOG.md"
     p.write_text(
