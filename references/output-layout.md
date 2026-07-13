@@ -112,6 +112,7 @@ outputs/<slug>/
     *.aux *.log *.out *.blg …         # LaTeX compile intermediates — disposable anytime
   compile-notes.md                    # (optional) compile notes — for Claude's analysis
   reviews-log.md                      # (optional) scholar-mock-review verdict history — append-only, create-if-absent, never touches .tex/.bib
+  research-log.md                     # (optional) dated project narrative memory — append-only, create-if-absent, never a .bib source (see §2.4)
 
 .oms/state/                           # cross-slug mechanism state (NOT per-job)
   verified-citations.json             # cite-guard allowlist — written ONLY by scripts/verify_bib_entry.py --record (atomic, oms_atomic)
@@ -144,6 +145,11 @@ outputs/<slug>/
 - A new kind of intermediate maps into one of the existing subdirectories (no inventing a new
   top-level folder). Only a genuinely new category that maps to none of them is added by amending
   this convention.
+- Two narrative-memory files sit directly under `.oms/<slug>/` (not inside either layer's
+  subdirectories, so the two-layer split above doesn't cover them) and are equally invariant in
+  name/place: `reviews-log.md` (mock-review verdict history) and `research-log.md` (dated project
+  narrative memory — see §2.4). Both are append-only, create-if-absent, written by the calling
+  session, and **KEEP** at T18 cleanup (§5).
 
 ### 2.2 State schema (pipeline mechanism state)
 
@@ -216,6 +222,37 @@ write/prune contract:
 - `## Manual` is the human's own space in the same file — automation must not touch it, ever
   (no write, no prune), regardless of age.
 
+### 2.4 research-log entry format (`.oms/<slug>/research-log.md`)
+
+`.oms/<slug>/research-log.md` is a **durable, dated, append-only project narrative memory** — "what
+we tried / decided / dropped, and why" — sibling of `reviews-log.md` directly under `.oms/<slug>/`.
+Written **only by the calling session** (never a dispatched agent), create-if-absent, append-only
+(never rewritten, never pruned).
+
+**Entry format**:
+
+```
+## YYYY-MM-DD — <context: pilot|discuss|read|manual>
+- tried: …
+- decided: …
+- dropped: … — and why
+```
+
+- `<context>` names the stage that produced the entry (`pilot` for scholar-pilot Step 10; `discuss`
+  / `read` for the R5 scholar-discuss / scholar-read skills; `manual` for a human-added entry).
+- Free-prose bullets under the dated heading cover `tried / decided / dropped — and why` — no fixed
+  machine schema beyond the heading line.
+- ⚠️ **secondary memo only** (same discipline as the wiki, `references/wiki/README.md`): a citation
+  key that appears in a research-log entry is never treated as citation authority, and this file is
+  **never a `.bib` source** — the only door into the bibliography stays scholar-research →
+  human-confirmed `.bib` (invariant 2).
+
+**Who writes it**: `scholar-pilot` Step 10 appends a run summary (context `pilot`: stages executed,
+GATE outcomes, major decisions, dropped directions) alongside the wiki-capture step. `--no-log`
+opts out, mirroring `--no-wiki`.
+
+**Cleanup fate**: KEEP — see §5.
+
 ---
 
 ## 3. Version filename rule (deterministic)
@@ -287,6 +324,7 @@ order = version number order = sort order, always.
 | `.oms/<slug>/consensus/` | ✅ all | per-run `--consensus` mode handoff artifacts — a workspace, T18 cleanup target |
 | `.oms/state/pilot-*.json` / `revise-*.json` | ✅ clean | at terminal, after GATE 3 (mechanism state, not paper content) |
 | `.oms/<slug>/reviews-log.md` | ❌ **KEEP** | durable mock-review verdict history — lives in `.oms/<slug>/` but is never aggregated or deleted at T18 (unlike renders/gen-image/tmp/versions/consensus) |
+| `.oms/<slug>/research-log.md` | ❌ **KEEP** | durable dated project narrative memory (tried/decided/dropped, §2.4) — lives in `.oms/<slug>/` but is never aggregated or deleted at T18; never a `.bib` source |
 | `outputs/<slug>/<slug>.pdf` | ❌ never | user asset — excluded from tally and deletion, mentioned only |
 | `<project>/…tex/.bib` source | ❌ never | citation-bound source asset — outside cleanup scope entirely |
 
@@ -334,3 +372,6 @@ order = version number order = sort order, always.
 - [ ] `scholar-mock-review` appends one dated entry per completed review to `.oms/<slug>/reviews-log.md`
       (create-if-absent, append-only, never touches `.tex`/`.bib`) — written by the calling session, not the
       dispatched `scholar-reviewer` agent (§5 KEEP fate — never aggregated for T18 cleanup)
+- [ ] `scholar-pilot` appends one dated entry per pipeline run to `.oms/<slug>/research-log.md`
+      (create-if-absent, append-only, never a `.bib` source, format in §2.4; `--no-log` opts out) —
+      written by the calling session at Step 10, alongside the wiki-capture step (§5 KEEP fate)

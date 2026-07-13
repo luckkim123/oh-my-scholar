@@ -22,6 +22,7 @@ from conftest import skill_md
 
 ROOT = Path(__file__).parent.parent
 README = (ROOT / "references" / "wiki" / "README.md").read_text(encoding="utf-8")
+LAYOUT = (ROOT / "references" / "output-layout.md").read_text(encoding="utf-8")
 PILOT = skill_md("scholar-pilot")
 
 OLD_APPEND_SENTENCE = "A new category file is free-form .md (no machine schema)."
@@ -31,6 +32,15 @@ def _step10_section() -> str:
     idx = PILOT.index("10. **wiki capture")
     end = PILOT.index("11. **terminal cleanup")
     return PILOT[idx:end]
+
+
+def _layout_section(start_pattern: str, end_pattern: str) -> str:
+    """Extract text between a heading and the next given heading (exclusive of both)."""
+    start_m = re.search(start_pattern, LAYOUT, re.MULTILINE)
+    assert start_m, f"heading not found: {start_pattern}"
+    rest = LAYOUT[start_m.end():]
+    end_m = re.search(end_pattern, rest, re.MULTILINE)
+    return rest[: end_m.start()] if end_m else rest
 
 
 def _readme_evidence_section() -> str:
@@ -102,3 +112,110 @@ def test_readme_evidence_block_does_not_restate_full_pilot_procedure():
 def test_readme_no_automated_compliance_check_claim():
     sec = _readme_evidence_section()
     assert re.search(r"no automated compliance check|prompt-contract", sec, re.I)
+
+
+# =========================================================== R5 T1 (#30): research-log substrate
+#
+# scholar-pilot Step 10 gains an additional unnumbered sub-bullet (D10 — no renumbering, both
+# `_step10_section()` anchors above stay byte-identical) appending a dated run summary to
+# `.oms/<slug>/research-log.md`. Contract lives in `references/output-layout.md` §2.4 (new
+# subsection, mirrors §2.2/§2.3), plus footprint in §2 tree, §2.1 invariance bullet, §5 KEEP-fate
+# table row, and §6 checklist. Secondary-memo discipline (invariant 2): never a `.bib` source.
+
+def test_step10_research_log_entry_exists():
+    sec = _step10_section()
+    assert "research-log.md" in sec
+    assert "create-if-absent" in sec
+    assert re.search(r"##\s*YYYY-MM-DD\s*—\s*pilot", sec)
+    assert re.search(r"tried\s*/\s*decided\s*/\s*dropped", sec)
+
+
+def test_step10_research_log_no_log_opt_out_mirrors_no_wiki():
+    sec = _step10_section()
+    assert "--no-log" in sec
+    assert "--no-wiki" in sec  # both opt-outs coexist in the same step
+
+
+def test_step10_research_log_writer_identity_calling_session():
+    sec = _step10_section()
+    assert "calling session" in sec
+    assert re.search(r"never a dispatched agent", sec, re.I)
+
+
+def test_step10_research_log_secondary_memo_never_bib_source():
+    sec = _step10_section()
+    assert re.search(r"never a `?\.bib` source", sec)
+    assert re.search(r"citation authority", sec, re.I)
+    assert "invariant 2" in sec
+
+
+# --------------------------------------------------------- output-layout.md §2 tree
+def test_layout_tree_has_research_log_entry():
+    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    assert "research-log.md" in sec2
+    assert "append-only" in sec2
+    assert "create-if-absent" in sec2
+
+
+# --------------------------------------------------------- output-layout.md §2.1 invariance
+def test_layout_invariance_mentions_research_log_alongside_reviews_log():
+    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    idx = sec2.index("### 2.1 Invariance rules")
+    inv = sec2[idx:]
+    assert "research-log.md" in inv
+    assert "reviews-log.md" in inv
+    assert "KEEP" in inv
+
+
+# --------------------------------------------------------- output-layout.md §2.4 (new subsection)
+def test_layout_has_research_log_entry_format_subsection():
+    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    idx = sec2.index("### 2.4 research-log entry format")
+    sub = sec2[idx:]
+    assert re.search(r"##\s*YYYY-MM-DD\s*—\s*<context:\s*pilot\|discuss\|read\|manual>", sub)
+    assert "scholar-pilot" in sub
+    assert re.search(r"never a `?\.bib` source", sub)
+
+
+# --------------------------------------------------------- output-layout.md §5 KEEP fate
+def test_layout_cleanup_table_has_research_log_keep_row():
+    sec5 = _layout_section(r"^## 5\. Terminal cleanup", r"^## 6\.")
+    research_log_lines = [ln for ln in sec5.splitlines() if "research-log.md" in ln]
+    assert research_log_lines, "§5 cleanup table missing research-log.md row"
+    assert any("KEEP" in ln for ln in research_log_lines)
+
+
+# --------------------------------------------------------- output-layout.md §6 checklist
+def test_layout_checklist_has_research_log_row():
+    sec6 = _layout_section(r"^## 6\. Implementation checklist", r"\Z")
+    assert "scholar-pilot" in sec6
+    assert "research-log.md" in sec6
+    assert "calling session" in sec6
+    assert "--no-log" in sec6
+
+
+# --------------------------------------------------------- footprint discriminance (plan Acceptance)
+def test_research_log_footprint_limited_to_output_layout_pilot_and_tests():
+    """Acceptance: `git grep research-log` hits output-layout, pilot body, tests only."""
+    hits = []
+    for path in ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(ROOT)
+        parts = rel.parts
+        if parts[0] in (".git", "node_modules"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, PermissionError):
+            continue
+        if "research-log" in text:
+            hits.append(str(rel))
+    allowed_prefixes = (
+        "references/output-layout.md",
+        "skill-bodies/scholar-pilot/SKILL.md",
+        "tests/",
+        "docs/",  # planning docs (roadmap, execution plan) — not shipped plugin surface
+    )
+    stray = [h for h in hits if not h.startswith(allowed_prefixes)]
+    assert not stray, f"research-log leaked outside its allowed footprint: {stray}"
