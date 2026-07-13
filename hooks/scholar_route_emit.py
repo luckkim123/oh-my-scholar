@@ -18,9 +18,33 @@ stage especially worth surfacing (draft vs verify is a safety-relevant split).
 
 MVP: static checkpoint text (no keyword parsing). Fail-open: any error returns 0
 so the session is never blocked.
+
+R3 #22: two additive changes (the CHECKPOINT text above stays byte-identical).
+(a) A relevance gate (`is_paper_related`) — prompts unrelated to paper work are
+silent, no injection tax; a missing/unparseable prompt still fails toward
+injection. (b) env DISABLE_OMS (1/true/on/yes, case/whitespace-insensitive) is
+the umbrella kill switch shared by all 5 registered oms hooks, checked first,
+before reading stdin (mirrors OMC's DISABLE_OMC) — never advertised in any
+injected text.
 """
 import json
+import os
+import re
 import sys
+
+CJK_TOKENS = (
+    "논문", "학위", "초안", "원고", "관련연구", "선행연구", "문헌", "인용",
+    "참고문헌", "서지", "투고", "게재", "심사", "리비전", "초록", "목차",
+    "아웃라인", "저널", "학회", "모의심사",
+)
+ASCII_TOKENS = (
+    "paper", "thesis", "dissertation", "manuscript", "latex", "tex", "bib",
+    "bibtex", "citation", "cite", "venue", "survey", "outline", "draft",
+    "journal", "conference", "arxiv", "doi", "review", "reviewer", "rebuttal",
+    "revise", "verify", "abstract", "scholar", "oms", "ideate", "related",
+)
+DOT_TOKENS = (".tex", ".bib")
+_ASCII_RE = re.compile(r"\b(?:" + "|".join(re.escape(t) for t in ASCII_TOKENS) + r")\b")
 
 CHECKPOINT = (
     "<oms-routing>\n"
@@ -54,8 +78,41 @@ CHECKPOINT = (
 )
 
 
-def main() -> int:
+def is_paper_related(prompt) -> bool:
+    """True when prompt is missing/not-a-string (fail-toward-inject) or any
+    paper-domain token matches. Never raises -- an internal error also fails
+    toward injection."""
     try:
+        if not isinstance(prompt, str):
+            return True
+        lowered = prompt.lower()
+        if any(tok in lowered for tok in CJK_TOKENS):
+            return True
+        if any(tok in lowered for tok in DOT_TOKENS):
+            return True
+        return bool(_ASCII_RE.search(lowered))
+    except Exception:
+        return True  # gate exception -> inject
+
+
+def _disable_oms() -> bool:
+    try:
+        return os.environ.get("DISABLE_OMS", "").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+        return False  # env-read exception -> proceed as if unset
+
+
+def main() -> int:
+    if _disable_oms():
+        return 0
+    try:
+        try:
+            payload = json.load(sys.stdin)
+        except Exception:
+            payload = None
+        prompt = payload.get("prompt") if isinstance(payload, dict) else None
+        if not is_paper_related(prompt):
+            return 0
         out = {
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",

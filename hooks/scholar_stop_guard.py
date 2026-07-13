@@ -29,6 +29,10 @@ Escape hatch for humans: env OMS_STOP_GUARD in {off,0,false} (never
 mentioned in the reason). The revise-end escape IS advertised in the reason
 — unlike cite-guard's hidden env hatch, ending the loop and reporting to the
 human is the desired behavior here.
+
+R3 #22: env DISABLE_OMS (1/true/on/yes) is the umbrella kill switch shared by
+all 5 registered oms hooks, checked first, before OMS_STOP_GUARD and before
+stdin -- never mentioned in the block reason.
 """
 import json
 import os
@@ -117,7 +121,16 @@ def block(marker: dict, target: Path, slug: str) -> int:
     return 0
 
 
+def _disable_oms() -> bool:
+    try:
+        return os.environ.get("DISABLE_OMS", "").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+        return False  # env-read exception -> proceed as if unset
+
+
 def main() -> int:
+    if _disable_oms():
+        return 0
     try:
         if os.environ.get("OMS_STOP_GUARD", "").lower() in ("off", "0", "false"):
             return 0
