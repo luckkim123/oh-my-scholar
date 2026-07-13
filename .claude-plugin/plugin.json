@@ -18,7 +18,8 @@
     "./skills/scholar-revise/",
     "./skills/scholar-learn/",
     "./skills/scholar-pilot/",
-    "./skills/scholar-read/"
+    "./skills/scholar-read/",
+    "./skills/scholar-discuss/"
   ],
   "hooks": {
     "UserPromptSubmit": [

@@ -44,6 +44,11 @@ ASCII_TOKENS = (
     "revise", "verify", "abstract", "scholar", "oms", "ideate", "related",
 )
 DOT_TOKENS = (".tex", ".bib")
+PHRASE_TOKENS = (
+    "deep read", "reading note", "read this paper", "논문 읽어", "이 논문 정리", "딥리드", "리딩노트",
+    "discuss this idea", "devil's advocate", "argue with me", "challenge my idea",
+    "토론하자", "아이디어 논의", "반론해줘", "디스커션",
+)
 _ASCII_RE = re.compile(r"\b(?:" + "|".join(re.escape(t) for t in ASCII_TOKENS) + r")\b")
 
 CHECKPOINT = (
@@ -57,6 +62,9 @@ CHECKPOINT = (
     "mock-review(venue reviewer 입장 심판 — 점수+venue-native 판정(컨퍼런스 accept/reject·letter / "
     "저널 minor·major revision), inspect와 다른 축) / "
     "verify(총괄 게이트) / revise(통과까지 루프), 또는 scholar-pilot(통째).\n"
+    "- 보조 단계(입력 확장·논의, 온디맨드): read(외부 논문 딥리드 → .oms/reading/ 리딩노트, 단일 dispatch, "
+    ".bib 미기록) / discuss(아이디어 토론 — Contrarian/Simplifier/Ontologist, subagent dispatch 없음, "
+    "outline 변경은 제안만 — 자동 적용 금지).\n"
     "- 메타 단계: learn(관찰→venue 기본값 승격, 사람 게이트) — 운영 중 .oms/learned.md 에 쌓인 "
     "관찰을 venue 강제 기본값으로 굳힐 때만. 자동 발동 아님(heavy=사람 게이트).\n"
     "단일 단계면 그 스킬 직접, 브리프→완성이면 scholar-pilot.\n"
@@ -72,7 +80,7 @@ CHECKPOINT = (
     "추측·단정하는 것은 결함이다. 거기에 없을 때만 '신뢰할 출처 없음'을 선언하라 — wiki 를 "
     "확인하기 전에는 그 선언도 금지.\n\n"
     "논문 작업이면, 판정을 응답 맨 앞 omha ROUTE 줄 바로 다음에 이 한 줄로 출력하라(누락 금지):\n"
-    "STAGE(paper) → <init|research|deepen|ideate|outline|draft|inspect|mock-review|verify|revise|learn|scholar-pilot> · <한 줄 근거>\n"
+    "STAGE(paper) → <init|research|deepen|ideate|outline|draft|inspect|mock-review|verify|revise|learn|read|discuss|scholar-pilot> · <한 줄 근거>\n"
     "논문 작업이 아니면 이 블록 전체 무시(STAGE 줄도 출력하지 말 것).\n"
     "</oms-routing>"
 )
@@ -89,6 +97,8 @@ def is_paper_related(prompt) -> bool:
         if any(tok in lowered for tok in CJK_TOKENS):
             return True
         if any(tok in lowered for tok in DOT_TOKENS):
+            return True
+        if any(tok.lower() in lowered for tok in PHRASE_TOKENS):
             return True
         return bool(_ASCII_RE.search(lowered))
     except Exception:
