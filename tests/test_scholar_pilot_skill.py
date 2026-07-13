@@ -151,8 +151,7 @@ def test_layout_tree_has_research_log_entry():
 # --------------------------------------------------------- output-layout.md §2.1 invariance
 def test_layout_invariance_mentions_research_log_alongside_reviews_log():
     sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
-    idx = sec2.index("### 2.1 Invariance rules")
-    inv = sec2[idx:]
+    inv = layout_section(sec2, r"### 2\.1 Invariance rules", r"### 2\.2")
     assert "research-log.md" in inv
     assert "reviews-log.md" in inv
     assert "KEEP" in inv
