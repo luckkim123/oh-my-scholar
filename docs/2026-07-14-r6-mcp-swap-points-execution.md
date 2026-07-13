@@ -53,13 +53,15 @@ R5 plan's invariants 1–7 apply verbatim (single careful generation / no citati
 - **New `scripts/bib_coupling.py`** per E3 (parsing pointers: `ENTRY_RE` pattern re-derived read-only from `scholar_cite_guard.py:25`; `_norm()` idiom from `verify_bib_entry.py:36`; DOI/title field extraction = new work) + **`tests/test_bib_coupling.py`** (import via the `importlib` idiom of `tests/test_oms_wiki_audit.py`): fixture `.bib` reference-lists (tmp files) covering: DOI-keyed intersection, title-fallback normalization (braces/case/punct), threshold behavior (`--min-shared`), connected-component merging (A–B, B–C ⇒ one cluster), singleton isolation, `--json` shape, usage-error exit 2, and a zero-network guarantee lock (no `urllib`/`socket` import — test greps the source).
 - **Acceptance**: suite green; script runs standalone (`python3 scripts/bib_coupling.py --help` exits 0); skill body's existing locked phrases intact.
 
-### U4 — Release v0.11.0
+### U4 — Release prep with DEFERRED version bump (revised after SDD blocker — the regression locks are the authority)
 
-- plugin.json → `0.11.0`; CHANGELOG `## [0.11.0]` (Added per item with `(file, test)` provenance; Notes: stacked-on-R5 merge order + merge-back procedure, omha card follow-up 0.11.0, P5 closes the 2026-07-11 roadmap — remaining deferrals per §6 stay deferred).
+**Why revised**: the original U4 sanctioned a tag-surface DRIFT, but two pre-existing live-repo locks (`tests/test_version_sync.py::test_live_repo_surfaces_agree`, `tests/test_oms_doctor.py::test_live_repo_is_healthy`) correctly hard-fail on a 2-deep untagged release stack — the 1-deep pre-tag window is deliberate tagging-discipline pressure, and weakening those locks (or the checker) to accommodate a stacked branch would gut the alarm. Therefore the bump is deferred, not the locks.
+
+- **plugin.json stays `0.10.0` in this PR** — no version bump while v0.10.0 is untagged.
+- **CHANGELOG**: R6 items land under the existing `## [Unreleased]` section (Added per item with `(file, test)` provenance; Notes: stacked-on-R5 merge order + merge-back procedure, the deferred-bump step below, omha card 0.11.0 follow-up, P5 closes the 2026-07-11 roadmap — §6 deferrals stay deferred). If any existing lock forbids a non-empty `[Unreleased]`, STOP and report — do not improvise.
 - README: mention `citation_lookup()` swap-point contract + `bib_coupling.py` in the appropriate existing sections (no new top-level section unless the README idiom demands it); Status test count updated to measured value.
-- `sync_version.py`: plugin.json/CHANGELOG surfaces PASS; **tag surface DRIFT expected** until R5's v0.10.0 tag exists (stacked-branch limitation — the latest tag v0.9.0 is two releases behind and matches neither 0.11.0 nor CHANGELOG-prev 0.10.0; R3/R4/R5 all branched from a freshly-tagged main, R6 is the first round stacked on an untagged base); omha card DRIFT expected. **Exit 1 with exactly two drift lines (tag + card) is the acceptable state** — do NOT gate on tag PASS.
-- `oms_doctor.py` clean; full suite measured.
-- **Acceptance**: surfaces agree; suite green.
+- **Acceptance**: full suite green (all live-repo locks pass unmodified); `sync_version.py` state IDENTICAL to the R5 branch — plugin.json/CHANGELOG/tag PASS, omha card-only DRIFT, exit 1; `oms_doctor.py` same as R5 (card WARN only).
+- **Post-merge bump procedure (user, documented in the PR body)**: after R5 squash-merge + `v0.10.0` tag + R6 merge-back (`git merge -X ours origin/main`): one mechanical commit — plugin.json → `0.11.0`, retitle `## [Unreleased]` → `## [0.11.0] — <date>` (fresh empty `[Unreleased]` above) — then merge R6 and tag `v0.11.0`.
 
 ---
 
