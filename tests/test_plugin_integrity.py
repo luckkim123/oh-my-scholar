@@ -77,3 +77,13 @@ def test_stop_guard_registered():
     hooks = load_plugin()["hooks"]
     stop = json.dumps(hooks.get("Stop", []))
     assert "scholar_stop_guard.py" in stop
+
+
+def test_resume_emit_registered():
+    """⑦ scholar_resume_emit hook 이 SessionStart 에 등록돼 있다 (R2 #9+#13),
+    compact matcher 포함 — #13(post-compaction Priority-Context 재주입) 이
+    실제로 compact 소스에서 트리거되려면 matcher 에 compact 가 있어야 한다."""
+    hooks = load_plugin()["hooks"]
+    session_start = json.dumps(hooks.get("SessionStart", []))
+    assert "scholar_resume_emit.py" in session_start
+    assert "compact" in session_start
