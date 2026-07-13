@@ -239,7 +239,9 @@ def check_empty_and_orphan(inv, root) -> list:
     for f in files:
         for ref in f["refs"]:
             target_file = _resolve_ref_file(ref, f["relpath"], by_relpath, by_stem)
-            if target_file is not None:
+            # A file linking to itself is not an "OTHER file" referrer (spec:
+            # "zero inbound refs from any OTHER file") -- exclude self-refs.
+            if target_file is not None and target_file["relpath"] != f["relpath"]:
                 inbound.add(target_file["relpath"])
 
     mention_text = "\n".join(f["text"] for f in files if f["name"] in META_FILENAMES)
@@ -248,7 +250,13 @@ def check_empty_and_orphan(inv, root) -> list:
             continue
         if f["relpath"] in inbound:
             continue
-        if f["name"] in mention_text:
+        # Exact-name match, not substring: plain `in` would let "b.md" match
+        # inside "web.md". `\b` alone doesn't fix this either, since '-' is a
+        # regex word-boundary character too (e.g. "web.md" still matches
+        # "b.md" right after a hyphen) -- use an explicit non-filename-char
+        # lookaround instead.
+        name_pattern = re.compile(r"(?<![A-Za-z0-9_-])" + re.escape(f["name"]) + r"(?![A-Za-z0-9_-])")
+        if name_pattern.search(mention_text):
             continue
         rows.append({
             "status": "WARN",

@@ -161,6 +161,30 @@ def test_orphan_file_warns(tmp_path, capsys):
     assert not _lines_with(out2, "lonely.md", "orphan")
 
 
+def test_self_reference_does_not_clear_orphan(tmp_path, capsys):
+    """A file that only wikilinks itself must not count as its own inbound
+    referrer -- spec says 'zero inbound refs from any OTHER file'."""
+    _write(tmp_path, "convention/self.md", _fm() + "# Self\n\nSee [[self]] for details.\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert _lines_with(out, "self.md", "orphan", "WARN")
+
+
+def test_orphan_mention_requires_exact_name(tmp_path, capsys):
+    """Naive substring matching would let 'b.md' match inside the README's
+    mention of 'web.md'. Only an exact-name mention should clear orphan
+    status."""
+    _write(tmp_path, "convention/web.md", _fm() + "# Web\n\nbody\n")
+    _write(tmp_path, "convention/b.md", _fm() + "# B\n\nbody\n")
+    _write(tmp_path, "README.md", "# Wiki\n\nSee web.md for details.\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert _lines_with(out, "convention/b.md", "orphan", "WARN")
+    assert not _lines_with(out, "convention/web.md", "orphan")
+
+
 def test_missing_frontmatter_warns(tmp_path, capsys):
     _write(tmp_path, "convention/nofm.md", "# No Frontmatter\n\nbody\n")
 
