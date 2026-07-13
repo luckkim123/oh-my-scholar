@@ -15,7 +15,7 @@ Orchestrates every paper stage from research question to submission readiness. I
 
 <Use_When>
 - "Build the whole paper from scratch for me" — full pipeline from a short brief
-- When it's clear which stage to start from, start at that stage (--from)
+- When it's clear which stage to start from, start at that stage (--from reads `pilot-<slug>.json` via `oms_state.py read` — see the `--from` entry point note below)
 </Use_When>
 
 <Do_Not_Use_When>
@@ -30,7 +30,7 @@ Orchestrates every paper stage from research question to submission readiness. I
   3. Before draft (.tex), lock down concepts·sources in ideate (.md) first.
 - The 3 GATEs are human decision points — no automatic pass-through.
 - Each stage is delegated to its dedicated skill (no re-implementation).
-- Stage outputs are recorded in `.oms/state/` (OMC state pattern) — resumable after interruption.
+- At **every stage boundary and every GATE decision**, run `python3 <plugin>/scripts/oms_state.py write --slug <slug> --stage <stage> --gate-status <status> [--open-fail-ids …]` — the schema (documented in `references/output-layout.md` §2.2) is what `--from` resume, the Stop guard, and the SessionStart advisory read; a stage that skips the write is invisible to all three.
 - **Record priority context on entry (survives compaction)**: at pipeline start, write the critical constraints into the `## Priority Context` section of `.oms/notepad.md` — "no citation fabrication / no parallel draft / human confirmation before editing .bib + current GATE n/3 + list of unverified citations". So that even if context is compacted during a long pipeline, the 3 citation-safety principles and the GATE position are always recoverable.
   - **.md is the default**: write/append directly to `.oms/notepad.md` (since the original notepad is a single .md + section parsing, the loss of reproducing it as .md ≈ 0). If notepad MCP is available, you can mirror via `notepad_write_priority(...)` (same .md target, optional acceleration) — even when absent, a .md write produces identical behavior, not an error.
 - The stage-output path is fixed at **`.oms/state/`** (a verified real path; do not nail down unverified sub-segments like `.oms/specs`·`sessions/{sid}`).
@@ -68,7 +68,7 @@ Orchestrates every paper stage from research question to submission readiness. I
     - On "clean up" → **delete via a recoverable path** (no permanent `rm`): macOS `trash` (if absent `~/.Trash`) / Linux `gio trash`·`trash-cli` / Windows PowerShell move-to-recycle-bin (`Shell.Application` ParseName+InvokeVerb('delete'), no permanent `Remove-Item` — documented, unverified) / in environments without a trash (CI·container) only after the user re-confirms "permanent deletion".
     - ⚠️ `outputs/<slug>/<slug>.pdf` (user asset) and the **project source folder's .tex/.bib (citation-bound assets)** are **fully excluded** from aggregation·deletion — mention only. For detailed procedure see `references/output-layout.md` §5.
 
-> **`--from <stage>` entry point**: can start from an intermediate stage — `research|deepen|ideate|outline|draft|inspect|verify|revise`. e.g.: `--from deepen` means start from deepen using the existing research notes as input.
+> **`--from <stage>` entry point**: can start from an intermediate stage — `research|deepen|ideate|outline|draft|inspect|verify|revise`. e.g.: `--from deepen` means start from deepen using the existing research notes as input. `--from` now *reads* `pilot-<slug>.json` (via `python3 <plugin>/scripts/oms_state.py read --slug <slug>`) and, when invoked without an explicit stage, proposes the recorded `stage` as the resume point.
 </Steps>
 
 <Output>

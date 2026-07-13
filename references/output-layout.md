@@ -112,6 +112,8 @@ outputs/<slug>/
 
 .oms/state/                           # cross-slug mechanism state (NOT per-job)
   verified-citations.json             # cite-guard allowlist — written ONLY by scripts/verify_bib_entry.py --record (atomic, oms_atomic)
+  pilot-<slug>.json                   # pilot pipeline stage state — written ONLY by scripts/oms_state.py write (atomic, oms_atomic)
+  revise-<slug>.json                  # revise-loop round/strike ledger — written ONLY by scripts/oms_state.py revise-* (atomic, oms_atomic)
 
 .oms/wiki/                            # project-wide accrual — NOT per-job (sibling of <slug>/, carries across sessions)
   convention/  decision/  reference/  # auto-appended reject patterns / decisions (see references/wiki/README.md)
@@ -136,6 +138,56 @@ outputs/<slug>/
 - A new kind of intermediate maps into one of the existing subdirectories (no inventing a new
   top-level folder). Only a genuinely new category that maps to none of them is added by amending
   this convention.
+
+### 2.2 State schema (pipeline mechanism state)
+
+`.oms/state/` holds cross-slug **mechanism state** — not paper content, not citations. Both shapes
+below are written **only via `scripts/oms_state.py`** (atomic, `oms_atomic.atomic_write_json`); no
+other script or skill writes these files directly.
+
+**`pilot-<slug>.json`** — the pilot pipeline's current stage/gate, written by `oms_state.py write`:
+
+```json
+{
+  "slug": "2026-07-13_paper-slug",
+  "stage": "research|deepen|ideate|outline|draft|inspect|verify|revise|submission|terminal",
+  "gate_status": "pending|approved|revise|abort|null",
+  "open_fail_ids": ["defect-id", "…"],
+  "paper_root": "/abs/cwd/where/the/pipeline/runs",
+  "updated_at": "2026-07-13T09:00:00+00:00"
+}
+```
+
+On create, `write` always initializes the full key set (`gate_status: null`, `open_fail_ids: []`,
+`paper_root` = resolved cwd unless `--paper-root` overrides) so downstream consumers read stable
+keys instead of `.get()`-guessing. On merge, unnamed fields (including `paper_root`) are preserved.
+
+**`revise-<slug>.json`** — the revise-loop's round/strike ledger, written by `oms_state.py
+revise-start`/`revise-round`/`strike`/`revise-end`:
+
+```json
+{
+  "slug": "…",
+  "active": true,
+  "round": 2,
+  "round_id": "uuid4-of-current-round",
+  "max_rounds": 5,
+  "ttl_hours": 6,
+  "strikes": {"defect-id": 2},
+  "stop_blocks": 0,
+  "paper_root": "/abs/cwd/where/the/loop/was/started",
+  "started_at": "2026-07-13T09:00:00+00:00",
+  "status": "live|done|stopped|abort"
+}
+```
+
+**Who reads them**: `pilot-<slug>.json` is read by `scholar-pilot`'s `--from` resume (proposes the
+recorded `stage`), the Stop guard, and the SessionStart advisory; `revise-<slug>.json` is read by
+the same Stop guard (a live marker means the loop is still running) and the revise-loop itself
+(round/strike counters).
+
+**Cleanup fate**: both files are per-slug mechanism state, not paper content — at pilot terminal
+(GATE 3 confirm) they are removable together with the slug's work area (see §5 table).
 
 ---
 
@@ -205,6 +257,7 @@ order = version number order = sort order, always.
 | `.oms/<slug>/gen-image/` | ✅ all | except figures the user asks to keep |
 | `.oms/<slug>/tmp/` | ✅ all | LaTeX compile intermediates (.aux/.log/…) |
 | `.oms/<slug>/versions/` | ✅ **all but the latest 1 + user-designated milestones** | keep the near-final snapshot, prune the middle |
+| `.oms/state/pilot-*.json` / `revise-*.json` | ✅ clean | at terminal, after GATE 3 (mechanism state, not paper content) |
 | `outputs/<slug>/<slug>.pdf` | ❌ never | user asset — excluded from tally and deletion, mentioned only |
 | `<project>/…tex/.bib` source | ❌ never | citation-bound source asset — outside cleanup scope entirely |
 
