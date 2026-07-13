@@ -102,6 +102,48 @@ def test_readme_index_is_not_a_query_surface():
     assert re.search(r"grep", sec, re.I), "must still point recall at grep over the notes"
 
 
+# --------------------------------------------------------- README: citation_lookup() contract (R6 U1 #35)
+def test_readme_citation_lookup_contract_section_exists():
+    body = _read(README)
+    assert "## `citation_lookup(doi_or_title)` abstract function contract" in body
+    assert "citation_lookup(" in body
+
+
+def test_readme_citation_lookup_swap_points_named():
+    body = _read(README)
+    sec = section(body, r"^## `citation_lookup", r"^## Data this store collects")
+    assert "Semantic Scholar MCP" in sec
+    assert "arXiv MCP" in sec
+    assert "Zotero MCP" in sec
+
+
+def test_readme_citation_lookup_zotero_human_gate_adjacent():
+    body = _read(README)
+    sec = section(body, r"^## `citation_lookup", r"^## Data this store collects")
+    assert re.search(r"Zotero.{0,200}human gate", sec, re.I | re.S), \
+        "Zotero row must be adjacent to a human-gate statement"
+
+
+def test_readme_citation_lookup_empirical_validation_rule():
+    body = _read(README)
+    sec = section(body, r"^## `citation_lookup", r"^## Data this store collects")
+    assert re.search(r"empirical", sec, re.I)
+    assert re.search(r"probe call", sec, re.I)
+
+
+def test_readme_citation_lookup_fallback_chain():
+    body = _read(README)
+    sec = section(body, r"^## `citation_lookup", r"^## Data this store collects")
+    assert "WebSearch" in sec and "WebFetch" in sec
+    assert re.search(r"fallback chain", sec, re.I)
+
+
+def test_readme_citation_lookup_mcp_absence_changes_nothing():
+    body = _read(README)
+    sec = section(body, r"^## `citation_lookup", r"^## Data this store collects")
+    assert re.search(r"[Aa]bsence of every MCP.{0,80}nothing", sec, re.S)
+
+
 # --------------------------------------------------------- output-layout.md: five categories
 def test_output_layout_wiki_block_has_all_five_categories():
     body = _read(LAYOUT)

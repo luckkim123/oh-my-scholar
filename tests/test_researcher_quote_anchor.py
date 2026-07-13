@@ -60,3 +60,9 @@ def test_deep_read_mode_has_its_own_quote_anchor_reuse_note():
     end = AGENT.index("</Investigation_Protocol>")
     sec = AGENT[idx:end]
     assert re.search(r"same quote-anchor contract as mode=gap-research", sec, re.I)
+
+
+# =========================================================== R6 U1 (#35): citation_lookup() pointer
+def test_skill_points_to_citation_lookup_contract():
+    assert re.search(r"citation_lookup\(", SKILL), "citation_lookup() 계약 포인터 누락"
+    assert "references/wiki/README.md" in SKILL, "wiki README 경로 포인터 누락"

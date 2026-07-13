@@ -133,6 +133,32 @@ wiki_query(category) → list of matched .md excerpts (empty list if none)
 
 ---
 
+## `citation_lookup(doi_or_title)` abstract function contract
+
+```
+citation_lookup(doi_or_title) → verdict + normalized metadata
+```
+
+- **Deterministic-lookup rule (P5-C)**: the verdict is always an API/database match result, never an embedding-similarity ranking. External services may use embeddings server-side; nothing embedding-shaped enters the verdict this function returns.
+- **Current implementation (today's target)** — `scripts/verify_bib_entry.py`, described precisely rather than as one chain:
+  - **DOI path**: try Crossref first. On `HTTPError` (not found / rejected), fall through to OpenAlex. On `URLError` (network unreachable), short-circuit straight to `NETWORK_ERROR` — OpenAlex is only tried after a Crossref *HTTP* failure, never after a Crossref *network* failure.
+  - **Title-only path** (no DOI supplied): Crossref bibliographic search only — no OpenAlex fallback.
+  - `WebSearch`/`WebFetch` is a **separate agent-level manual fallback**, reached for at the caller's discretion when the above returns `NOT_FOUND`/`NETWORK_ERROR` — it is never code-chained off an exit code; a human or the researcher agent decides whether to use it.
+- **Caller/implementation boundary (future replacement point, same idiom as `wiki_query` above)**: the researcher/verifier merely calls the abstract function `citation_lookup`; it does not know whether the implementation is "Crossref-then-OpenAlex" or a standalone MCP. Only this function's implementation swaps.
+- **MCP swap-points** (opt-in accelerators — P5-A: none becomes a prerequisite for any stage):
+
+  | MCP | Role | Human gate |
+  |:--|:--|:--|
+  | Semantic Scholar MCP | citation lookup / metadata source | same as today — proposed entries still pass `verify_bib_entry.py` + cite-guard before any `.bib` write |
+  | arXiv MCP | citation lookup / metadata source | same as today — same human gate |
+  | Zotero MCP | **opt-in** citation source for users with an existing library | same human gate as today — proposed entries only, human confirms every one before write |
+
+  Every MCP here is a *proposal source*, never a bypass (P5-B) — nothing lands in `.bib` automatically. Absence of every MCP changes nothing about correctness guarantees — only speed.
+- **Empirical tool-description validation rule** (the Anthropic lesson): before trusting any MCP server's tool descriptions in a research pass, dispatch one cheap probe call and compare its observed behavior against the description — validate empirically, never trust the description alone.
+- **Graceful fallback chain**: Crossref → OpenAlex (DOI path only, HTTPError-gated) → optional MCP (Semantic Scholar / arXiv / Zotero, if configured) → WebSearch/WebFetch (manual, agent discretion). Every link past Crossref is optional; with zero MCPs installed the chain degrades to today's Crossref/OpenAlex behavior unchanged.
+
+---
+
 ## Data this store collects *newly* (net-new — not a migration)
 
 Reject reasons and defect patterns are **net-new data**. The existing `references/formats/venues.md` (or venue cards) only have `page_limit`·`sections`·`quality_threshold` and *no reject field* — so this wiki is not migrated from venue cards; rather, inspector sessions *collect it newly* as they critique and load it in.

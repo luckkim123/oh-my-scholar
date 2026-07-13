@@ -30,6 +30,7 @@ Systematically survey the related-work landscape before writing a paper and iden
 - ⚠️ **Parallel reading is OK, but parallel citation generation is prohibited** — reading and analyzing multiple sources at once is allowed. However, if multiple agents generate the citation entries themselves in parallel, hallucination is amplified.
 - ⚠️ **passage-level grounding** — do not build citations from the abstract alone; ground them in the cited text span (the full passage). The abstract-only condition produces more hallucination than passage-level ([arXiv:2309.06365](https://arxiv.org/abs/2309.06365), self-verified). The structural reason that separating research (search) → draft (generation) reduces knowledge-hallucination ([arXiv:2510.24476](https://arxiv.org/abs/2510.24476)). Full external landscape: global wiki `reference/llm-paper-writing-landscape.md`.
 - Quote anchors are the mechanical substrate of verify's claim-faithfulness (citation-misuse) check — a claim row without its quote can only be checked by a human.
+- `citation_lookup()`'s abstract-function contract (signature, deterministic-lookup rule, today's implementation target, MCP swap-points) lives in `references/wiki/README.md`, adjacent to `wiki_query()`.
 - The deliverable is a .md research note — do not write .tex directly. The note becomes the input for ideate/outline/draft.
 - The researcher must not self-approve — human review after producing the note is recommended.
 </Execution_Policy>
