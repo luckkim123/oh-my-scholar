@@ -70,3 +70,10 @@ def test_cite_guard_registered():
     hooks = load_plugin()["hooks"]
     pre = json.dumps(hooks.get("PreToolUse", []))
     assert "scholar_cite_guard.py" in pre
+
+
+def test_stop_guard_registered():
+    """⑥ scholar_stop_guard hook 이 Stop 에 등록돼 있다 (R2 #8)."""
+    hooks = load_plugin()["hooks"]
+    stop = json.dumps(hooks.get("Stop", []))
+    assert "scholar_stop_guard.py" in stop
