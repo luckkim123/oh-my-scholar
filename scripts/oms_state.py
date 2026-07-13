@@ -10,6 +10,7 @@ import argparse
 import json
 import re
 import sys
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,6 +22,9 @@ STAGES = (
     "inspect", "verify", "revise", "submission", "terminal",
 )
 GATE_STATUSES = ("pending", "approved", "revise", "abort")
+REVISE_STATUSES = ("done", "stopped", "abort")
+MAX_ROUNDS_RANGE = (1, 20)
+TTL_HOURS_RANGE = (1, 168)
 SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
@@ -53,6 +57,10 @@ def write_pilot(state_dir, slug, **fields) -> dict:
     data["updated_at"] = datetime.now(timezone.utc).isoformat()
     atomic_write_json(target, data)
     return data
+
+
+def _revise_target(state_dir, slug) -> Path:
+    return Path(state_dir) / f"revise-{slug}.json"
 
 
 def _err(message) -> int:
@@ -110,6 +118,89 @@ def _cmd_read(args) -> int:
     return 0
 
 
+def _cmd_revise_start(args) -> int:
+    if not _valid_slug(args.slug):
+        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+    if not (MAX_ROUNDS_RANGE[0] <= args.max_rounds <= MAX_ROUNDS_RANGE[1]):
+        return _err(f"--max-rounds must be between {MAX_ROUNDS_RANGE[0]} and {MAX_ROUNDS_RANGE[1]}")
+    if not (TTL_HOURS_RANGE[0] <= args.ttl_hours <= TTL_HOURS_RANGE[1]):
+        return _err(f"--ttl-hours must be between {TTL_HOURS_RANGE[0]} and {TTL_HOURS_RANGE[1]}")
+
+    existing = load(args.state_dir, f"revise-{args.slug}")
+    # Idempotent resume: a crash/compaction resume must never zero the never-wedge
+    # counters (round/strikes/stop_blocks) or extend the TTL clock (started_at).
+    if existing and existing.get("active") and existing.get("status") == "live" and not args.force_restart:
+        print(json.dumps({**existing, "resumed": True}))
+        return 0
+
+    data = {
+        "slug": args.slug,
+        "active": True,
+        "round": 0,
+        "round_id": None,
+        "max_rounds": args.max_rounds,
+        "ttl_hours": args.ttl_hours,
+        "strikes": {},
+        "stop_blocks": 0,
+        "paper_root": str(Path.cwd()),
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "status": "live",
+    }
+    atomic_write_json(_revise_target(args.state_dir, args.slug), data)
+    print(json.dumps(data))
+    return 0
+
+
+def _cmd_revise_round(args) -> int:
+    if not _valid_slug(args.slug):
+        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+    data = load(args.state_dir, f"revise-{args.slug}")
+    if not data:
+        return _err(f"no revise marker for slug {args.slug!r} — run revise-start first")
+
+    data["round"] += 1
+    data["round_id"] = str(uuid.uuid4())
+    atomic_write_json(_revise_target(args.state_dir, args.slug), data)
+
+    out = {"round": data["round"], "max_rounds": data["max_rounds"], "round_id": data["round_id"]}
+    if data["round"] > data["max_rounds"]:
+        out["exceeded"] = True  # the CLI never blocks; the SKILL decides to stop
+    print(json.dumps(out))
+    return 0
+
+
+def _cmd_strike(args) -> int:
+    if not _valid_slug(args.slug):
+        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+    if not _valid_slug(args.defect_id):
+        return _err(f"--defect-id {args.defect_id!r} must match {SLUG_RE.pattern} (no path separators)")
+    data = load(args.state_dir, f"revise-{args.slug}")
+    if not data:
+        return _err(f"no revise marker for slug {args.slug!r} — run revise-start first")
+
+    count = data["strikes"].get(args.defect_id, 0) + 1
+    data["strikes"][args.defect_id] = count
+    atomic_write_json(_revise_target(args.state_dir, args.slug), data)
+    print(json.dumps({"defect_id": args.defect_id, "count": count, "third_strike": count >= 3}))
+    return 0
+
+
+def _cmd_revise_end(args) -> int:
+    if not _valid_slug(args.slug):
+        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+    if args.status not in REVISE_STATUSES:
+        return _err(f"--status must be one of {REVISE_STATUSES}")
+    data = load(args.state_dir, f"revise-{args.slug}")
+    if not data:
+        return _err(f"no revise marker for slug {args.slug!r} — run revise-start first")
+
+    data["active"] = False
+    data["status"] = args.status
+    atomic_write_json(_revise_target(args.state_dir, args.slug), data)
+    print(json.dumps(data))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="oms .oms/state/ pipeline mechanism state CLI.")
     sub = parser.add_subparsers(dest="verb", required=True)
@@ -126,11 +217,40 @@ def main(argv=None) -> int:
     p_read.add_argument("--slug", default=None)
     p_read.add_argument("--state-dir", default="./.oms/state")
 
+    p_revise_start = sub.add_parser("revise-start")
+    p_revise_start.add_argument("--slug", required=True)
+    p_revise_start.add_argument("--max-rounds", type=int, default=5)
+    p_revise_start.add_argument("--ttl-hours", type=int, default=6)
+    p_revise_start.add_argument("--force-restart", action="store_true")
+    p_revise_start.add_argument("--state-dir", default="./.oms/state")
+
+    p_revise_round = sub.add_parser("revise-round")
+    p_revise_round.add_argument("--slug", required=True)
+    p_revise_round.add_argument("--state-dir", default="./.oms/state")
+
+    p_strike = sub.add_parser("strike")
+    p_strike.add_argument("--slug", required=True)
+    p_strike.add_argument("--defect-id", required=True)
+    p_strike.add_argument("--state-dir", default="./.oms/state")
+
+    p_revise_end = sub.add_parser("revise-end")
+    p_revise_end.add_argument("--slug", required=True)
+    p_revise_end.add_argument("--status", default="done")
+    p_revise_end.add_argument("--state-dir", default="./.oms/state")
+
     args = parser.parse_args(argv)
 
     if args.verb == "write":
         return _cmd_write(args)
-    return _cmd_read(args)
+    if args.verb == "read":
+        return _cmd_read(args)
+    if args.verb == "revise-start":
+        return _cmd_revise_start(args)
+    if args.verb == "revise-round":
+        return _cmd_revise_round(args)
+    if args.verb == "strike":
+        return _cmd_strike(args)
+    return _cmd_revise_end(args)
 
 
 if __name__ == "__main__":

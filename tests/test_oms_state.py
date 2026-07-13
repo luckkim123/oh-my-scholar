@@ -67,3 +67,85 @@ def test_write_goes_through_oms_atomic():
     src = SCRIPT.read_text(encoding="utf-8")
     assert "atomic_write_json" in src
     assert "import requests" not in src  # stdlib only
+
+
+# R2 #7 — revise marker + strike/round ledger
+
+
+def test_revise_start_creates_marker(tmp_path, capsys):
+    assert run(["revise-start", "--slug", "s1", "--max-rounds", "3"], tmp_path) == 0
+    d = json.loads((tmp_path / "revise-s1.json").read_text())
+    assert d["active"] is True and d["round"] == 0 and d["strikes"] == {}
+    assert d["max_rounds"] == 3 and d["status"] == "live" and d["stop_blocks"] == 0
+
+
+def test_revise_round_increments_and_mints_round_id(tmp_path, capsys):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    capsys.readouterr()
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    r1 = json.loads(capsys.readouterr().out)
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    r2 = json.loads(capsys.readouterr().out)
+    assert (r1["round"], r2["round"]) == (1, 2)
+    assert r1["round_id"] != r2["round_id"] and len(r1["round_id"]) >= 32
+
+
+def test_revise_round_flags_exceeded(tmp_path, capsys):
+    run(["revise-start", "--slug", "s1", "--max-rounds", "1"], tmp_path)
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    capsys.readouterr()
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    assert json.loads(capsys.readouterr().out).get("exceeded") is True
+
+
+def test_strike_counts_to_three(tmp_path, capsys):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    capsys.readouterr()
+    for expected in (False, False, True):
+        run(["strike", "--slug", "s1", "--defect-id", "dangling-ref"], tmp_path)
+        assert json.loads(capsys.readouterr().out)["third_strike"] is expected
+
+
+def test_revise_end_deactivates(tmp_path):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    run(["revise-end", "--slug", "s1", "--status", "stopped"], tmp_path)
+    d = json.loads((tmp_path / "revise-s1.json").read_text())
+    assert d["active"] is False and d["status"] == "stopped"
+
+
+def test_ledger_verbs_require_started_loop(tmp_path):
+    assert run(["strike", "--slug", "ghost", "--defect-id", "d"], tmp_path) == 2
+    assert run(["revise-round", "--slug", "ghost"], tmp_path) == 2
+
+
+def test_revise_start_idempotent_on_live_marker(tmp_path, capsys):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    run(["strike", "--slug", "s1", "--defect-id", "d"], tmp_path)
+    capsys.readouterr()
+    assert run(["revise-start", "--slug", "s1"], tmp_path) == 0
+    assert json.loads(capsys.readouterr().out).get("resumed") is True
+    d = json.loads((tmp_path / "revise-s1.json").read_text())
+    assert d["round"] == 1 and d["strikes"] == {"d": 1}  # never-wedge counters preserved
+
+
+def test_revise_start_force_restart_resets(tmp_path):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    run(["revise-round", "--slug", "s1"], tmp_path)
+    run(["revise-start", "--slug", "s1", "--force-restart"], tmp_path)
+    d = json.loads((tmp_path / "revise-s1.json").read_text())
+    assert d["round"] == 0 and d["strikes"] == {}
+
+
+def test_revise_start_rejects_insane_bounds(tmp_path):
+    assert run(["revise-start", "--slug", "s1", "--max-rounds", "999"], tmp_path) == 2
+    assert run(["revise-start", "--slug", "s1", "--ttl-hours", "0"], tmp_path) == 2
+    assert not (tmp_path / "revise-s1.json").exists()
+
+
+def test_strike_defect_id_rejects_path_chars(tmp_path):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    before = (tmp_path / "revise-s1.json").read_text()
+    assert run(["strike", "--slug", "s1", "--defect-id", "../x"], tmp_path) == 2
+    assert run(["strike", "--slug", "s1", "--defect-id", "a/b"], tmp_path) == 2
+    assert (tmp_path / "revise-s1.json").read_text() == before  # no marker mutation
