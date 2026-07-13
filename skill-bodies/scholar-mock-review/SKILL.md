@@ -45,6 +45,11 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 
 <Execution_Policy>
 - ⚠️ **Read-only** — the reviewer does not modify .tex/.bib. Adjudication only. Edits go to scholar-revise.
+  **Carve-out (verdict history)**: after the Area Chair verdict (Step 3), the orchestrating SKILL flow — **the calling session**, never the dispatched `scholar-reviewer` agent
+  (`agents/scholar-reviewer.md:6` sets `disallowedTools: Write, Edit, NotebookEdit`, so an agent-side attempt would silently never write) — appends one
+  dated entry to `.oms/<slug>/reviews-log.md` (create-if-absent, append-only, never touches .tex/.bib). This is
+  read-only w.r.t. the paper — the reviews-log append is workbench metadata, not a draft edit, so it does not widen
+  the rule above.
 - ⚠️ **3-lens parallel dispatch is safe** — because it is read-only (same as inspect). If cost is a concern, a single reviewer running
   the 3 lenses sequentially is also allowed (default = 3 in parallel).
 - ⚠️ **No self-approval** — drafter and reviewer are different lanes. You do not review a draft you wrote yourself.
@@ -67,8 +72,19 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
    - Inputs: 3-lens outputs + venue form.
    - re-check (drop unanchored weaknesses · demote novelty) → venue-scale per-axis scores → accept-bias calibration
      → venue-native final verdict → rebuttal/revision guide.
-4. **Output the synthesis report** (Output below) — including the disclaimer.
-5. Guide: "to fix by reflecting the weaknesses → scholar-revise, for the mechanical gate → scholar-verify."
+4. **Verdict-history append + meta-review (calling session, not the dispatched agent)** — after Step 3's AC synthesis
+   completes, the orchestrating SKILL flow itself (**this calling session** — never
+   `Task(subagent_type="oh-my-scholar:scholar-reviewer", ...)`, which is read-only) appends one dated entry to
+   `.oms/<slug>/reviews-log.md`: date, venue, lens set, per-axis venue-scale scores, final verdict, top weakness
+   types (one line each, anchors kept), rebuttal flag — **append-only, create-if-absent**, never touching
+   `.tex`/`.bib` (see `references/output-layout.md` §2 for the file's place in the per-slug tree).
+   - **Meta-review sub-step** — run only when the log holds **at least 3 entries**, or the user explicitly asks for
+     it: mine recurring weakness *types* across the logged entries; flag **"always-moderate"** score drift (all
+     verdicts sitting in the borderline band with low variance = calibration suspicion, not genuine convergence).
+     Output is a set of **proposed** lens-prompt tweaks, presented at a **human gate** — never auto-applied; lens
+     prompts are edited by the human only.
+5. **Output the synthesis report** (Output below) — including the disclaimer.
+6. Guide: "to fix by reflecting the weaknesses → scholar-revise, for the mechanical gate → scholar-verify."
 </Steps>
 
 <Output>
@@ -79,4 +95,8 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 - Calibration note (how accept-bias was corrected)
 - ⚠️ "Mock review — not a replacement for real peer review" disclaimer + novelty-no-access caveat
 - Next-step guidance (revise / verify)
+- Verdict-history log confirmation: `.oms/<slug>/reviews-log.md` entry appended (date/venue/scores/verdict/weakness-types/rebuttal-flag)
+- Meta-review report (only when Step 4's gate fires — **at least 3** log entries or explicit user request): recurring
+  weakness types, **"always-moderate"** drift flag (if triggered), proposed lens-prompt tweaks — presented at a
+  **human gate**, never auto-applied
 </Output>
