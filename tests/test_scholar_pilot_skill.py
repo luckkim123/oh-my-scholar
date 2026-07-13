@@ -204,6 +204,7 @@ def test_research_log_footprint_limited_to_output_layout_pilot_and_tests():
     allowed_prefixes = (
         "references/output-layout.md",
         "skill-bodies/scholar-pilot/SKILL.md",
+        "skill-bodies/scholar-read/SKILL.md",  # R5 T2 (#28): research-log append, context `read`
         "tests/",
         "docs/",  # planning docs (roadmap, execution plan) — not shipped plugin surface
     )
