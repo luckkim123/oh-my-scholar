@@ -1,4 +1,5 @@
-"""Tests for scholar-mock-review verdict-history + meta-review mining (R4 #27, Task 5).
+"""Tests for scholar-mock-review verdict-history + meta-review mining (R4 #27, Task 5),
+plus the R5 #31 rebuttal-and-reconsider round (Task 4).
 
 Background: scholar-mock-review's read-only rule (skill-bodies/scholar-mock-review/SKILL.md:47)
 gains one carve-out — after the AC verdict (Step 3), the orchestrating SKILL flow (the calling
@@ -7,6 +8,17 @@ session, never the dispatched read-only scholar-reviewer agent) appends one date
 meta-review sub-step (>= 3 log entries or explicit user request) mines recurring weakness types
 and flags "always-moderate" score drift, proposing lens-prompt tweaks at a human gate only —
 never auto-applied.
+
+R5 #31 adds a `--with-rebuttal` opt-in rebuttal round as lettered sub-steps (a)-(e) INSIDE the
+same existing Step 4 (D10 — no renumbering, `4. **Verdict-history append` /
+`5. **Output the synthesis report` stay byte-identical): (a) lock the pre-rebuttal verdicts
+verbatim, (b) the calling session drafts the rebuttal at a human gate (D8), (c) re-dispatch the
+same 3 lenses (mode="lens") to reconsider with an anchoring-aware under-adjustment guard,
+(d) the AC produces a pre-vs-post delta report with a one-venue-scale-band cap (an
+LLM-sycophancy countermeasure) and a fixable/fundamental classification, (e) the rebuttal flag +
+delta summary fold into the existing reviews-log field list rather than a second append step.
+`agents/scholar-reviewer.md` gains a matching lens "reconsider" sub-mode and an AC delta-report
+step/output block.
 
 Two other surfaces also say "read-only" about mock-review and are deliberately left untouched
 this task (frontmatter frozen; both mean read-only w.r.t. the reviewed draft, which a metadata
@@ -25,6 +37,7 @@ from conftest import layout_section, skill_md
 ROOT = Path(__file__).parent.parent
 BODY = skill_md("scholar-mock-review")
 LAYOUT = (ROOT / "references" / "output-layout.md").read_text(encoding="utf-8")
+REVIEWER_AGENT = (ROOT / "agents" / "scholar-reviewer.md").read_text(encoding="utf-8")
 
 # The pre-existing Execution_Policy prohibition sentence (must survive verbatim after the edit).
 ORIGINAL_READONLY_SENTENCE = (
@@ -126,6 +139,103 @@ def test_meta_review_output_is_proposed_and_human_gated_never_auto_applied():
     assert "proposed" in sec.lower()
 
 
+# --------------------------------------------------------- R5 #31 rebuttal round (Task 4)
+def test_rebuttal_round_gated_on_flag_inside_step4():
+    """The rebuttal round is opt-in and lives inside Step 4, before Step 5's heading."""
+    sec = _step4_section()
+    assert "--with-rebuttal" in sec
+    assert "opt-in" in sec
+
+
+def test_rebuttal_round_lettered_substeps_present():
+    sec = _step4_section()
+    for label in ("(a)", "(b)", "(c)", "(d)", "(e)"):
+        assert label in sec, f"missing lettered sub-step: {label}"
+
+
+def test_rebuttal_lock_subphase_verbatim_no_restatement():
+    sec = _step4_section()
+    assert "Lock" in sec
+    assert "pre-rebuttal" in sec
+    assert "verbatim" in sec
+    assert "never re-asked" in sec
+
+
+def test_rebuttal_author_rebuttal_human_gate():
+    sec = _step4_section()
+    assert "human gate" in sec
+    assert "D8" in sec
+    assert "point-by-point" in sec
+    assert "edits/approves" in sec
+
+
+def test_rebuttal_reconsider_redispatch_same_lenses():
+    sec = _step4_section()
+    assert 'mode="lens"' in sec
+    assert "addressed | partially | unaddressed" in sec
+    assert "under-adjust" in sec
+
+
+def test_rebuttal_ac_delta_report_one_band_cap_and_classification():
+    sec = _step4_section()
+    assert "delta report" in sec
+    assert "fixable" in sec
+    assert "fundamental" in sec
+    assert "at most one" in sec
+    assert "venue-scale band per axis" in sec
+    assert "sycophancy" in sec.lower()
+
+
+def test_rebuttal_flag_folds_into_existing_log_append_not_separate_step():
+    sec = _step4_section()
+    assert "fold into the field list" in sec or "folds into" in sec
+    assert "NOT a separate reviews-log append step" in sec
+
+
+def test_rebuttal_flag_true_false_in_field_list():
+    sec = _step4_section()
+    assert "`true` when `--with-rebuttal` ran" in sec
+    assert "`false`" in sec
+
+
+def test_default_path_step4_field_list_still_has_original_fields():
+    """Acceptance: without --with-rebuttal the default path stays intact — the original
+    field-list phrases from R4 #27 survive verbatim after the R5 #31 edit."""
+    sec = _step4_section()
+    for field in ("date", "venue", "lens set", "per-axis venue-scale scores", "final verdict",
+                  "top weakness", "append-only", "create-if-absent"):
+        assert field in sec, f"missing pre-existing field: {field}"
+
+
+# --------------------------------------------------------- reviewer agent locks (R5 #31)
+def test_reviewer_agent_lens_reconsider_submode():
+    assert "Reconsider sub-mode" in REVIEWER_AGENT
+    assert "locked pre-rebuttal review" in REVIEWER_AGENT
+    assert "approved author rebuttal" in REVIEWER_AGENT
+    assert "addressed | partially | unaddressed" in REVIEWER_AGENT
+    assert "under-adjust" in REVIEWER_AGENT
+
+
+def test_reviewer_agent_ac_delta_report_step():
+    assert "Rebuttal delta report" in REVIEWER_AGENT
+    assert "fixable" in REVIEWER_AGENT
+    assert "fundamental" in REVIEWER_AGENT
+    assert "at most one" in REVIEWER_AGENT
+    assert "venue-scale band per axis" in REVIEWER_AGENT
+
+
+def test_reviewer_agent_output_format_has_reconsideration_and_delta_blocks():
+    assert "### Reconsideration (rebuttal round only)" in REVIEWER_AGENT
+    assert "### Rebuttal delta report (rebuttal round only" in REVIEWER_AGENT
+
+
+def test_reviewer_agent_still_no_final_verdict_in_lens_mode():
+    """Default-path acceptance: lens mode still never issues a final score/verdict —
+    the R5 reconsider sub-mode explicitly restates the same rule."""
+    assert "a final score or verdict" in REVIEWER_AGENT
+    assert "Still no final score/verdict" in REVIEWER_AGENT
+
+
 # --------------------------------------------------------- Output section rows
 def test_output_section_has_log_confirmation_row():
     sec = _output_section()
@@ -138,6 +248,13 @@ def test_output_section_has_meta_review_report_row():
     assert "Meta-review report" in sec
     assert "at least 3" in sec
     assert "human gate" in sec
+
+
+def test_output_section_has_rebuttal_delta_report_row():
+    sec = _output_section()
+    assert "Rebuttal delta report" in sec
+    assert "--with-rebuttal" in sec
+    assert "fixable" in sec and "fundamental" in sec
 
 
 # --------------------------------------------------------- frozen surfaces untouched
