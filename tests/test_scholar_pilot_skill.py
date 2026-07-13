@@ -18,7 +18,7 @@ proving the old `:61` sentence is actually gone (not just co-existing with new w
 import re
 from pathlib import Path
 
-from conftest import skill_md
+from conftest import layout_section, skill_md
 
 ROOT = Path(__file__).parent.parent
 README = (ROOT / "references" / "wiki" / "README.md").read_text(encoding="utf-8")
@@ -32,15 +32,6 @@ def _step10_section() -> str:
     idx = PILOT.index("10. **wiki capture")
     end = PILOT.index("11. **terminal cleanup")
     return PILOT[idx:end]
-
-
-def _layout_section(start_pattern: str, end_pattern: str) -> str:
-    """Extract text between a heading and the next given heading (exclusive of both)."""
-    start_m = re.search(start_pattern, LAYOUT, re.MULTILINE)
-    assert start_m, f"heading not found: {start_pattern}"
-    rest = LAYOUT[start_m.end():]
-    end_m = re.search(end_pattern, rest, re.MULTILINE)
-    return rest[: end_m.start()] if end_m else rest
 
 
 def _readme_evidence_section() -> str:
@@ -151,7 +142,7 @@ def test_step10_research_log_secondary_memo_never_bib_source():
 
 # --------------------------------------------------------- output-layout.md §2 tree
 def test_layout_tree_has_research_log_entry():
-    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     assert "research-log.md" in sec2
     assert "append-only" in sec2
     assert "create-if-absent" in sec2
@@ -159,7 +150,7 @@ def test_layout_tree_has_research_log_entry():
 
 # --------------------------------------------------------- output-layout.md §2.1 invariance
 def test_layout_invariance_mentions_research_log_alongside_reviews_log():
-    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     idx = sec2.index("### 2.1 Invariance rules")
     inv = sec2[idx:]
     assert "research-log.md" in inv
@@ -169,7 +160,7 @@ def test_layout_invariance_mentions_research_log_alongside_reviews_log():
 
 # --------------------------------------------------------- output-layout.md §2.4 (new subsection)
 def test_layout_has_research_log_entry_format_subsection():
-    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     idx = sec2.index("### 2.4 research-log entry format")
     sub = sec2[idx:]
     assert re.search(r"##\s*YYYY-MM-DD\s*—\s*<context:\s*pilot\|discuss\|read\|manual>", sub)
@@ -179,7 +170,7 @@ def test_layout_has_research_log_entry_format_subsection():
 
 # --------------------------------------------------------- output-layout.md §5 KEEP fate
 def test_layout_cleanup_table_has_research_log_keep_row():
-    sec5 = _layout_section(r"^## 5\. Terminal cleanup", r"^## 6\.")
+    sec5 = layout_section(LAYOUT, r"^## 5\. Terminal cleanup", r"^## 6\.")
     research_log_lines = [ln for ln in sec5.splitlines() if "research-log.md" in ln]
     assert research_log_lines, "§5 cleanup table missing research-log.md row"
     assert any("KEEP" in ln for ln in research_log_lines)
@@ -187,7 +178,7 @@ def test_layout_cleanup_table_has_research_log_keep_row():
 
 # --------------------------------------------------------- output-layout.md §6 checklist
 def test_layout_checklist_has_research_log_row():
-    sec6 = _layout_section(r"^## 6\. Implementation checklist", r"\Z")
+    sec6 = layout_section(LAYOUT, r"^## 6\. Implementation checklist", r"\Z")
     assert "scholar-pilot" in sec6
     assert "research-log.md" in sec6
     assert "calling session" in sec6

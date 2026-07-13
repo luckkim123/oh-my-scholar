@@ -20,7 +20,7 @@ co-existing nearby text — the exact substring must still be there)."""
 import re
 from pathlib import Path
 
-from conftest import skill_md
+from conftest import layout_section, skill_md
 
 ROOT = Path(__file__).parent.parent
 BODY = skill_md("scholar-mock-review")
@@ -48,15 +48,6 @@ def _output_section() -> str:
     idx = BODY.index("<Output>")
     end = BODY.index("</Output>")
     return BODY[idx:end]
-
-
-def _layout_section(start_pattern: str, end_pattern: str) -> str:
-    """Extract text between a heading and the next given heading (exclusive of both)."""
-    start_m = re.search(start_pattern, LAYOUT, re.MULTILINE)
-    assert start_m, f"heading not found: {start_pattern}"
-    rest = LAYOUT[start_m.end():]
-    end_m = re.search(end_pattern, rest, re.MULTILINE)
-    return rest[: end_m.start()] if end_m else rest
 
 
 # --------------------------------------------------------- Execution_Policy carve-out (:47)
@@ -165,20 +156,20 @@ def test_paper_eval_rubric_line_68_untouched():
 
 # --------------------------------------------------------- output-layout.md
 def test_layout_tree_has_reviews_log_entry():
-    sec2 = _layout_section(r"^## 2\. Fixed directory structure", r"^## 3\.")
+    sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     assert "reviews-log.md" in sec2
     assert "append-only" in sec2
 
 
 def test_layout_cleanup_table_has_keep_fate_row():
-    sec5 = _layout_section(r"^## 5\. Terminal cleanup", r"^## 6\.")
+    sec5 = layout_section(LAYOUT, r"^## 5\. Terminal cleanup", r"^## 6\.")
     reviews_log_lines = [ln for ln in sec5.splitlines() if "reviews-log.md" in ln]
     assert reviews_log_lines, "§5 cleanup table missing reviews-log.md row"
     assert any("KEEP" in ln for ln in reviews_log_lines)
 
 
 def test_layout_checklist_has_mock_review_row():
-    sec6 = _layout_section(r"^## 6\. Implementation checklist", r"\Z")
+    sec6 = layout_section(LAYOUT, r"^## 6\. Implementation checklist", r"\Z")
     assert "scholar-mock-review" in sec6
     assert "reviews-log.md" in sec6
     assert "calling session" in sec6
