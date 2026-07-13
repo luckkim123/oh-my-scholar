@@ -70,6 +70,12 @@ heavy, consequential decision. It therefore travels the gated path:
 the human gate plus `scholar-learn`'s write step perform the write. (Design §8 #4: judgment ≠
 approval ≠ enforcement — the three-way separation that forbids self-approval.)
 
+> **Third lane — reference-card anchoring.** A separate, human-gated verb promotes a mature
+> *global*-wiki cluster into a `references/` card (not a `venues.md` default) — distinct from
+> both venue-default promotion above and the local→global wiki elevation (§1.4). Trigger, verb,
+> and dev-mode guard live in `scholar-learn`'s Step 6 (`skill-bodies/scholar-learn/SKILL.md`) —
+> not restated here.
+
 ### Light channel — PATTERNS / DECISIONS (`wiki/*.md` auto-append, grep recall, no gate)
 
 A **pattern or decision** is a note about how this user works that is useful to *remember* but
