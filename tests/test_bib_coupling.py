@@ -115,3 +115,19 @@ def test_entry_re_matches_cite_guard_pattern():
     m = re.search(r"ENTRY_RE = re\.compile\((.+)\)", guard)
     assert m, "hooks/scholar_cite_guard.py ENTRY_RE pattern not found"
     assert bc.ENTRY_RE.pattern == eval(m.group(1))
+
+
+def test_title_field_not_matched_inside_booktitle():
+    """M1 regression: `booktitle` before `title` (or alone) must never be read as the title."""
+    entry = '@inproceedings{k1,\n  booktitle = {Proc of ICRA},\n  title = {Real Title},\n}'
+    assert bc._extract_field(entry, "title") == "Real Title"
+    only_book = '@inproceedings{k2,\n  booktitle = {Proc of ICRA},\n}'
+    assert bc._extract_field(only_book, "title") is None
+
+
+def test_identity_key_strips_doi_url_prefix():
+    """M2 regression: 10.1/x must couple with its https://doi.org/ (and dx.doi.org) URL form."""
+    bare = bc.identity_key("10.1/X", "")
+    assert bare == "10.1/x"
+    assert bc.identity_key("https://doi.org/10.1/X", "") == bare
+    assert bc.identity_key("http://dx.doi.org/10.1/x", "") == bare

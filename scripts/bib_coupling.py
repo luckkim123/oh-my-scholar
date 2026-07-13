@@ -29,7 +29,8 @@ def _norm(s: str) -> str:
 
 
 def _extract_field(entry: str, field: str) -> str:
-    m = re.search(rf"{field}\s*=\s*", entry, re.IGNORECASE)
+    # delimiter-anchored so `title` never matches inside `booktitle`/`subtitle`
+    m = re.search(rf"(?:^|[\s,{{]){re.escape(field)}\s*=\s*", entry, re.IGNORECASE)
     if not m:
         return None
     rest = entry[m.end():]
@@ -61,7 +62,8 @@ def split_entries(text: str) -> list:
 
 def identity_key(doi: str, title: str) -> str:
     if doi:
-        return doi.strip().lower()
+        # normalize URL-form DOIs so 10.1/x couples with https://doi.org/10.1/x
+        return re.sub(r"^https?://(dx\.)?doi\.org/", "", doi.strip().lower())
     return _norm(title)
 
 
