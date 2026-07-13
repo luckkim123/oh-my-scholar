@@ -88,8 +88,8 @@ All notable changes to oh-my-scholar (oms).
   empty-Priority-Context drop path comment; the compact-time SessionStart "6 fires" investigation; `oms doctor`
   PASS-row suppression (cosmetic); `sync_version.py` row() wording coupling; a basename ceiling comment. The
   stray `.omc/state/` contamination inside the live global wiki is a **claudebase ticket**, not R4 — the audit
-  script correctly *finds* it (dot-directories are skipped, so it never surfaces as a finding) but R4 does not
-  delete it.
+  script correctly does *not* surface it (dot-directories are skipped by the scan), and R4 does not delete it
+  either.
 
 ### Verification
 - `python3 -m pytest tests/ -q` — **382 passed** (up from 287 at the R3 merge-base; R4 added 95 tests across
