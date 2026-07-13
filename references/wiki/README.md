@@ -86,6 +86,14 @@ sightings: 3
   (If re-verification is needed, look at the relevant sections of these two slugs — not a citation, internal navigation.)
 ```
 
+### `reference/` few-shot review examples (scholar-mock-review calibration, R5 #32)
+
+A `reference/` note named `venue-review-examples-<venue>.md` holds user-collected real reviews for that venue —
+private, hand-pasted by the user, and **never shipped** with the plugin (same non-distribution rule as the rest
+of `.oms/wiki/`). `scholar-reviewer` (lens mode) reads it when present through the same 2-tier
+`wiki_query(category="reference")` contract already specified below — no new mechanism, no embedding search.
+When absent, the lens proceeds on its own judgment only (same graceful-degrade rule as every other category).
+
 ---
 
 ## Frontmatter standard (thin, stdlib-parsable)

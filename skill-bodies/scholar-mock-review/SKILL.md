@@ -72,6 +72,8 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
    - Inputs: 3-lens outputs + venue form.
    - re-check (drop unanchored weaknesses · demote novelty) → venue-scale per-axis scores → accept-bias calibration
      → venue-native final verdict → rebuttal/revision guide.
+   - **Concession-threshold**: the AC lowers a weakness's severity or raises a score only on concrete anchored
+     evidence (a quote/number/experiment) — never on rhetorical concession, author confidence, or repetition.
 4. **Verdict-history append + meta-review (calling session, not the dispatched agent)** — after Step 3's AC synthesis
    completes, the orchestrating SKILL flow itself (**this calling session** — never
    `Task(subagent_type="oh-my-scholar:scholar-reviewer", ...)`, which is read-only) appends one dated entry to

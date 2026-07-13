@@ -42,6 +42,15 @@ Strengths/Weaknesses are evaluated against originality·quality·clarity·signif
 
 **Verdict**: Overall score + accept/borderline/reject. No revision stage → "what the rebuttal must address".
 
+### Score bands (populate from public venue stats — keep a source URL per row; never guess)
+
+| Band | Meaning | Source |
+|:--|:--|:--|
+| _(empty — add a row only from this venue's verified public acceptance-rate/score-distribution stats)_ | | |
+
+Read by `scholar-reviewer` (lens/AC) when populated; when empty, state "no calibration data — uncalibrated
+venue-scale estimate" rather than guessing a band.
+
 ---
 
 ## Form 2 — CVPR / ICCV (vision conferences)
@@ -64,6 +73,15 @@ Venue norms (must be reflected):
 
 ⚠️ The labels (Strong Accept … Strong Reject) are verified. The integer mapping (5/4/3/2/1 vs a 6-point variant)
 **differs per year's OpenReview form** — confirm that year's form before hardcoding. v1 uses labels only.
+
+### Score bands (populate from public venue stats — keep a source URL per row; never guess)
+
+| Band | Meaning | Source |
+|:--|:--|:--|
+| _(empty — add a row only from this venue's verified public acceptance-rate/score-distribution stats)_ | | |
+
+Read by `scholar-reviewer` (lens/AC) when populated; when empty, state "no calibration data — uncalibrated
+venue-scale estimate" rather than guessing a band.
 
 ---
 
@@ -94,6 +112,15 @@ to convert the letter into a number for aggregation — it is not a score the re
 
 **Verdict**: a single letter grade (A~D) + overall free-text. No per-axis numeric sub-scores, no revision stage.
 
+### Score bands (populate from public venue stats — keep a source URL per row; never guess)
+
+| Band | Meaning | Source |
+|:--|:--|:--|
+| _(empty — add a row only from this venue's verified public acceptance-rate/score-distribution stats)_ | | |
+
+Read by `scholar-reviewer` (lens/AC) when populated; when empty, state "no calibration data — uncalibrated
+venue-scale estimate" rather than guessing a band.
+
 ---
 
 ## Form 4 — Journals (IEEE T-RO · RA-L, etc.)
@@ -110,6 +137,15 @@ Source: IEEE Transactions / RA-L editorial conventions.
 **The key difference from conferences = only here does major/minor revision exist.** If the author
 wants a "revision verdict", first confirm whether the venue is a journal — if a conference, correct it
 to accept/reject + rebuttal and advise accordingly.
+
+### Score bands (populate from public venue stats — keep a source URL per row; never guess)
+
+| Band | Meaning | Source |
+|:--|:--|:--|
+| _(empty — add a row only from this venue's verified public acceptance-rate/score-distribution stats)_ | | |
+
+Read by `scholar-reviewer` (lens/AC) when populated; when empty, state "no calibration data — uncalibrated
+venue-scale estimate" rather than guessing a band.
 
 ---
 
