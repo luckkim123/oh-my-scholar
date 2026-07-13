@@ -68,7 +68,7 @@ Since v0.6.0 principle 2 is **enforced, not just stated**: a PreToolUse interloc
 | scholar-planner | opus | read-only | outline·story arc |
 | scholar-inspector | opus | read-only | formative critique (logic/prose) — coach |
 | scholar-reviewer | opus | read-only | adjudicative judgment (3 lenses + AC, venue score·verdict) |
-| scholar-verifier | opus | read-only | summative automated gate |
+| scholar-verifier | sonnet | read-only | summative automated gate |
 | scholar-drafter | sonnet | write | the only .tex/.bib author (single, careful) |
 
 ## Routing

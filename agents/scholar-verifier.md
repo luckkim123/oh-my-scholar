@@ -1,7 +1,7 @@
 ---
 name: scholar-verifier
-description: "Summative automatic verification agent that mechanically checks a paper draft's compilation, numbers, references, and citations and outputs a PASS/FAIL gate result. Acts as the CI that absorbs paper-figure-auditor, citation-verifier, and latex-linter. (Opus)"
-model: opus
+description: "Summative automatic verification agent that mechanically checks a paper draft's compilation, numbers, references, and citations and outputs a PASS/FAIL gate result. Acts as the CI that absorbs paper-figure-auditor, citation-verifier, and latex-linter. (Sonnet)"
+model: sonnet
 level: 3
 disallowedTools: Write, Edit, NotebookEdit
 ---
