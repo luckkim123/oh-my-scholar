@@ -66,3 +66,54 @@ def test_deep_read_mode_has_its_own_quote_anchor_reuse_note():
 def test_skill_points_to_citation_lookup_contract():
     assert re.search(r"citation_lookup\(", SKILL), "citation_lookup() 계약 포인터 누락"
     assert "references/wiki/README.md" in SKILL, "wiki README 경로 포인터 누락"
+
+
+# =========================================================== R6 U3 (#37): Steps rework — 4-field
+# delegation template, fan-out sizing/cap, interleaved gap-check, stopping heuristic, clustering.
+# The load-bearing Execution_Policy sentence (parallel citation generation is prohibited) must
+# survive the Steps rework byte-unchanged (D10-adjacent freeze — U1/U2 also edit this region).
+
+def test_execution_policy_parallel_citation_prohibition_untouched():
+    idx = SKILL.index("<Execution_Policy>")
+    end = SKILL.index("</Execution_Policy>")
+    sec = SKILL[idx:end]
+    assert "parallel citation generation is prohibited" in sec
+
+
+def test_step2_has_4field_delegation_template():
+    assert "4-field delegation template" in SKILL
+    assert re.search(r"\*\*Objective\*\*", SKILL)
+    assert re.search(r"\*\*Output format\*\*", SKILL)
+    assert re.search(r"\*\*Tool guidance\*\*", SKILL)
+    assert re.search(r"\*\*Boundaries\*\*", SKILL)
+
+
+def test_single_dispatch_not_authorized_as_parallel_fanout():
+    """Acceptance sub-check (U3): the fan-out text cannot be read as authorizing
+    parallel Task(mode=gap-research) dispatches — exactly one dispatch call in the body."""
+    hits = re.findall(r'Task\(subagent_type="oh-my-scholar:scholar-researcher"', SKILL)
+    assert len(hits) == 1
+    assert "never a second parallel `mode=gap-research` dispatch" in SKILL
+
+
+def test_fanout_cap_anchored_to_mock_review_precedent():
+    assert "3 concurrent read batches" in SKILL
+    assert "mock-review" in SKILL
+
+
+def test_interleaved_gap_check():
+    assert re.search(r"re-derive the gap list", SKILL)
+
+
+def test_stopping_heuristic_marginal_returns():
+    assert "2 consecutive batches" in SKILL
+    assert "no new method family" in SKILL
+    assert "no new gap" in SKILL
+    assert '"until exhausted"' in SKILL
+    assert "Undermind" in SKILL
+
+
+def test_clustering_step_optional_and_advisory():
+    assert "scripts/bib_coupling.py" in SKILL
+    assert re.search(r"\boptional\b", SKILL, re.I)
+    assert re.search(r"\badvisory\b", SKILL, re.I)
