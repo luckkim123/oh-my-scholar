@@ -72,17 +72,44 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
    - Inputs: 3-lens outputs + venue form.
    - re-check (drop unanchored weaknesses · demote novelty) → venue-scale per-axis scores → accept-bias calibration
      → venue-native final verdict → rebuttal/revision guide.
+   - **Concession-threshold**: the AC lowers a weakness's severity or raises a score only on concrete anchored
+     evidence (a quote/number/experiment) — never on rhetorical concession, author confidence, or repetition.
 4. **Verdict-history append + meta-review (calling session, not the dispatched agent)** — after Step 3's AC synthesis
    completes, the orchestrating SKILL flow itself (**this calling session** — never
    `Task(subagent_type="oh-my-scholar:scholar-reviewer", ...)`, which is read-only) appends one dated entry to
    `.oms/<slug>/reviews-log.md`: date, venue, lens set, per-axis venue-scale scores, final verdict, top weakness
-   types (one line each, anchors kept), rebuttal flag — **append-only, create-if-absent**, never touching
+   types (one line each, anchors kept), rebuttal flag (`true` when `--with-rebuttal` ran, else `false`) + a
+   one-line delta summary when it did — **append-only, create-if-absent**, never touching
    `.tex`/`.bib` (see `references/output-layout.md` §2 for the file's place in the per-slug tree).
    - **Meta-review sub-step** — run only when the log holds **at least 3 entries**, or the user explicitly asks for
      it: mine recurring weakness *types* across the logged entries; flag **"always-moderate"** score drift (all
      verdicts sitting in the borderline band with low variance = calibration suspicion, not genuine convergence).
      Output is a set of **proposed** lens-prompt tweaks, presented at a **human gate** — never auto-applied; lens
      prompts are edited by the human only.
+   - **Rebuttal round (`--with-rebuttal`, opt-in)** — turns the rebuttal/revision guide (Output below) into a
+     measured round with a delta report. Skipped entirely unless the flag is passed; without it Steps 1-4 above
+     are unchanged.
+     - **(a) Lock**: record each lens's per-lens pre-rebuttal verdict and the AC's per-axis venue-scale scores
+       **verbatim**, exactly as already in hand from Step 2/3 — lenses are never re-asked to restate their
+       originals. The locked block is quoted in the final output.
+     - **(b) Author rebuttal (human gate, D8)**: the calling session drafts point-by-point candidate responses
+       to the AC's prioritized author questions, each anchored to paper text or verified evidence (an
+       anchor-less response is marked as such); the human edits/approves the rebuttal before anything is
+       re-dispatched.
+     - **(c) Reconsider**: re-dispatch the SAME 3 lens roles —
+       `Task(subagent_type="oh-my-scholar:scholar-reviewer", mode="lens", ...)` ×3, parallel, read-only — each
+       given the original paper target, its own locked pre-rebuttal review, and the approved rebuttal.
+       Anchoring-aware instruction (human reviewers systematically under-adjust — the AgentReview lesson):
+       each lens judges ONLY whether a rebuttal response materially addresses its flagged weakness, and
+       re-scores per axis with a verdict of `addressed | partially | unaddressed` per weakness, each anchored.
+     - **(d) AC delta report**: `Task(subagent_type="oh-my-scholar:scholar-reviewer", mode="area-chair", ...)`
+       synthesizes a pre-vs-post score table per axis + a per-weakness `fixable` (addressed by the rebuttal) vs
+       `fundamental` (untouched core weakness) classification. The final verdict may move **at most one
+       venue-scale band per axis** — an **LLM-sycophancy countermeasure** (distinct from the under-adjustment
+       guardrail in (c): that one fights reviewers being too stingy with credit, this one fights an LLM AC being
+       too generous with a well-worded rebuttal).
+     - **(e)** the rebuttal flag and delta summary **fold into the field list above** — one write, one owner;
+       this is NOT a separate reviews-log append step.
 5. **Output the synthesis report** (Output below) — including the disclaimer.
 6. Guide: "to fix by reflecting the weaknesses → scholar-revise, for the mechanical gate → scholar-verify."
 </Steps>
@@ -99,4 +126,7 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 - Meta-review report (only when Step 4's gate fires — **at least 3** log entries or explicit user request): recurring
   weakness types, **"always-moderate"** drift flag (if triggered), proposed lens-prompt tweaks — presented at a
   **human gate**, never auto-applied
+- Rebuttal delta report (only when `--with-rebuttal` ran): the locked pre-rebuttal block, the approved rebuttal,
+  per-weakness `addressed | partially | unaddressed` verdicts, a pre-vs-post per-axis score table, per-weakness
+  `fixable`/`fundamental` classification, and the one-venue-scale-band cap note
 </Output>

@@ -3,6 +3,7 @@
 > Per-conference/journal constraint SSOT. Referenced by scholar-outline (sections/pages), scholar-verify (page_limit/citation count), and scholar-drafter (class/template). A simplified absorption of the paper-write venues YAML.
 >
 > ⚠️ **The per-venue *review form* (score axes, scales, verdict vocabulary) is NOT here — its SSOT is `rubrics/venue-review-forms.md`** — scholar-mock-review/scholar-reviewer read that card. This card holds *constraints* (page_limit/min_citations/sections); that card holds the *review form* (NeurIPS 1-4/1-10, IROS letter A~D, journal minor/major revision). Role separation.
+> Score bands (optional per-venue calibration data — band/meaning/source) live inside that same card too, as a per-form slot: see `rubrics/venue-review-forms.md`'s "Score bands" block. This card keeps delegating that content — no score data lands here.
 
 ## Schema
 

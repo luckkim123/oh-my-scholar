@@ -43,18 +43,30 @@ def test_context_states_stage_emit_contract():
 
 
 def test_context_lists_all_stages():
-    """③ 11개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
+    """③ 13개 단계가 contract 에 모두 열거돼야 (skill 과 정합).
 
     deepen 은 scholar-deepen 스킬(research↔ideate 사이 모호성 게이트)이
     실재하므로 STAGE 카탈로그에 포함돼야 한다 (T14 에서 추가).
     learn 은 scholar-learn 스킬(관찰→venue 기본값 승격, 사람 게이트)이
     실재하므로 메타 단계로 포함돼야 한다 (H9 에서 추가).
     init 은 scholar-init 스킬(0단계 부트스트랩 — 새 논문 시작)이 실재하므로
-    포함돼야 한다 (scholar-init 도입에서 추가)."""
+    포함돼야 한다 (scholar-init 도입에서 추가).
+    read/discuss 는 R5 T2/T3 의 scholar-read·scholar-discuss 스킬이 실재하므로
+    보조 단계로 포함돼야 한다 (D7: 라우팅 enum 확장은 T3 한 번, 두 스킬 모두)."""
     out = context_of(run_hook({"prompt": "논문 작업"}))
     for stage in ("init", "research", "deepen", "ideate", "outline", "draft",
-                  "inspect", "verify", "revise", "learn", "scholar-pilot"):
+                  "inspect", "verify", "revise", "learn", "read", "discuss", "scholar-pilot"):
         assert stage in out, f"stage '{stage}' missing from contract"
+
+
+def test_read_discuss_stages_described_in_checkpoint():
+    """③-e R5 T3: read/discuss 보조 단계 설명이 STAGE 카탈로그 본문에도 등장해야
+    (토큰 줄뿐 아니라 단계 설명 문단에도 — omha ROUTE 카드와 동형 규율)."""
+    out = context_of(run_hook({"prompt": "논문 작업"}))
+    assert "read(" in out
+    assert "discuss(" in out
+    assert ".oms/reading/" in out
+    assert "자동 적용 금지" in out  # D9: outline 델타는 제안만, 자동 적용 금지
 
 
 def test_init_stage_is_bootstrap_zero():
@@ -194,3 +206,20 @@ def test_paper_prompt_still_injects_full_checkpoint():
     out = context_of(run_hook({"prompt": "이 논문 introduction 초안 써줘"}))
     assert "STAGE(paper) →" in out
     assert "누락 금지" in out
+
+
+def test_bare_read_and_discuss_words_do_not_trigger():
+    """⑩-f R5 T3: bare 토큰 'read'/'discuss' 는 relevance-gate 키워드가 아니다 —
+    scholar-read/scholar-discuss 의 Triggers 는 다단어 구문만(`deep read`,
+    `discuss this idea` 등). 일상 프롬프트에 그 단어가 섞여도 4KB CHECKPOINT
+    injection tax 가 붙으면 안 된다."""
+    assert run_hook({"prompt": "please read the attached file and summarize it"}).strip() == ""
+    assert run_hook({"prompt": "let's discuss dinner plans for tonight"}).strip() == ""
+
+
+def test_phrase_triggers_do_inject():
+    """⑩-g R5 T3: scholar-read/scholar-discuss 의 다단어 Trigger 구문은 실제로
+    injection 을 발동시켜야 (⑩-f 의 대조 확인 — 게이트가 죽은 게 아니라 선택적)."""
+    assert run_hook({"prompt": "can you deep read this for me"}).strip() != ""
+    assert run_hook({"prompt": "I want to discuss this idea with you"}).strip() != ""
+    assert run_hook({"prompt": "be my devil's advocate here"}).strip() != ""

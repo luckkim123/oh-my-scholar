@@ -29,3 +29,34 @@ def test_agent_quote_missing_degrade():
 def test_skill_mentions_anchoring_and_faithfulness_feed():
     assert re.search(r"quote", SKILL, re.I), "SKILL 에 quote 앵커 지시 누락"
     assert re.search(r"claim-faithfulness|faithfulness", SKILL, re.I), "verify 연계(#3 feed) 언급 누락"
+
+
+# =========================================================== R5 T2 (#28): mode=deep-read addition
+#
+# scholar-researcher gains a second mode (mode=deep-read, for scholar-read) alongside the
+# existing default mode=gap-research. These tests lock the mode split itself; the fuller
+# deep-read output-contract/RETRACTED/injection-hygiene locks live in test_scholar_read_skill.py
+# (which owns the new skill), so this file stays scoped to what it already owned: the quote-anchor
+# contract still holding for BOTH modes after the split.
+
+def test_agent_has_two_named_modes():
+    assert "mode=gap-research" in AGENT
+    assert "mode=deep-read" in AGENT
+    assert re.search(r"invoked in one of two modes", AGENT, re.I)
+
+
+def test_quote_anchor_contract_still_applies_to_gap_research_after_split():
+    """Discriminance: the original R1 #5 Success_Criteria sentence (mode=gap-research's contract)
+    was not deleted or reworded when the mode split was introduced."""
+    idx = AGENT.index("<Success_Criteria>")
+    end = AGENT.index("</Success_Criteria>")
+    sec = AGENT[idx:end]
+    assert "never reconstructed from memory" in sec
+    assert "quote-missing (abstract-only)" in sec
+
+
+def test_deep_read_mode_has_its_own_quote_anchor_reuse_note():
+    idx = AGENT.index("### mode=deep-read")
+    end = AGENT.index("</Investigation_Protocol>")
+    sec = AGENT[idx:end]
+    assert re.search(r"same quote-anchor contract as mode=gap-research", sec, re.I)

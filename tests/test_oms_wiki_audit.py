@@ -185,12 +185,44 @@ def test_orphan_mention_requires_exact_name(tmp_path, capsys):
     assert not _lines_with(out, "convention/web.md", "orphan")
 
 
+def test_orphan_cleared_by_index_only_mention(tmp_path, capsys):
+    """T8 #1 (regression) — a content file with zero inbound refs and no
+    README, mentioned ONLY by the generated INDEX.md, must NOT WARN as
+    orphan once INDEX.md exists (INDEX.md is in META_FILENAMES's mention
+    text same as README.md — the generated artifact neutralizes the
+    orphan finding it created)."""
+    _write(tmp_path, "convention/lonely.md", _fm() + "# Lonely\n\nbody\n")
+    # No README.md anywhere -- the only possible mention is INDEX.md itself.
+
+    assert owa.main(["--root", str(tmp_path), "--write-index"]) == 0
+    out = capsys.readouterr().out
+    assert not _lines_with(out, "lonely.md", "orphan")
+
+    # And a later, separate plain-run invocation (INDEX.md now on disk)
+    # must agree -- not just the re-scan inside the --write-index call.
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out2 = capsys.readouterr().out
+    assert not _lines_with(out2, "lonely.md", "orphan")
+
+
 def test_missing_frontmatter_warns(tmp_path, capsys):
     _write(tmp_path, "convention/nofm.md", "# No Frontmatter\n\nbody\n")
 
     assert owa.main(["--root", str(tmp_path)]) == 0
     out = capsys.readouterr().out
     assert _lines_with(out, "nofm.md", "WARN", "no frontmatter")
+    assert not _lines_with(out, "nofm.md", "malformed")
+
+
+def test_malformed_frontmatter_warns(tmp_path, capsys):
+    """T8 #2 — opening `---` fence with no closing fence is a DIFFERENT
+    finding from no fence at all: "malformed", not "no frontmatter"."""
+    _write(tmp_path, "convention/broken.md", "---\nconfidence: high\n# Broken\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert _lines_with(out, "broken.md", "WARN", "malformed frontmatter")
+    assert not _lines_with(out, "broken.md", "WARN", "no frontmatter")
 
 
 def test_bad_confidence_warns(tmp_path, capsys):
