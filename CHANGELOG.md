@@ -4,6 +4,41 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-07-14
+
+### Added
+- **Actionable-status wiki convention (family wiki-status backport)** (`references/wiki/README.md`,
+  `scripts/oms_wiki_audit.py`, `skill-bodies/scholar-verify/SKILL.md`, `tests/test_oms_wiki_audit.py`) —
+  a wiki note may now carry an optional `status: open-gap | resolved` frontmatter field (plus
+  `blocked-on: <free text>` when open). `open-gap` marks an unresolved reviewer/audit finding that
+  must ride every summary until closed; `resolved` is terminal; **absent = not actionable** (every
+  existing note, byte-unchanged). This is the oms adaptation of the om*-family fix for the class of
+  failure where actionable knowledge is recorded in the wiki but silently dropped from the dependent
+  artifact — the wiki succeeds as an archive yet fails as a gate.
+  - `oms_wiki_audit.py` gains a new `open_gaps` dimension that enumerates every `open-gap` note
+    tree-wide (keyword-independent — walks the whole tree, not a ranked query), so a recorded finding
+    cannot silently drop out of the next draft. A typo'd status is a WARN in the `frontmatter`
+    dimension (`status` not in `{open-gap, resolved}`), because a mistyped value would silently leave
+    the enumeration — the failure class itself.
+  - `scholar-verify` gains an **Open wiki gaps (WARN)** check: it runs the `open_gaps` enumeration and
+    refuses a clean PASS while any `open-gap` note is neither addressed in the draft nor explicitly
+    deferred in the verdict. This is oms's carry-forward boundary (the summative gate). WARN only —
+    oms has no launch boundary to hard-block at — so it does not count toward FAIL.
+  - `grep -rl '^status: open-gap' .oms/wiki/` is the family-wide fallback enumeration (the on-disk
+    `status:`/`blocked-on:` keys are identical across every om* harness).
+
+### Verification
+- `python3 -m pytest tests/test_oms_wiki_audit.py tests/test_scholar_verify_skill.py tests/test_wiki_spec_docs.py -q`
+  green (5 new open-gap/unknown-status tests added; pre-existing verify-card item locks unaffected).
+
+### Notes
+- **Backwards compatible / additive-optional**: notes without a `status` key never surface as gaps and
+  are byte-unchanged; the audit's frontmatter check stays WARN-never-FAIL. No new subsystem, storage,
+  or scheduler — the existing audit CLI is the enumeration surface and the existing verify gate is the
+  boundary.
+- **Version-skew caveat**: the audit's stdlib splitter only reads `status`/`blocked-on`; it never
+  strips them (read-only), so unlike a rewrite-on-merge tool there is no field-loss risk here.
+
 ## [0.11.0] — 2026-07-14
 
 ### Added

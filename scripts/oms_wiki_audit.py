@@ -28,6 +28,10 @@ from oms_atomic import atomic_write_text  # noqa: E402
 CATEGORIES = ("convention", "pattern", "decision", "reference", "history")
 META_FILENAMES = ("README.md", "INDEX.md")
 CONFIDENCE_VALUES = {"high", "med", "low"}
+# Family wiki-status convention (soft/warn only — oms has no launch boundary to
+# refuse at): `open-gap` = an unresolved reviewer/audit finding that must ride
+# every summary until closed; `resolved` = terminal. Absent = not actionable.
+STATUS_VALUES = {"open-gap", "resolved"}
 
 _H1_RE = re.compile(r'^#(?!#)\s+(.+?)\s*$')
 _HEADING_RE = re.compile(r'^#{2,}\s+(\S+)')
@@ -307,6 +311,33 @@ def check_frontmatter(inv) -> list:
                     "status": "WARN",
                     "message": f'{f["relpath"]}: sightings {fm["sightings"]!r} is not an integer',
                 })
+        if "status" in fm and fm["status"] not in STATUS_VALUES:
+            # a typo'd status silently exits open-gap enumeration -> WARN it.
+            rows.append({
+                "status": "WARN",
+                "message": f'{f["relpath"]}: status {fm["status"]!r} not in {sorted(STATUS_VALUES)}',
+            })
+    return rows
+
+
+# --------------------------------------------------------- check_open_gaps
+def check_open_gaps(inv) -> list:
+    """Enumerate every note flagged `status: open-gap` — keyword-independent by
+    construction (walks the whole tree, not a ranked query), so a reviewer/audit
+    finding recorded here rides every audit close until it is resolved
+    (`status: resolved`) or explicitly deferred in scholar-verify. WARN only:
+    oms has no launch boundary to refuse at. `resolved`/absent do not surface."""
+    rows = []
+    for f in inv["files"]:
+        if f["name"] in META_FILENAMES:
+            continue
+        if f["frontmatter"].get("status") == "open-gap":
+            blocked = f["frontmatter"].get("blocked-on")
+            suffix = f" (blocked-on: {blocked})" if blocked else ""
+            rows.append({
+                "status": "WARN",
+                "message": f'{f["relpath"]}: open gap{suffix} — carry into scholar-verify or resolve',
+            })
     return rows
 
 
@@ -370,6 +401,7 @@ def main(argv=None) -> int:
         ("dangling_refs", check_dangling_refs(inv)),
         ("empty_and_orphan", check_empty_and_orphan(inv, root)),
         ("frontmatter", check_frontmatter(inv)),
+        ("open_gaps", check_open_gaps(inv)),
         ("index", check_index(inv, root)),
     ]
 

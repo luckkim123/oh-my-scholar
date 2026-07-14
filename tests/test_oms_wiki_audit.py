@@ -303,3 +303,61 @@ def test_read_only_without_flag(tmp_path):
 def test_exit_1_on_fail(tmp_path):
     _write(tmp_path, "convention/a.md", _fm() + "# A\n\n[[ghost]]\n")
     assert owa.main(["--root", str(tmp_path)]) == 1
+
+
+# --- actionable-status (open-gap enumeration; family wiki-status convention) ---
+def _fm_status(status, blocked_on=None):
+    extra = f"status: {status}\n"
+    if blocked_on is not None:
+        extra += f"blocked-on: {blocked_on}\n"
+    return f"---\nconfidence: high\nsightings: 1\n{extra}---\n"
+
+
+def test_open_gap_enumerated(tmp_path, capsys):
+    """A note flagged `status: open-gap` surfaces in the open_gaps dimension —
+    keyword-independent (walks the tree), so a reviewer finding cannot silently
+    drop out of the next summary."""
+    _write(tmp_path, "decision/gap.md",
+           _fm_status("open-gap") + "# Missing ablation\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0  # WARN-only, non-blocking
+    out = capsys.readouterr().out
+    assert _lines_with(out, "gap.md", "WARN", "open gap")
+
+
+def test_resolved_status_not_enumerated(tmp_path, capsys):
+    _write(tmp_path, "decision/done.md",
+           _fm_status("resolved") + "# Ablation added\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert not _lines_with(out, "done.md", "open gap")
+
+
+def test_no_status_no_finding(tmp_path, capsys):
+    """Backwards compat: a note without a status key never surfaces as a gap."""
+    _write(tmp_path, "decision/plain.md", _fm() + "# Plain\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert not _lines_with(out, "plain.md", "open gap")
+
+
+def test_unknown_status_warns(tmp_path, capsys):
+    """A typo'd status silently exits enumeration (the failure class) -> WARN."""
+    _write(tmp_path, "decision/typo.md",
+           _fm_status("open-gpa") + "# Typo\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert _lines_with(out, "typo.md", "WARN", "status")
+
+
+def test_open_gap_shows_blocked_on(tmp_path, capsys):
+    _write(tmp_path, "decision/gap.md",
+           _fm_status("open-gap", blocked_on="need reviewer count from PC") +
+           "# Missing ablation\n\nbody\n")
+
+    assert owa.main(["--root", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert _lines_with(out, "gap.md", "open gap", "reviewer count")
