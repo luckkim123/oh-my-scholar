@@ -4,6 +4,8 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-07-14
+
 ### Added
 - **`citation_lookup()` MCP swap-point contract** (#35, `references/wiki/README.md`,
   `skill-bodies/scholar-research/SKILL.md`, `tests/test_wiki_spec_docs.py`,
@@ -42,6 +44,16 @@ All notable changes to oh-my-scholar (oms).
   prohibited" sentence stay byte-unchanged (D10/E5); a new phrase-lock test pins that sentence since
   U1/U2/U3 all edit the same region.
 
+### Fixed
+- **`bib_coupling.py` final-review Minors (M1/M2)** — field extraction is delimiter-anchored so `title`
+  never matches inside `booktitle`/`subtitle`; URL-form DOIs (`https://doi.org/…`, `dx.doi.org`) are
+  normalized so they couple with their bare form. Both regression-tested (`tests/test_bib_coupling.py`).
+- **Footprint tests skip `.claude/`** (`tests/test_scholar_pilot_skill.py`,
+  `tests/test_scholar_pilot_moderator.py`) — the R5 footprint scans walked `ROOT.rglob("*")` excluding
+  only `.git`/`node_modules`, so nested worktree checkouts under `.claude/worktrees/` leaked into the
+  scan and failed the suite on the main checkout (surfaced right after the R5 squash-merge; green in
+  any fresh clone — the tagged trees themselves are sound).
+
 ### Notes
 - **Version bump deferred** — `plugin.json` stays `0.10.0` in this PR; `v0.10.0` is still untagged
   (R6 is stacked on the unmerged `feat/r5-research-companion`). Two pre-existing live-repo locks
@@ -50,8 +62,9 @@ All notable changes to oh-my-scholar (oms).
   release stack, so the bump waits rather than weakening those locks. **Post-merge procedure** (human,
   documented in the PR body): after R5 squash-merges, `v0.10.0` is tagged, and R6 merges back onto
   main (`git merge -X ours origin/main`) — one mechanical commit bumps `plugin.json` → `0.11.0` and
-  retitles this `## [Unreleased]` section to `## [0.11.0] — <date>` (with a fresh empty `[Unreleased]`
-  above it), then R6 merges and `v0.11.0` is tagged.
+  retitles this section (formerly `## [Unreleased]`) to `## [0.11.0] — 2026-07-14` (with a fresh empty
+  `[Unreleased]` above it), then R6 merges and `v0.11.0` is tagged. **Executed as documented — this
+  section's retitle IS that mechanical commit.**
 - **Stacked-PR merge order**: this branch's base is `feat/r5-research-companion`; R5 merges first.
 - **omha card follow-up**: after this PR (eventually) merges, `oh-my-heroacademia`'s routing card
   (`cards/oms.json`) needs a separate PR bumping to `0.11.0` — out of this repo's scope; `sync_version.py`
@@ -61,12 +74,13 @@ All notable changes to oh-my-scholar (oms).
   artifacts) remain out of scope, unchanged from R5's Notes.
 
 ### Verification
-- `python3 -m pytest tests/ -q` — **553 passed** (up from 518 at the R5 merge-base; R6 added 35 tests
+- `python3 -m pytest tests/ -q` — **555 passed** (up from 518 at the R5 merge-base; R6 added 37 tests
   across `tests/test_bib_coupling.py` (new) and extensions to `tests/test_wiki_spec_docs.py`,
   `tests/test_researcher_quote_anchor.py`, `tests/test_grobid_card.py` (new)).
 - `python3 scripts/sync_version.py` — exit 1, identical state to the R5 branch: `plugin`/`changelog`/`tag`
-  rows PASS (pre-tag window), `card:` DRIFT only (foreign `cards/oms.json` still reads 0.8.0).
-  `oms_doctor.py` routes `card:` to WARN, so the doctor run stays exit 0 — same pattern as R4/R5.
+  rows PASS (pre-tag window), `card:` DRIFT only (foreign `cards/oms.json` read 0.8.0 at review time,
+  0.9.0 after omha PR #5; the 0.11.0 card PR follows this merge). `oms_doctor.py` routes `card:` to WARN,
+  so the doctor run stays exit 0 — same pattern as R4/R5.
 
 ## [0.10.0] — 2026-07-14
 
