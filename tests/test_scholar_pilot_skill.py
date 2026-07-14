@@ -193,7 +193,7 @@ def test_research_log_footprint_limited_to_output_layout_pilot_and_tests():
             continue
         rel = path.relative_to(ROOT)
         parts = rel.parts
-        if parts[0] in (".git", "node_modules"):
+        if parts[0] in (".git", "node_modules", ".claude"):
             continue
         try:
             text = path.read_text(encoding="utf-8")

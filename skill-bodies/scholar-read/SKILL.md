@@ -33,7 +33,7 @@ Turn "read this paper for me" into a structured, citation-safe reading note. Del
 </Execution_Policy>
 
 <Steps>
-1. **Resolve the input**: a PDF path (under `refs/` or elsewhere), an arXiv id/URL, or pasted text. Extract whatever title/authors/venue/DOI is available from it. (A future optional accelerator — GROBID-based structured PDF intake — is out of scope here, tracked as R6 #36; today's resolution is manual/Read-based.)
+1. **Resolve the input**: a PDF path (under `refs/` or elsewhere), an arXiv id/URL, or pasted text. Extract whatever title/authors/venue/DOI is available from it. (An optional accelerator — GROBID-based structured PDF intake — is documented at `references/grobid-intake.md`; today's resolution is manual/Read-based, and its absence changes nothing about this step.)
 2. **Mechanical identity pre-check** — when a DOI or title is available, run `python3 scripts/verify_bib_entry.py --key <citekey> --title "<title>" --doi "<doi>" --author "<first-author-family>"` (no `--record`). Read the `VERDICT=` line: `VERIFIED | MISMATCH | RETRACTED | NOT_FOUND | NETWORK_ERROR`. When neither DOI nor title is resolvable, skip the check and mark `identity: unverified` instead of guessing.
 3. **Single dispatch**: `Task(subagent_type="oh-my-scholar:scholar-researcher", mode="deep-read", ...)`:
    - Input: the resolved paper (path/id/text), the identity verdict from step 2, any project context the caller wants the note related to (optional — `.oms/<slug>/outline/` / `methodology/` paths if relevant)
