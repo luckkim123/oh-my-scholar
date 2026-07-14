@@ -54,6 +54,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
      - **Uncited-claim scan (WARN)**: claim-shaped sentences without \cite — WARN list, human judges (never auto-cite).
      - **Blind-review anonymization (WARN)**: only when the mapped venue form/venues.md indicates double-blind — grep for `\author`/`\thanks`/acknowledgment blocks, self-identifying phrases, non-anonymized repo/grant IDs. No such indication → N/A. WARN with locations, never auto-edits.
      - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
+     - **Open wiki gaps (WARN — family wiki-status convention)**: if a wiki root exists (check first — the script exits 2 rather than reporting N/A on a missing root), run `python3 scripts/oms_wiki_audit.py --root <wiki-root>` and read its `open_gaps` dimension (equivalently `grep -rlE '^status:\s*open-gap' <wiki-root>`). Every note flagged `status: open-gap` must be either addressed in this draft or explicitly deferred in the verdict — an open gap left silent (neither) is a WARN, not a clean PASS. This is the carry-forward boundary: a reviewer/audit finding recorded in the wiki cannot drop out of the next submission without a human deciding to defer it. WARN only (does not count toward FAIL); N/A if no wiki root exists.
 3. Receive the verifier output — collate per-item PASS/FAIL.
 4. If there are FAIL items, classify by fixable_by_llm:
    - fixable_by_llm=true → can be passed to scholar-revise
