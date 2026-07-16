@@ -65,13 +65,13 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
    - does each `learned`-origin item have `learned_refs` provenance (§6.C no silent changes)
    - on mismatch, **WARN only** — not FAIL. ⚠️ verify only **reads** the meta, never repairs it
      (meta repair is `scholar-learn`'s human-gate job). Same as the auto-fix-forbidden principle.
-7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline, claim-faithfulness, blind-review anonymization, open wiki gaps) does not count toward FAIL** — reported only, human judgment).
+7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline, claim-faithfulness, uncited-claim scan, blind-review anonymization, open wiki gaps) does not count toward FAIL** — reported only, human judgment).
 
 **Categorized report (#34 preflight-style)**: scholar-verifier's per-item report reads as a submission checklist — the same PASS/FAIL/WARN rows are grouped under 5 fixed category headers (language / citations / formatting-metadata / tables-figures / declarations), each showing the worst severity among its rows. Presentation only — no check is added, removed, or reweighted, except the new blind-review anonymization (WARN) check, which lands under `declarations` and only runs for venues the mapped venue form/venues.md marks double-blind.
 </Steps>
 
 <Output>
-- Per-item results, grouped under 5 categories (language / citations / formatting-metadata / tables-figures / declarations) with a worst-severity roll-up per category (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), venue meta, blind-review anonymization (double-blind venues only), open wiki gaps PASS/WARN)
+- Per-item results, grouped under 5 categories (language / citations / formatting-metadata / tables-figures / declarations) with a worst-severity roll-up per category (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), uncited-claim scan, venue meta, blind-review anonymization (double-blind venues only), open wiki gaps PASS/WARN)
 - FAIL item details: evidence (log line, grep result, file:line) + fixable_by_llm classification
 - List of unverified citations (no auto-fix — human confirmation only)
 - Final verdict: **PASS** (all items pass) or **FAIL** (N items failed)
