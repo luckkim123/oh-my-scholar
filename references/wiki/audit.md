@@ -14,7 +14,7 @@ python3 <plugin>/scripts/oms_wiki_audit.py --root <wiki-tree>
 - `.oms/wiki/` exists at two levels (`references/wiki/README.md`'s local + global model) and the script takes exactly one `--root` per invocation — no ascent built in. Run it **once per level**: once against the local `.oms/wiki/`, once against the parent global `.oms/wiki/` (found by ascent, same discovery method as `wiki_query`).
 - `--write-index` regenerates `<root>/INDEX.md` — a derived artifact, never hand-edited. Run it only *after* the findings from a plain run have been reviewed, not blind.
 - Exit codes: `0` clean, `1` a FAIL-severity mechanical finding exists, `2` `--root` does not exist or another usage error.
-- The script's `--help` and module docstring are the SSOT for what the five mechanical dimensions check and how each is defined — this card does not re-list them.
+- The script's `--help` and module docstring are the SSOT for what the mechanical dimensions check and how each is defined — this card does not re-list them.
 - **Ambiguous-stem token grammar (boundary note, T8 #3)**: a section token is the first whitespace-delimited word of a `^##+ ` heading, one trailing `.`/`:` stripped, then required to `re.fullmatch(§?[A-Z][0-9]*[a-z]?)` against the *whole* remainder. `H.` and `H-contrast.` never collide — `H-contrast` fails the fullmatch (hyphen + multi-char suffix isn't a token at all), so it is simply not extracted. `F1` and `F1b` never collide either — the optional trailing lowercase letter is part of the token string itself, not stripped, so the two strings are already distinct before comparison. Only an exact string match after this normalization counts as a duplicate-token finding.
 
 ## §2. Judgment dimension A — SSOT-delegation integrity
