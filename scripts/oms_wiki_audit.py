@@ -2,10 +2,10 @@
 per invocation (no ascent — `references/wiki/README.md`'s two-layer model;
 run once per level, local then global).
 
-Five *mechanical* dimensions, each a pure function over an in-memory
+Six *mechanical* dimensions, each a pure function over an in-memory
 `scan()` inventory (unit-testable without I/O): duplicate section tokens,
-dangling cross-refs, empty/orphan categories, frontmatter validity, and
-INDEX.md drift. The single opt-in write path is `--write-index`, which
+dangling cross-refs, empty/orphan categories, frontmatter validity,
+INDEX.md drift, and open actionable gaps (`status: open-gap` enumeration). The single opt-in write path is `--write-index`, which
 (re)generates `<root>/INDEX.md` via `atomic_write_text` (`hooks/oms_atomic.py:69`)
 — a derived artifact, never hand-edited, never "repaired" content.
 

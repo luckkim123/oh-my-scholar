@@ -4,6 +4,21 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-07-16
+
+### Fixed
+
+- **scholar-verify's authoritative WARN enumeration now names every WARN check.** Step 7's
+  "does not count toward FAIL" parenthetical and the Output PASS/WARN list only named
+  meta consistency + abstract discipline, leaving claim-faithfulness, blind-review
+  anonymization, and the new open-wiki-gaps check enumerable only from their own step-2
+  bullets (2026-07-16 wiki-week review). Both sites now carry the complete list.
+- `oms_wiki_audit.py` module docstring: five -> six mechanical dimensions (`open_gaps` was
+  added in 0.12.0 without folding it into the docstring that `references/wiki/audit.md`
+  defers to as the dimension SSOT).
+- CHANGELOG 0.12.0 entry: grep fallback pattern aligned with the 6cbdbf4 loosened form
+  (`^status:\s*open-gap`).
+
 ## [0.12.0] — 2026-07-14
 
 ### Added
@@ -24,7 +39,7 @@ All notable changes to oh-my-scholar (oms).
     refuses a clean PASS while any `open-gap` note is neither addressed in the draft nor explicitly
     deferred in the verdict. This is oms's carry-forward boundary (the summative gate). WARN only —
     oms has no launch boundary to hard-block at — so it does not count toward FAIL.
-  - `grep -rl '^status: open-gap' .oms/wiki/` is the family-wide fallback enumeration (the on-disk
+  - `grep -rlE '^status:\s*open-gap' .oms/wiki/` is the family-wide fallback enumeration (the on-disk
     `status:`/`blocked-on:` keys are identical across every om* harness).
 
 ### Verification
