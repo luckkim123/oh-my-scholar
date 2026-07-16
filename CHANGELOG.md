@@ -4,6 +4,19 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-07-16
+
+### Fixed
+
+- **`references/wiki/audit.md` made dimension-count-agnostic** (2026-07-16 om* wiki audit
+  finding): the card still read "the five mechanical dimensions" while the script docstring —
+  which the same sentence declares to be the SSOT — says six. Rather than correcting the digit
+  (which would drift again on the next dimension change), the count is removed ("the mechanical
+  dimensions"): the card already defers to the docstring and does not re-list the dimensions, so
+  the duplicated fact is deleted instead of guarded by a prose-parsing test.
+- **scholar-verify uncited-claim WARN enumeration** (v0.12.1 verifier finding, committed
+  post-release) ships in this release.
+
 ## [0.12.1] - 2026-07-16
 
 ### Fixed
