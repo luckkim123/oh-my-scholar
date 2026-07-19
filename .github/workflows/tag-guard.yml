@@ -1,0 +1,28 @@
+name: Tag Guard
+
+# actions/checkout@v4 defaults to fetch-tags: false, so a plain checkout
+# leaves the working tree with zero local tags. test_version_sync.py's
+# test_live_repo_surfaces_agree() treats "no tags" as the pre-release-tag
+# window and silently no-ops the tag-drift assertion instead of failing --
+# so ci.yml (checkout without fetch-tags) has never actually exercised the
+# tag-vs-plugin.json comparison. This workflow fetches tags explicitly so
+# the same test runs for real.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tag-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pytest
+      - run: python3 -m pytest tests/test_version_sync.py -q
