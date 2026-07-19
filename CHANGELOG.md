@@ -4,6 +4,12 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`references/wiki/README.md` stale cross-reference** — pointed to a nonexistent
+  `references/formats/venues.md`; corrected to `references/venues.md`, matching every other
+  cross-reference to the venue card in the repo.
+
 ## [0.12.3] - 2026-07-19
 
 ### Fixed
