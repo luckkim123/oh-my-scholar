@@ -29,7 +29,6 @@ House convention (see test_scholar_pilot_skill.py): plain asserts via `skill_md(
 `.index()`-scoped windows, one discriminance test proving the original .tex/.bib prohibition
 sentence survives verbatim inside the carved-out Execution_Policy bullet (not merely
 co-existing nearby text — the exact substring must still be there)."""
-import re
 from pathlib import Path
 
 from conftest import layout_section, skill_md

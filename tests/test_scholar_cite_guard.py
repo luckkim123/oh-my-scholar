@@ -2,7 +2,10 @@
 
 핵심 계약: 미검증 새 .bib entry / dangling \cite 는 deny-with-feedback 으로
 구조적으로 차단하되, 절대 auto-fix 를 지시하지 않는다. 그 외엔 침묵·fail-open."""
-import json, os, subprocess, sys
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 HOOK = Path(__file__).parent.parent / "hooks" / "scholar_cite_guard.py"
