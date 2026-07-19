@@ -3,6 +3,8 @@ merge semantics, strict enums, read never fails. The substrate for #7–#11/#13.
 import importlib.util, json, sys
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).parent.parent / "scripts" / "oms_state.py"
 spec = importlib.util.spec_from_file_location("oms_state", SCRIPT)
 oms_state = importlib.util.module_from_spec(spec)
@@ -149,3 +151,42 @@ def test_strike_defect_id_rejects_path_chars(tmp_path):
     assert run(["strike", "--slug", "s1", "--defect-id", "../x"], tmp_path) == 2
     assert run(["strike", "--slug", "s1", "--defect-id", "a/b"], tmp_path) == 2
     assert (tmp_path / "revise-s1.json").read_text() == before  # no marker mutation
+
+
+# --- slug validation guard, exercised for every remaining verb (only `write`'s
+# own slug check was covered before) — a malformed slug must be refused and no
+# state file may be written anywhere, including the tmp_path's parent.
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["read", "--slug", "../evil"],
+        ["revise-start", "--slug", "../evil"],
+        ["revise-round", "--slug", "../evil"],
+        ["strike", "--slug", "../evil", "--defect-id", "d"],
+        ["revise-end", "--slug", "../evil"],
+    ],
+)
+def test_slug_path_traversal_rejected_for_every_verb(argv, tmp_path, capsys):
+    rc = run(argv, tmp_path)
+    err = capsys.readouterr().err
+    assert rc == 2 and "must match" in err
+    assert not list(tmp_path.glob("*.json"))
+    assert not list(tmp_path.parent.glob("*evil*"))
+
+
+def test_write_requires_stage_on_first_creation(tmp_path):
+    assert run(["write", "--slug", "s1"], tmp_path) == 2
+    assert not (tmp_path / "pilot-s1.json").exists()
+
+
+def test_revise_end_invalid_status_rejected(tmp_path):
+    run(["revise-start", "--slug", "s1"], tmp_path)
+    before = (tmp_path / "revise-s1.json").read_text()
+    assert run(["revise-end", "--slug", "s1", "--status", "vibing"], tmp_path) == 2
+    assert (tmp_path / "revise-s1.json").read_text() == before  # no mutation
+
+
+def test_revise_end_requires_started_loop(tmp_path):
+    assert run(["revise-end", "--slug", "ghost"], tmp_path) == 2
