@@ -162,7 +162,7 @@ citation_lookup(doi_or_title) → verdict + normalized metadata
 
 ## Data this store collects *newly* (net-new — not a migration)
 
-Reject reasons and defect patterns are **net-new data**. The existing `references/formats/venues.md` (or venue cards) only have `page_limit`·`sections`·`quality_threshold` and *no reject field* — so this wiki is not migrated from venue cards; rather, inspector sessions *collect it newly* as they critique and load it in.
+Reject reasons and defect patterns are **net-new data**. The existing `references/venues.md` (or venue cards) only have `page_limit`·`sections`·`quality_threshold` and *no reject field* — so this wiki is not migrated from venue cards; rather, inspector sessions *collect it newly* as they critique and load it in.
 
 The loading party = **scholar-pilot's wiki capture stage automatically** (right after verify, before terminal — `scholar-pilot/SKILL.md` Step 10). It appends the reject patterns discovered in this session by inspect/verify into `convention/<venue>-reject-patterns.md`. When running standalone stages, the caller may load it directly. **Automatic is the default** — this is the write half of the bidirectional loop above. Skipped if the user passes `--no-wiki`. Append-only · pre-check for duplicates with grep · pass through on an empty session · no speculative loading (only what was actually discovered).
 
