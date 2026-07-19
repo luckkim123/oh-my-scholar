@@ -58,7 +58,7 @@ def test_atomic_write_cleans_up_on_failure(tmp_path):
     target = tmp_path / "meta.json"
     with pytest.raises(TypeError):
         atomic_write_json(target, object())  # JSON 직렬화 불가 → json.dump raise
-    leftovers = list(tmp_path.glob(".oms-tmp-*.json"))
+    leftovers = list(tmp_path.glob(".om-tmp-*.json"))
     assert leftovers == [], f"실패 시 임시파일 미정리: {leftovers}"
     assert not target.exists(), "실패인데 target 이 생성됨"
 

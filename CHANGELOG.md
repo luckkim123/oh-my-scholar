@@ -17,6 +17,19 @@ All notable changes to oh-my-scholar (oms).
 - Added a root `LICENSE` (MIT) — `plugin.json` declared `"license": "MIT"` with no license file backing
   the claim.
 
+## [0.13.1] - 2026-07-19
+
+### Changed
+
+- **Vendored `hooks/oms_atomic.py` from the new shared `om-core` repo** — oms was the
+  donor of this primitive, so this is a near-identical content-swap: only the temp-file
+  prefix changed (`.oms-tmp-` -> `.om-tmp-`, no functional change). The failure-cleanup
+  test's glob was updated to match (`test_atomic_write_cleans_up_on_failure`) — a
+  RED/GREEN sanity check confirmed it stays a real (non-vacuous) leftover-temp-file
+  guard after the rename. Adds a local-only `tests/test_atomic_vendored_sync.py` that
+  byte-compares the vendored copy against `~/om-core/atomic_fn.py` and skips gracefully
+  when that sibling repo is absent (clean CI).
+
 ## [0.13.0] - 2026-07-19
 
 ### Added
