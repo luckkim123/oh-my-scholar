@@ -9,6 +9,13 @@ All notable changes to oh-my-scholar (oms).
 - **`references/wiki/README.md` stale cross-reference** — pointed to a nonexistent
   `references/formats/venues.md`; corrected to `references/venues.md`, matching every other
   cross-reference to the venue card in the repo.
+- **README doc-quality sweep**: Status section's version header and pytest count had drifted behind
+  `plugin.json` (0.12.3) and the current test run; the 0.12.0–0.12.3 changes had no summary. Added an
+  Installation section (marketplace-add/install commands via the `oh-my-heroacademia` marketplace,
+  prerequisites, a first-command pointer to `scholar-init`) and a Routing clarification that oms's
+  hooks work standalone without `oh-my-heroacademia`/`oh-my-claudecode` installed.
+- Added a root `LICENSE` (MIT) — `plugin.json` declared `"license": "MIT"` with no license file backing
+  the claim.
 
 ## [0.12.3] - 2026-07-19
 
