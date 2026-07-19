@@ -1,7 +1,9 @@
 """Tests for the DOI/retraction pre-gate (R1 #2). Network is always faked —
 verdict logic must be fully testable offline; --record writes the allowlist
 atomically and refuses non-VERIFIED."""
-import importlib.util, json, sys, urllib.error
+import importlib.util
+import json
+import urllib.error
 from pathlib import Path
 
 import pytest

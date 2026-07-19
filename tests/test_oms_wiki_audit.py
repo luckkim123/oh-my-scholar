@@ -25,7 +25,7 @@ def _fm(confidence="high", sightings=1):
 
 
 def _lines_with(out, *needles):
-    return [l for l in out.splitlines() if all(n in l for n in needles)]
+    return [line for line in out.splitlines() if all(n in line for n in needles)]
 
 
 def test_healthy_tree_passes(tmp_path, capsys):
@@ -64,12 +64,12 @@ def test_duplicate_token_fails(tmp_path, capsys):
     assert owa.main(["--root", str(tmp_path)]) == 1
     out = capsys.readouterr().out
     dup_lines = _lines_with(out, "duplicate section token")
-    f2_lines = [l for l in dup_lines if "F2" in l]
+    f2_lines = [line for line in dup_lines if "F2" in line]
     assert f2_lines, dup_lines
     f2_line = f2_lines[0]
     assert f2_line.count(":") >= 2  # both source:line occurrences quoted
     assert "First" in f2_line and "Second" in f2_line
-    assert not any("ok.md" in l for l in dup_lines)  # F1 vs F1b distinct -> no finding
+    assert not any("ok.md" in line for line in dup_lines)  # F1 vs F1b distinct -> no finding
 
 
 def test_hyphenated_suffix_heading_not_a_token(tmp_path, capsys):

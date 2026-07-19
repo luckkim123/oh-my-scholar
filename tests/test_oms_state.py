@@ -1,6 +1,7 @@
 """R2 #6 — .oms/state/ schema: pilot-<slug>.json written atomically (oms_atomic),
 merge semantics, strict enums, read never fails. The substrate for #7–#11/#13."""
-import importlib.util, json, sys
+import importlib.util
+import json
 from pathlib import Path
 
 import pytest
