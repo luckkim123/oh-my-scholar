@@ -74,9 +74,14 @@ def _valid_slug(slug) -> bool:
     return bool(SLUG_RE.match(slug))
 
 
+def _slug_error(value, flag="--slug") -> str:
+    """Shared error string for any {slug} arg failing to match `SLUG_RE`."""
+    return f"{flag} {value!r} must match {SLUG_RE.pattern} (no path separators)"
+
+
 def _cmd_write(args) -> int:
     if not _valid_slug(args.slug):
-        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.slug))
     existing = load(args.state_dir, f"pilot-{args.slug}")
     if not existing and args.stage is None:
         return _err("--stage is required when creating a new state (no existing pilot file)")
@@ -107,7 +112,7 @@ def _cmd_read(args) -> int:
     state_dir = Path(args.state_dir)
     if args.slug is not None:
         if not _valid_slug(args.slug):
-            return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+            return _err(_slug_error(args.slug))
         print(json.dumps(load(args.state_dir, f"pilot-{args.slug}")))
         return 0
     results = []
@@ -120,7 +125,7 @@ def _cmd_read(args) -> int:
 
 def _cmd_revise_start(args) -> int:
     if not _valid_slug(args.slug):
-        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.slug))
     if not (MAX_ROUNDS_RANGE[0] <= args.max_rounds <= MAX_ROUNDS_RANGE[1]):
         return _err(f"--max-rounds must be between {MAX_ROUNDS_RANGE[0]} and {MAX_ROUNDS_RANGE[1]}")
     if not (TTL_HOURS_RANGE[0] <= args.ttl_hours <= TTL_HOURS_RANGE[1]):
@@ -153,7 +158,7 @@ def _cmd_revise_start(args) -> int:
 
 def _cmd_revise_round(args) -> int:
     if not _valid_slug(args.slug):
-        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.slug))
     data = load(args.state_dir, f"revise-{args.slug}")
     if not data:
         return _err(f"no revise marker for slug {args.slug!r} — run revise-start first")
@@ -171,9 +176,9 @@ def _cmd_revise_round(args) -> int:
 
 def _cmd_strike(args) -> int:
     if not _valid_slug(args.slug):
-        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.slug))
     if not _valid_slug(args.defect_id):
-        return _err(f"--defect-id {args.defect_id!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.defect_id, flag="--defect-id"))
     data = load(args.state_dir, f"revise-{args.slug}")
     if not data:
         return _err(f"no revise marker for slug {args.slug!r} — run revise-start first")
@@ -187,7 +192,7 @@ def _cmd_strike(args) -> int:
 
 def _cmd_revise_end(args) -> int:
     if not _valid_slug(args.slug):
-        return _err(f"--slug {args.slug!r} must match {SLUG_RE.pattern} (no path separators)")
+        return _err(_slug_error(args.slug))
     if args.status not in REVISE_STATUSES:
         return _err(f"--status must be one of {REVISE_STATUSES}")
     data = load(args.state_dir, f"revise-{args.slug}")

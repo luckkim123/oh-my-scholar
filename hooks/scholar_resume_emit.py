@@ -46,6 +46,8 @@ import re
 import sys
 from pathlib import Path
 
+from oms_paths import nearest_ancestor
+
 SECTION_RE = re.compile(r"^## Priority Context\s*\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
 PRIORITY_CONTEXT_CHAR_LIMIT = 2000
 
@@ -54,11 +56,11 @@ def nearest_oms_root(cwd: Path):
     """First ancestor of cwd (inclusive) whose `.oms/` has a `state/` dir or a
     `notepad.md` (existence only — a corrupt/mistyped notepad still counts as
     "found"; it just fails open later when actually read), or None."""
-    for candidate in (cwd, *cwd.parents):
-        oms = candidate / ".oms"
-        if (oms / "state").is_dir() or (oms / "notepad.md").exists():
-            return oms
-    return None
+    root = nearest_ancestor(
+        cwd,
+        lambda c: (c / ".oms" / "state").is_dir() or (c / ".oms" / "notepad.md").exists(),
+    )
+    return (root / ".oms") if root is not None else None
 
 
 def load_json(path: Path):
