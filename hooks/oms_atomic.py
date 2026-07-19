@@ -1,20 +1,14 @@
-"""Atomic JSON/text write for .oms/ state files. stdlib only, cross-platform.
+"""om-core shared atomic-write primitive (function form) — vendored verbatim into
+consumer repos; edit only in om-core.
 
-oms never moves *citation-bound sources* (.tex/.bib) into .oms/, yet it had no
-equivalent write-safety for writes to its *own state files* (scholar-init's
-venue-config/meta, future index files). If a state file is corrupted by a crash
-mid-write, bootstrap breaks — so write to a temp file first, fsync, then atomic
-rename.
-
-A text variant (`atomic_write_text`) exists so non-JSON state files (e.g. the
-`.oms/venues/<key>.yaml` venue-config, composed as YAML text) get the same
-crash-safety as JSON writers — the venue-config was the motivating case that had
-none (R3 audit).
+Provides a crash-safe write to a target file: write to a same-dir temp file,
+fsync, then atomically `os.replace` onto the target. On any failure the temp
+file is cleaned up and the original exception re-raised — the target is never
+left partially written.
 
 os.replace() guarantees an atomic same-volume rename on both POSIX and Windows
 (Python 3.3+) — a partial-write state is never exposed at the target. No
-third-party dependency. (Same pattern as omp's hooks/omp_atomic.py, ported into
-the oms context.)
+third-party dependency.
 """
 import json
 import os
@@ -40,7 +34,7 @@ def _atomic_write(target, write_fn) -> None:
         # (".json" for json targets, ".yaml" for yaml, etc.) — unchanged behavior
         # for existing .json callers, generalized for any target.
         fd, tmp = tempfile.mkstemp(
-            dir=str(target.parent), prefix=".oms-tmp-", suffix=target.suffix
+            dir=str(target.parent), prefix=".om-tmp-", suffix=target.suffix
         )
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             write_fn(f)
