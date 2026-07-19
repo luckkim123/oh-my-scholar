@@ -4,6 +4,23 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.12.3] - 2026-07-19
+
+### Fixed
+
+- **`oms_state.py`'s slug error-string duplication (6 sites), tracked as debt since v0.7.0/v0.8.0** —
+  extracted a `_slug_error(value, flag="--slug")` helper alongside the existing `_valid_slug()`;
+  all 6 `--slug` sites plus the sibling `--defect-id` message in `_cmd_strike` now build the
+  string through it. Messages are byte-identical to before.
+- **The two hooks' nearest-root ascent asymmetry, tracked as open debt since R2** — added
+  `hooks/oms_paths.py::nearest_ancestor(start, predicate, include_start)`, a single directory-walk
+  loop parameterized by a per-call-site marker predicate. `scholar_stop_guard.py`'s
+  `nearest_state_dir` and `scholar_resume_emit.py`'s `nearest_oms_root` now both call it (each
+  keeps its own marker check and its own return value — a `.oms/state` dir vs a `.oms` dir).
+  `scholar_cite_guard.py`'s third, previously-untracked inline `list(start.parents)` walk in
+  `allowlisted_keys` is unified too, using `include_start=False` plus its own cwd fallback
+  candidate, to preserve its distinct exclusive-of-start / specific-file semantics.
+
 ## [0.12.2] - 2026-07-16
 
 ### Fixed
