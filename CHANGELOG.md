@@ -17,6 +17,25 @@ All notable changes to oh-my-scholar (oms).
 - Added a root `LICENSE` (MIT) — `plugin.json` declared `"license": "MIT"` with no license file backing
   the claim.
 
+## [0.13.0] - 2026-07-19
+
+### Added
+
+- **Tier 1: `tests/test_integration_smoke_script.py`** — unit-tests `scripts/integration_smoke.py`'s
+  own logic (transcript-dispatch parsing, scaffold-assertion, preflight fail-fast) against synthetic
+  fixtures only. Explicitly does **not** re-cover the existing wiring-integrity suite
+  (`test_plugin_integrity.py`, `test_agent_integrity.py`, `oms_doctor.py`) — those already assert
+  plugin.json↔skills/agents wiring, frontmatter parse, and dispatch-target existence in full.
+- **Tier 2: `scripts/integration_smoke.py`** — a manual, developer-run `scholar-init` smoke test via
+  `claude -p --plugin-dir` in a disposable `tempfile.mkdtemp()` workspace. Asserts the
+  dispatch->artifact edge (skill invocation -> `Task(subagent_type="oh-my-scholar:scholar-planner")`
+  -> `.oms/<slug>/` scaffold on disk) that six release cycles (v0.6.0→v0.12.3) shipped without
+  exercising. Never invoked by CI, a git hook, or any other automated trigger. Requires either an
+  interactively-logged-in `claude` CLI session or `ANTHROPIC_API_KEY`; cost is one sonnet-tier
+  orchestrating turn plus one opus-tier `scholar-planner` dispatch — a few cents per run, not
+  CI-reusable. `--deep` is an opt-in flag that chains `scholar-research` in the same workspace after
+  a passing `scholar-init`, off by default.
+
 ## [0.12.3] - 2026-07-19
 
 ### Fixed
