@@ -41,6 +41,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from oms_atomic import atomic_write_json
+from oms_paths import nearest_ancestor
 
 
 def script_path() -> str:
@@ -49,11 +50,8 @@ def script_path() -> str:
 
 def nearest_state_dir(cwd: Path):
     """First ancestor of cwd (inclusive) containing `.oms/state/`, or None."""
-    for candidate in (cwd, *cwd.parents):
-        state = candidate / ".oms" / "state"
-        if state.is_dir():
-            return state
-    return None
+    root = nearest_ancestor(cwd, lambda c: (c / ".oms" / "state").is_dir())
+    return (root / ".oms" / "state") if root is not None else None
 
 
 def load_json(path: Path):

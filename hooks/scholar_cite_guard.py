@@ -21,6 +21,8 @@ import re
 import sys
 from pathlib import Path
 
+from oms_paths import nearest_ancestor
+
 WRITE_TOOLS = ("Edit", "Write", "MultiEdit")
 ENTRY_RE = re.compile(r"@\w+\s*\{\s*([^,\s{}]+)\s*,")
 CITE_RE = re.compile(r"\\[a-zA-Z]*cite[a-zA-Z]*\*?(?:\[[^\]]*\])*\{([^}]*)\}")
@@ -56,17 +58,21 @@ def cite_keys(text: str) -> set:
 
 
 def allowlisted_keys(start: Path, cwd: str) -> set:
-    candidates = list(start.parents)
-    if cwd:
-        candidates.append(Path(cwd))
-    for base in candidates:
-        f = base / ".oms" / "state" / "verified-citations.json"
-        if f.is_file():
-            try:
-                return set(json.loads(f.read_text(encoding="utf-8")).get("keys", {}))
-            except (OSError, ValueError):
-                return set()
-    return set()
+    def has_allowlist(base) -> bool:
+        return (base / ".oms" / "state" / "verified-citations.json").is_file()
+
+    # start's parents (exclusive of start itself) take priority; cwd is an extra
+    # fallback candidate checked last — same order as the original flat list.
+    found = nearest_ancestor(start, has_allowlist, include_start=False)
+    if found is None and cwd and has_allowlist(Path(cwd)):
+        found = Path(cwd)
+    if found is None:
+        return set()
+    f = found / ".oms" / "state" / "verified-citations.json"
+    try:
+        return set(json.loads(f.read_text(encoding="utf-8")).get("keys", {}))
+    except (OSError, ValueError):
+        return set()
 
 
 def sibling_bib_keys(tex: Path):
