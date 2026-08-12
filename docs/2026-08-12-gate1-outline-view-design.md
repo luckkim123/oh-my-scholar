@@ -90,7 +90,7 @@ planner's output schema — nothing new is asked of the planner.
 The link text sits *between* cards rather than inside them, because it is a
 property of the transition, not of either section.
 
-### 4.3 Flags — six, all mechanical
+### 4.3 Flags — seven, all mechanical
 
 The renderer reports absence only. Each flag is decidable by inspection of the
 text, with no judgment:
@@ -111,9 +111,32 @@ text, with no judgment:
    an inconsistency between the outline's two representations of the same data,
    which is mechanical to detect and invisible when reading serially.
 
+7. No section tree parsed at all. Without this the six above are vacuous on a
+   malformed outline — zero sections means zero per-section flags, so the most
+   broken possible input would render as a clean page. This flag is what makes
+   §4.6's "renders as a page of flags" true rather than aspirational.
+
 Near-duplicate detection is excluded: deciding that two sections say the same
 thing is judgment, and putting judgment in the renderer would make it a reviewer
 that nobody reviews.
+
+Three exemptions keep healthy outlines clean, and each corresponds to something
+the planner's schema legitimately omits:
+
+- The **last** chain entry ends with `→ paper contribution complete` instead of
+  `→ why this is needed`. It is terminal by construction, so flag 3 never fires
+  on it.
+- `researcher recheck needed` is documented as "omit otherwise", so its absence
+  is normal and only its presence is reported.
+- Flag 5 is skipped when the venue states no page limit (`page_limit: null`),
+  and flag 6 is skipped when the outline carries no
+  `### Full citation-dependency mapping` block at all — a missing summary table
+  is not a defect in the argument, only a disagreement between two present
+  representations is.
+
+The `### Word Budget summary` table is not parsed. Per-section budgets come from
+the section headings, which are the field the planner is instructed to emit; a
+second parse of the same numbers would invent a seventh check nobody asked for.
 
 ### 4.4 Components
 
@@ -200,9 +223,14 @@ shim; content added there is never surfaced.
 asserts, `conftest.skill_md()` for skill-text locks):
 
 - A complete fixture outline parses every field and produces zero flags.
-- Six fixtures, one per flag, each producing **exactly** its own flag and no
-  others — this is what stops a flag from firing on healthy outlines.
-- Garbage input raises nothing and reports everything as missing.
+- Seven fixtures, one per flag, each producing **exactly** its own flag and no
+  others — this is what stops a flag from firing on healthy outlines. Each is
+  the complete fixture with one targeted mutation, so the delta under test is
+  visible in the test body.
+- The three exemptions each get a test: a terminal chain entry does not trip
+  flag 3, an absent `researcher recheck needed` does not trip flag 4, and a null
+  page limit skips flag 5.
+- Garbage input raises nothing and produces exactly the no-section-tree flag.
 - Rendered HTML contains no external URL and no `<script src=`, locking the
   self-contained property.
 - `skill-bodies/scholar-outline/SKILL.md` mentions the render step within its
