@@ -19,6 +19,26 @@ All notable changes to oh-my-scholar (oms).
   only — never quality — so `GAPS=0` is not a verdict that the structure is good. New:
   `scripts/oms_outline_view.py`, `tests/test_oms_outline_view.py`.
 
+- **`references/systematic-review.md`** — the protocol `mode=gap-research` does not run.
+  gap-research is targeted (ground the topic, map the closest work, state the gap); it
+  pre-specifies no search strategy, no inclusion/exclusion criteria, no dedup, no two-stage
+  screening, and no re-runnable search log. Those are what "we systematically reviewed"
+  actually asserts, so writing that sentence over a gap-research pass is an over-claim about
+  *method* — and no citation check catches it, because every individual citation verifies fine.
+
+  Adapted from ECC's `scientific-thinking-literature-review` (MIT, github.com/affaan-m/ECC).
+  Its eight steps are kept; what is added is oms's own citation discipline — the verbatim
+  quote + locator anchor `scholar-verify` re-reads, and unverified-is-reported-not-dropped.
+  The card is explicit that an ordinary related-work section should stay on gap-research: a
+  screening log buys nothing a reader sees.
+
+### Changed
+
+- **`scholar-research` names the boundary** (`skill-bodies/scholar-research/SKILL.md`
+  Execution_Policy) — when the paper will claim survey-grade coverage or a reviewer will ask
+  how the works were found, route to the protocol and report its flow counts. A reference
+  nothing points at is a reference nobody reads.
+
 ### Fixed
 
 - **`references/wiki/README.md` stale cross-reference** — pointed to a nonexistent
