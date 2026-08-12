@@ -52,17 +52,22 @@ Create `tests/test_oms_outline_view.py`:
 ```python
 """Tests for the GATE 1 outline view (scripts/oms_outline_view.py).
 
-House convention: plain asserts, stdlib only. COMPLETE below is a healthy
-outline that must produce zero flags; every defect test is COMPLETE with one
-targeted mutation, so the delta under test is visible in the test body.
+House convention: plain asserts, stdlib only, and the importlib
+spec_from_file_location idiom for loading a script under test (matching
+test_oms_doctor.py and test_version_sync.py) rather than sys.path surgery.
+
+COMPLETE below is a healthy outline that must produce zero flags; every defect
+test is COMPLETE with one targeted mutation, so the delta under test is visible
+in the test body.
 """
-import sys
+import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
-
-import oms_outline_view as ov  # noqa: E402
+SCRIPT = ROOT / "scripts" / "oms_outline_view.py"
+_spec = importlib.util.spec_from_file_location("oms_outline_view", SCRIPT)
+ov = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(ov)
 
 COMPLETE = """## Outline — Entropy-Map Seabed Scanning
 
@@ -922,27 +927,41 @@ def render_html(outline: Outline, defects: list[Flag]) -> str:
 Run: `cd ~/oh-my-scholar && python3 -m pytest tests/test_oms_outline_view.py -v`
 Expected: PASS, 23 tests
 
-- [ ] **Step 5: Look at the real render and settle the deferred decision**
+- [ ] **Step 5: Emit a preview file for the controller**
 
-The spec (§9) leaves one choice to first render: whether `Proposition to argue` stays open or collapses behind a disclosure control. Generate and open the page:
+The spec (§9) leaves one choice to first render: whether `Proposition to argue`
+stays open or collapses behind a disclosure control. **You cannot settle it —
+it needs someone who can see a rendered page.** Build all three fields open
+(the code above already does) and emit the preview so the controller can judge:
 
 ```bash
 cd ~/oh-my-scholar
 python3 - <<'PY'
-import sys
+import importlib.util
 from pathlib import Path
-sys.path.insert(0, "scripts")
-sys.path.insert(0, "tests")
-import oms_outline_view as ov
-from test_oms_outline_view import COMPLETE
-o = ov.parse_outline(COMPLETE)
-Path("/tmp/gate1-preview.html").write_text(ov.render_html(o, ov.flags(o)), encoding="utf-8")
-print("wrote /tmp/gate1-preview.html")
+
+
+def load(alias, path):
+    spec = importlib.util.spec_from_file_location(alias, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+ov = load("ov", "scripts/oms_outline_view.py")
+t = load("t", "tests/test_oms_outline_view.py")
+o = ov.parse_outline(t.COMPLETE)
+out = Path(".superpowers/sdd/gate1-preview.html")
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(ov.render_html(o, ov.flags(o)), encoding="utf-8")
+print(out.resolve())
 PY
-open /tmp/gate1-preview.html
 ```
 
-Judge one thing only: can you see enough sections at once for the sheet to beat scrolling the markdown? If yes, keep all three fields open. If no, wrap the `Proposition` row in `<details><summary>` and re-run the tests. Record the choice and what the first render actually looked like in the commit message either way.
+Report the printed path in your report file under a heading `§9 preview`. Do
+not `open` it, do not claim to have looked at it, and do not add a
+`<details>` wrapper on your own judgment — the controller decides and, if a
+change is needed, it comes back as a separate fix round.
 
 - [ ] **Step 6: Lint and commit**
 
@@ -1247,16 +1266,20 @@ python3 scripts/sync_version.py
 ```
 Expected: no drift between `plugin.json`, the CHANGELOG's top released entry, the latest `v*` tag, and the omha card. The tag does not exist yet, so a tag-behind report at this point is expected and is resolved after the PR is approved.
 
-- [ ] **Step 5: Commit and push a branch**
+- [ ] **Step 5: Commit and push**
+
+The branch `feat/gate1-outline-view` already exists — it was created at setup,
+before Task 1, so every task's commits are already on it. Do not create it
+again.
 
 ```bash
 cd ~/oh-my-scholar
+git branch --show-current   # must print feat/gate1-outline-view
 git add CHANGELOG.md .claude-plugin/plugin.json README.md
 git commit -m "chore(release): 0.14.0 — GATE 1 outline view
 
 Confidence: high
 Scope-risk: narrow"
-git checkout -b feat/gate1-outline-view
 git push -u origin feat/gate1-outline-view
 ```
 
