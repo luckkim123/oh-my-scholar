@@ -283,6 +283,43 @@ def test_chain_written_with_trailing_periods_produces_no_false_section_off_chain
     assert codes(text) == []
 
 
+def test_chain_head_parses_multi_digit_and_nested_numbers_in_full():
+    # A regression lock for the lazy-number-group fix: with `\s*` instead of
+    # `\s+` after the optional trailing period, "§10 Conclusion" parsed as
+    # chain number "1" (stopping at the first digit) and "§4.5 Nested" parsed
+    # as "4" with "5 Nested" left in the rest — both silently truncated the
+    # number rather than raising, so the only signal was a spurious
+    # chain-off-tree/section-off-chain pair on a perfectly healthy outline.
+    text = """## Outline — Ten Sections
+
+### Section tree
+
+#### §10. Tenth — [word budget: 100 words]
+- **Purpose**: p
+- **Core message**: c
+- **Proposition to argue**: t
+
+#### §4.5. Nested — [word budget: 100 words]
+- **Purpose**: p
+- **Core message**: c
+- **Proposition to argue**: t
+
+### Story Arc — necessity chain
+§10 Tenth
+  → why this is needed: leads to the nested section
+§4.5 Nested
+  → paper contribution complete
+"""
+    outline = ov.parse_outline(text)
+    assert [c.number for c in outline.chain] == ["10", "4.5"]
+    assert ov.flags(outline) == []
+
+    text_periods = text.replace("§10 Tenth", "§10. Tenth").replace("§4.5 Nested", "§4.5. Nested")
+    outline_periods = ov.parse_outline(text_periods)
+    assert [c.number for c in outline_periods.chain] == ["10", "4.5"]
+    assert ov.flags(outline_periods) == []
+
+
 def test_over_budget_detail_is_visible_in_the_rendered_html():
     text = COMPLETE.replace(
         "#### §3. Method — [word budget: 1100 words]",

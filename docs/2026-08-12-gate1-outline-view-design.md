@@ -265,14 +265,16 @@ new declarative flag in the venue card.
 latest `v*` git tag, and the omha card at `<OMHA_ROOT>/cards/oms.json` — checked
 by `scripts/sync_version.py`.
 
-## 9. Decision deferred to implementation
+## 9. Decision: no disclosure control
 
 Showing Purpose, Core message, and Proposition to argue in full makes a tall
-card; roughly five fit on a screen. Whether Proposition collapses behind a
-disclosure control depends on how the first real render reads, and cannot be
-settled from the spec. The implementer decides at first render and records the
-choice in the execution plan. Either resolution satisfies this design; nothing
-downstream depends on it.
+card; roughly five fit on a screen. Whether Proposition should collapse behind
+a disclosure control was left open pending the first real render.
+
+Ruled (human, 2026-08-12): **all three fields stay open, no disclosure
+control.** The rendered sheet keeps Purpose, Core message, and Proposition to
+argue fully visible on every card, as already implemented. No rendering
+change follows from this decision.
 
 ## 10. Follow-up: the omd counterpart
 

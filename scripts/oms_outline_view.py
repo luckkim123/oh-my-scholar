@@ -114,7 +114,7 @@ def _parse_sections(text: str) -> list[Section]:
 _VENUE_RE = re.compile(r"venue:\s*(.+?)(?:\s{2,}|\s*\|\s*|$)", re.M)
 _PAGE_LIMIT_RE = re.compile(r"page_limit:\s*(\d+)")
 _BUDGET_TOTAL_RE = re.compile(r"word budget total:\s*([\d,]+)")
-_CHAIN_HEAD_RE = re.compile(r"^§\s*([0-9A-Za-z.]+?)\.?\s*(.*)$")
+_CHAIN_HEAD_RE = re.compile(r"^§\s*([0-9A-Za-z.]+?)\.?\s+(.*)$")
 _ARROW_RE = re.compile(r"^\s*→\s*(.+?)\s*:\s*(.*)$")
 _TERMINAL_RE = re.compile(r"→\s*paper contribution complete", re.I)
 _MAP_ROW_RE = re.compile(r"^\|\s*§\s*([0-9A-Za-z.]+)\s*\|\s*(.*?)\s*\|\s*$", re.M)
