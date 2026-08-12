@@ -118,3 +118,50 @@ def test_missing_field_parses_as_none_not_an_error():
     third = outline.sections[2]
     assert third.core_message is None
     assert third.purpose is not None
+
+
+def test_parses_venue_constraints():
+    outline = ov.parse_outline(COMPLETE)
+    assert outline.venue == "IROS"
+    assert outline.page_limit == 6
+    assert outline.budget_total == 3000
+
+
+def test_parses_the_necessity_chain_and_marks_the_terminal_link():
+    outline = ov.parse_outline(COMPLETE)
+    assert [c.number for c in outline.chain] == ["1", "2", "3", "4", "5"]
+    first = outline.chain[0]
+    assert first.establishes == "the coverage-time problem and the gap"
+    assert first.why_needed == "§2 must show the gap is not already closed"
+    assert first.terminal is False
+    last = outline.chain[-1]
+    assert last.terminal is True
+    assert last.why_needed is None
+
+
+def test_parses_the_citation_mapping_table():
+    outline = ov.parse_outline(COMPLETE)
+    assert outline.mapping == {
+        "1": ["galceran2013survey", "bourgault2002information"],
+        "2": ["galceran2013survey", "stachniss2005information"],
+        "3": ["bourgault2002information"],
+        "4": ["galceran2013survey"],
+        "5": ["bourgault2002information"],
+    }
+
+
+def test_absent_mapping_block_parses_as_none_not_empty():
+    text = COMPLETE.split("### Full citation-dependency mapping")[0]
+    outline = ov.parse_outline(text)
+    assert outline.mapping is None
+
+
+def test_null_page_limit_parses_as_none():
+    text = COMPLETE.replace(
+        "- venue: IROS  page_limit: 6 pages → word budget total: 3000 words",
+        "- venue: PhD Thesis  page_limit: null → word budget total: null",
+    )
+    outline = ov.parse_outline(text)
+    assert outline.page_limit is None
+    assert outline.budget_total is None
+    assert outline.venue == "PhD Thesis"
