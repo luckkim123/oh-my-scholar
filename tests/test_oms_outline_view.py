@@ -256,3 +256,42 @@ def test_null_page_limit_skips_the_budget_check():
 def test_absent_mapping_block_skips_the_citation_check():
     text = COMPLETE.split("### Full citation-dependency mapping")[0]
     assert codes(text) == []
+
+
+def test_render_is_self_contained():
+    html = ov.render_html(ov.parse_outline(COMPLETE), [])
+    assert "<script src=" not in html
+    assert "http://" not in html
+    assert "https://" not in html
+    assert "@import" not in html
+
+
+def test_render_shows_every_section_and_the_chain_text():
+    html = ov.render_html(ov.parse_outline(COMPLETE), [])
+    for name in ("Introduction", "Related Work", "Method", "Experiments", "Conclusion"):
+        assert name in html
+    assert "§2 must show the gap is not already closed" in html
+
+
+def test_render_escapes_content():
+    text = COMPLETE.replace("#### §3. Method —", "#### §3. <script>alert(1)</script> —")
+    html = ov.render_html(ov.parse_outline(text), [])
+    assert "<script>alert(1)</script>" not in html
+    assert "&lt;script&gt;" in html
+
+
+def test_render_reports_the_flag_count_and_each_code():
+    text = COMPLETE.replace(
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n", ""
+    )
+    outline = ov.parse_outline(text)
+    html = ov.render_html(outline, ov.flags(outline))
+    assert "missing-field" in html
+    assert "structural gap" in html
+
+
+def test_render_defines_all_three_theme_states():
+    html = ov.render_html(ov.parse_outline(COMPLETE), [])
+    assert "prefers-color-scheme: dark" in html or "prefers-color-scheme:dark" in html
+    assert ':root:not([data-theme="light"])' in html
+    assert ':root[data-theme="dark"]' in html

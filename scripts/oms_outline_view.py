@@ -8,6 +8,7 @@ Spec: docs/2026-08-12-gate1-outline-view-design.md
 """
 from __future__ import annotations
 
+import html as _html
 import re
 from dataclasses import dataclass, field
 
@@ -263,3 +264,144 @@ def flags(outline: Outline) -> list[Flag]:
                 out.append(Flag("citation-mismatch", sec.number, "; ".join(parts)))
 
     return out
+
+
+_CSS = """
+:root{--ground:#EDF0F0;--sheet:#F9FAFA;--card:#FFF;--ink:#141D1C;--muted:#5B6A67;
+--rule:#C8D1CF;--soft:#DEE5E4;--accent:#23628F;--accent-bg:#D8EAF6;--ok:#35674F;--crit:#9C3826;
+--crit-bg:#F6DED8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#0E1514;
+--sheet:#151E1D;--card:#1A2423;--ink:#E3EAE8;--muted:#91A39F;--rule:#2E3B39;--soft:#232F2E;
+--accent:#74BAE4;--accent-bg:#17384B;--ok:#74C398;--crit:#E5836A;--crit-bg:#3D211B}}
+:root[data-theme="dark"]{--ground:#0E1514;--sheet:#151E1D;--card:#1A2423;--ink:#E3EAE8;
+--muted:#91A39F;--rule:#2E3B39;--soft:#232F2E;--accent:#74BAE4;--accent-bg:#17384B;
+--ok:#74C398;--crit:#E5836A;--crit-bg:#3D211B}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-size:15px;line-height:1.55;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",
+sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 64px}
+.head{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:16px 20px;
+margin-bottom:8px}
+.head h1{margin:0 0 6px;font-size:19px;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.verdict{margin-top:10px;font-size:13.5px}
+.verdict.clean{color:var(--ok)}
+.verdict.dirty{color:var(--crit)}
+.card{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--rule);
+border-radius:3px;padding:12px 14px;margin-top:8px}
+.card.flagged{border-left-color:var(--crit)}
+.card h2{margin:0 0 8px;font-size:15px}
+.num{color:var(--muted);font-variant-numeric:tabular-nums}
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:4px 14px}
+dt{color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+padding-top:3px}
+dd{margin:0}
+dd.absent{color:var(--crit)}
+.bar{height:5px;background:var(--soft);border-radius:2px;margin-top:8px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.keys{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+.key{font-size:11px;padding:2px 7px;border-radius:2px;background:var(--accent-bg);
+color:var(--accent)}
+.chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:2px;
+background:var(--crit-bg);color:var(--crit);margin:0 4px 4px 0}
+.link{padding:8px 14px 0 17px;color:var(--muted);font-size:12.5px}
+.link.blank{color:var(--crit)}
+.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--rule);color:var(--muted);
+font-size:12.5px}
+""".strip()
+
+
+def _esc(value) -> str:
+    return _html.escape(str(value), quote=True)
+
+
+def _field_row(label: str, value: str | None) -> str:
+    if value is None:
+        return f"<dt>{_esc(label)}</dt><dd class='absent'>absent</dd>"
+    return f"<dt>{_esc(label)}</dt><dd>{_esc(value)}</dd>"
+
+
+def render_html(outline: Outline, defects: list[Flag]) -> str:
+    by_section: dict[str | None, list[Flag]] = {}
+    for f in defects:
+        by_section.setdefault(f.section, []).append(f)
+
+    budgets = [s.word_budget or 0 for s in outline.sections]
+    widest = max(budgets) if budgets else 0
+    chain = {c.number: c for c in outline.chain}
+
+    parts: list[str] = []
+    title = outline.title or "Outline"
+    parts.append(f"<div class='head'><h1>{_esc(title)}</h1>")
+    meta = [f"venue: {outline.venue or 'unstated'}", f"sections: {len(outline.sections)}"]
+    if outline.budget_total is not None:
+        meta.append(f"word budget: {sum(budgets)} / {outline.budget_total}")
+    parts.append(f"<div class='meta'>{_esc(' · '.join(meta))}</div>")
+
+    if defects:
+        listed = "".join(
+            f"<span class='chip'>{_esc(f.code)}"
+            f"{' §' + _esc(f.section) if f.section else ''}</span>"
+            for f in defects
+        )
+        parts.append(
+            f"<div class='verdict dirty'><b>{len(defects)}</b> structural gap(s) — "
+            f"nothing has been drafted yet.</div><div>{listed}</div>"
+        )
+    else:
+        parts.append(
+            "<div class='verdict clean'>No mechanical gap found. "
+            "Whether the argument holds is still yours to judge.</div>"
+        )
+    parts.append("</div>")
+
+    for sec in outline.sections:
+        hits = by_section.get(sec.number, [])
+        parts.append(f"<div class='card{' flagged' if hits else ''}'>")
+        parts.append(f"<h2><span class='num'>§{_esc(sec.number)}</span> {_esc(sec.name)}</h2>")
+        if hits:
+            parts.append(
+                "".join(f"<span class='chip'>{_esc(h.code)}: {_esc(h.detail)}</span>" for h in hits)
+            )
+        parts.append("<dl>")
+        parts.append(_field_row("Purpose", sec.purpose))
+        parts.append(_field_row("Core message", sec.core_message))
+        parts.append(_field_row("Proposition", sec.proposition))
+        parts.append("</dl>")
+        if sec.word_budget is not None and widest:
+            pct = round(100 * sec.word_budget / widest)
+            parts.append(
+                f"<div class='bar'><i style='width:{pct}%'></i></div>"
+                f"<div class='meta'>{sec.word_budget} words</div>"
+            )
+        else:
+            parts.append("<div class='meta'>word budget absent</div>")
+        if sec.citations:
+            keys = "".join(f"<span class='key'>{_esc(k)}</span>" for k in sec.citations)
+            parts.append(f"<div class='keys'>{keys}</div>")
+        parts.append("</div>")
+
+        link = chain.get(sec.number)
+        if link and link.terminal:
+            parts.append("<div class='link'>■ paper contribution complete</div>")
+        elif link and link.why_needed:
+            parts.append(f"<div class='link'>→ {_esc(link.why_needed)}</div>")
+        else:
+            parts.append(
+                "<div class='link blank'>→ no stated reason the next section is needed</div>"
+            )
+
+    parts.append(
+        "<div class='foot'>Derived read-only view of <code>outline.md</code>, which is the "
+        "single source of truth. Approve or revise there; this sheet is regenerated, never "
+        "edited.</div>"
+    )
+
+    body = "\n".join(parts)
+    return (
+        "<!doctype html>\n<html lang='en'>\n<head>\n<meta charset='utf-8'>\n"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"
+        f"<title>{_esc(title)} — GATE 1</title>\n<style>{_CSS}</style>\n</head>\n"
+        f"<body>\n<div class='wrap'>\n{body}\n</div>\n</body>\n</html>\n"
+    )
