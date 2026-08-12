@@ -8,9 +8,12 @@ Spec: docs/2026-08-12-gate1-outline-view-design.md
 """
 from __future__ import annotations
 
+import argparse
 import html as _html
 import re
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass
@@ -405,3 +408,34 @@ def render_html(outline: Outline, defects: list[Flag]) -> str:
         f"<title>{_esc(title)} — GATE 1</title>\n<style>{_CSS}</style>\n</head>\n"
         f"<body>\n<div class='wrap'>\n{body}\n</div>\n</body>\n</html>\n"
     )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Render an oms outline.md as a read-only GATE 1 sheet."
+    )
+    parser.add_argument("outline", help="path to .oms/<slug>/outline/outline.md")
+    parser.add_argument("-o", "--output", default=None, help="output .html path")
+    args = parser.parse_args(argv)
+
+    src = Path(args.outline)
+    if not src.is_file():
+        parser.error(f"no such outline file: {src}")
+
+    outline = parse_outline(src.read_text(encoding="utf-8"))
+    defects = flags(outline)
+
+    dest = Path(args.output) if args.output else src.with_name("gate1.html")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(render_html(outline, defects), encoding="utf-8")
+
+    print(dest)
+    for f in defects:
+        where = f"§{f.section}" if f.section else "outline"
+        print(f"  {f.code}  {where}  {f.detail}")
+    print(f"GAPS={len(defects)}")
+    return 1 if defects else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

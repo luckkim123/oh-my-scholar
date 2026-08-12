@@ -295,3 +295,43 @@ def test_render_defines_all_three_theme_states():
     assert "prefers-color-scheme: dark" in html or "prefers-color-scheme:dark" in html
     assert ':root:not([data-theme="light"])' in html
     assert ':root[data-theme="dark"]' in html
+
+
+def test_cli_writes_the_sheet_beside_the_input(tmp_path, capsys):
+    src = tmp_path / "outline.md"
+    src.write_text(COMPLETE, encoding="utf-8")
+    rc = ov.main([str(src)])
+    out = tmp_path / "gate1.html"
+    assert rc == 0
+    assert out.exists()
+    assert "Entropy-Map Seabed Scanning" in out.read_text(encoding="utf-8")
+    assert "GAPS=0" in capsys.readouterr().out
+
+
+def test_cli_honours_an_explicit_output_path(tmp_path):
+    src = tmp_path / "outline.md"
+    src.write_text(COMPLETE, encoding="utf-8")
+    dest = tmp_path / "sub" / "sheet.html"
+    assert ov.main([str(src), "-o", str(dest)]) == 0
+    assert dest.exists()
+
+
+def test_cli_returns_nonzero_when_gaps_are_found(tmp_path):
+    src = tmp_path / "outline.md"
+    src.write_text(
+        COMPLETE.replace(
+            "- **Core message**: The entropy map turns sonar returns into a "
+            "scan-priority field.\n",
+            "",
+        ),
+        encoding="utf-8",
+    )
+    assert ov.main([str(src)]) == 1
+    assert (tmp_path / "gate1.html").exists()
+
+
+def test_cli_raises_only_on_a_missing_input_file(tmp_path):
+    import pytest
+
+    with pytest.raises(SystemExit):
+        ov.main([str(tmp_path / "nope.md")])
