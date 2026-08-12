@@ -189,3 +189,77 @@ def parse_outline(text: str) -> Outline:
     outline.chain = _parse_chain(text)
     outline.mapping = _parse_mapping(text)
     return outline
+
+
+_REQUIRED = (
+    ("purpose", "Purpose"),
+    ("core_message", "Core message"),
+    ("proposition", "Proposition to argue"),
+    ("word_budget", "word budget"),
+)
+
+
+def flags(outline: Outline) -> list[Flag]:
+    """Report absence, never quality. Judgment stays with the inspector and the human."""
+    out: list[Flag] = []
+
+    if not outline.sections:
+        return [
+            Flag(
+                "no-sections",
+                None,
+                "No section tree was parsed — the outline is not in a shape a human can approve.",
+            )
+        ]
+
+    for sec in outline.sections:
+        missing = [label for attr, label in _REQUIRED if getattr(sec, attr) is None]
+        if missing:
+            out.append(Flag("missing-field", sec.number, "missing: " + ", ".join(missing)))
+        if sec.recheck is not None:
+            out.append(Flag("recheck", sec.number, f"researcher recheck needed: {sec.recheck}"))
+
+    on_chain = {link.number for link in outline.chain}
+    for sec in outline.sections:
+        if sec.number not in on_chain:
+            out.append(
+                Flag(
+                    "section-off-chain",
+                    sec.number,
+                    "present in the section tree but absent from the necessity chain",
+                )
+            )
+
+    for link in outline.chain:
+        if not link.terminal and link.why_needed is None:
+            out.append(
+                Flag("blank-link", link.number, "the chain link states no reason it is needed")
+            )
+
+    if outline.budget_total is not None:
+        total = sum(s.word_budget for s in outline.sections if s.word_budget is not None)
+        if total > outline.budget_total:
+            out.append(
+                Flag(
+                    "over-budget",
+                    None,
+                    f"section budgets sum to {total} words against a stated total of "
+                    f"{outline.budget_total}",
+                )
+            )
+
+    if outline.mapping is not None:
+        for sec in outline.sections:
+            mapped = set(outline.mapping.get(sec.number, []))
+            declared = set(sec.citations)
+            if mapped != declared:
+                only_map = sorted(mapped - declared)
+                only_sec = sorted(declared - mapped)
+                parts = []
+                if only_map:
+                    parts.append("in the mapping table only: " + ", ".join(only_map))
+                if only_sec:
+                    parts.append("in the section only: " + ", ".join(only_sec))
+                out.append(Flag("citation-mismatch", sec.number, "; ".join(parts)))
+
+    return out

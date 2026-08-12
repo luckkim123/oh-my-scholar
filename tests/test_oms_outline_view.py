@@ -165,3 +165,94 @@ def test_null_page_limit_parses_as_none():
     assert outline.page_limit is None
     assert outline.budget_total is None
     assert outline.venue == "PhD Thesis"
+
+
+def codes(text):
+    return sorted({f.code for f in ov.flags(ov.parse_outline(text))})
+
+
+def test_healthy_outline_produces_zero_flags():
+    assert ov.flags(ov.parse_outline(COMPLETE)) == []
+
+
+def test_missing_field_flag():
+    text = COMPLETE.replace(
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n", ""
+    )
+    assert codes(text) == ["missing-field"]
+    hit = [f for f in ov.flags(ov.parse_outline(text)) if f.code == "missing-field"]
+    assert len(hit) == 1
+    assert hit[0].section == "3"
+    assert "core message" in hit[0].detail.lower()
+
+
+def test_section_off_chain_flag():
+    text = COMPLETE.replace(
+        "§4 Experiments\n"
+        "  → establishes: the time gain across three textures\n"
+        "  → why this is needed: §5 can only conclude from measured gain\n",
+        "",
+    )
+    assert codes(text) == ["section-off-chain"]
+
+
+def test_blank_link_flag():
+    text = COMPLETE.replace(
+        "  → why this is needed: §2 must show the gap is not already closed",
+        "  → why this is needed:",
+    )
+    assert codes(text) == ["blank-link"]
+
+
+def test_recheck_flag():
+    text = COMPLETE.replace(
+        "- **Proposition to argue**: The result generalizes to any range sensor "
+        "with an occupancy posterior.",
+        "- **Proposition to argue**: The result generalizes to any range sensor "
+        "with an occupancy posterior.\n"
+        "- **researcher recheck needed**: sonar noise models",
+    )
+    assert codes(text) == ["recheck"]
+
+
+def test_over_budget_flag():
+    text = COMPLETE.replace(
+        "#### §3. Method — [word budget: 1100 words]",
+        "#### §3. Method — [word budget: 1600 words]",
+    )
+    assert codes(text) == ["over-budget"]
+
+
+def test_citation_mismatch_flag():
+    text = COMPLETE.replace(
+        "| §4 | `galceran2013survey` |",
+        "| §4 | `galceran2013survey`, `stachniss2005information` |",
+    )
+    assert codes(text) == ["citation-mismatch"]
+
+
+def test_no_sections_flag_on_garbage_input():
+    result = ov.flags(ov.parse_outline("완전히 관계없는 텍스트\n\n# nope\n"))
+    assert [f.code for f in result] == ["no-sections"]
+
+
+def test_terminal_chain_entry_does_not_trip_blank_link():
+    outline = ov.parse_outline(COMPLETE)
+    assert outline.chain[-1].why_needed is None
+    assert not [f for f in ov.flags(outline) if f.code == "blank-link"]
+
+
+def test_null_page_limit_skips_the_budget_check():
+    text = COMPLETE.replace(
+        "- venue: IROS  page_limit: 6 pages → word budget total: 3000 words",
+        "- venue: PhD Thesis  page_limit: null → word budget total: null",
+    ).replace(
+        "#### §3. Method — [word budget: 1100 words]",
+        "#### §3. Method — [word budget: 9900 words]",
+    )
+    assert codes(text) == []
+
+
+def test_absent_mapping_block_skips_the_citation_check():
+    text = COMPLETE.split("### Full citation-dependency mapping")[0]
+    assert codes(text) == []
