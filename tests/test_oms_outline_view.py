@@ -1,0 +1,120 @@
+"""Tests for the GATE 1 outline view (scripts/oms_outline_view.py).
+
+House convention: plain asserts, stdlib only, and the importlib
+spec_from_file_location idiom for loading a script under test (matching
+test_oms_doctor.py and test_version_sync.py) rather than sys.path surgery.
+
+COMPLETE below is a healthy outline that must produce zero flags; every defect
+test is COMPLETE with one targeted mutation, so the delta under test is visible
+in the test body.
+"""
+import importlib.util
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent
+SCRIPT = ROOT / "scripts" / "oms_outline_view.py"
+_spec = importlib.util.spec_from_file_location("oms_outline_view", SCRIPT)
+ov = importlib.util.module_from_spec(_spec)
+# dataclasses resolves string-form annotations (from __future__ import
+# annotations) by looking up cls.__module__ in sys.modules; register before
+# exec so that lookup doesn't AttributeError on Python 3.12.
+sys.modules["oms_outline_view"] = ov
+_spec.loader.exec_module(ov)
+
+COMPLETE = """## Outline — Entropy-Map Seabed Scanning
+
+### Venue constraints
+- venue: IROS  page_limit: 6 pages → word budget total: 3000 words
+- required sections: Introduction, Related Work, Method, Experiments, Conclusion
+
+### Section tree
+
+#### §1. Introduction — [word budget: 600 words]
+- **Purpose**: Frame the seabed-coverage problem and state the gap.
+- **Core message**: Uniform lawnmower scanning wastes time on low-information seabed.
+- **Proposition to argue**: Information-guided scanning beats uniform coverage under a fixed time budget.
+- **Dependent citations**: `galceran2013survey`, `bourgault2002information`
+
+#### §2. Related Work — [word budget: 500 words]
+- **Purpose**: Position against coverage planning and active perception.
+- **Core message**: Neither line covers entropy-driven seabed scanning with imaging sonar.
+- **Proposition to argue**: The two adjacent literatures leave the sonar-specific case open.
+- **Dependent citations**: `galceran2013survey`, `stachniss2005information`
+
+#### §3. Method — [word budget: 1100 words]
+- **Purpose**: Define the entropy map and the scan policy over it.
+- **Core message**: The entropy map turns sonar returns into a scan-priority field.
+- **Proposition to argue**: Entropy over the occupancy posterior is the right scan-priority signal.
+- **Dependent citations**: `bourgault2002information`
+
+#### §4. Experiments — [word budget: 600 words]
+- **Purpose**: Show coverage-per-time against the lawnmower baseline.
+- **Core message**: Entropy-guided scanning reaches the same map quality in less time.
+- **Proposition to argue**: The gain holds across three seabed textures, not one tuned case.
+- **Dependent citations**: `galceran2013survey`
+
+#### §5. Conclusion — [word budget: 200 words]
+- **Purpose**: State what was shown and the remaining limit.
+- **Core message**: Entropy guidance pays off; the sonar noise model is the open limit.
+- **Proposition to argue**: The result generalizes to any range sensor with an occupancy posterior.
+- **Dependent citations**: `bourgault2002information`
+
+### Story Arc — necessity chain
+§1 Introduction
+  → establishes: the coverage-time problem and the gap
+  → why this is needed: §2 must show the gap is not already closed
+§2 Related Work
+  → establishes: neither adjacent literature covers this case
+  → why this is needed: §3 can only claim novelty once the gap stands
+§3 Method
+  → establishes: the entropy map and the policy over it
+  → why this is needed: §4 needs a defined method to measure
+§4 Experiments
+  → establishes: the time gain across three textures
+  → why this is needed: §5 can only conclude from measured gain
+§5 Conclusion
+  → establishes: the generalization claim and its limit
+  → paper contribution complete
+
+### Word Budget summary
+| Section | Word Budget | Ratio |
+| §1 | 600 | 20% |
+| §2 | 500 | 17% |
+| §3 | 1100 | 37% |
+| §4 | 600 | 20% |
+| §5 | 200 | 7% |
+
+### Full citation-dependency mapping
+| Section | Citation keys |
+| §1 | `galceran2013survey`, `bourgault2002information` |
+| §2 | `galceran2013survey`, `stachniss2005information` |
+| §3 | `bourgault2002information` |
+| §4 | `galceran2013survey` |
+| §5 | `bourgault2002information` |
+
+**Unverified citation requests**: none
+"""
+
+
+def test_parses_every_section_with_every_field():
+    outline = ov.parse_outline(COMPLETE)
+    assert [s.number for s in outline.sections] == ["1", "2", "3", "4", "5"]
+    third = outline.sections[2]
+    assert third.name == "Method"
+    assert third.word_budget == 1100
+    assert third.purpose == "Define the entropy map and the scan policy over it."
+    assert third.core_message == "The entropy map turns sonar returns into a scan-priority field."
+    assert third.proposition.startswith("Entropy over the occupancy posterior")
+    assert third.citations == ["bourgault2002information"]
+    assert third.recheck is None
+
+
+def test_missing_field_parses_as_none_not_an_error():
+    text = COMPLETE.replace(
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n", ""
+    )
+    outline = ov.parse_outline(text)
+    third = outline.sections[2]
+    assert third.core_message is None
+    assert third.purpose is not None
