@@ -231,6 +231,68 @@ def test_citation_mismatch_flag():
     assert codes(text) == ["citation-mismatch"]
 
 
+def test_chain_off_tree_flag_when_a_heading_loses_its_section_sign():
+    text = COMPLETE.replace(
+        "#### §1. Introduction — [word budget: 600 words]",
+        "#### 1. Introduction — [word budget: 600 words]",
+    )
+    outline = ov.parse_outline(text)
+    assert [s.number for s in outline.sections] == ["2", "3", "4", "5"]
+    assert codes(text) == ["chain-off-tree"]
+    hit = [f for f in ov.flags(outline) if f.code == "chain-off-tree"]
+    assert len(hit) == 1
+    assert hit[0].section == "1"
+
+
+def test_duplicate_section_flag():
+    text = COMPLETE.replace(
+        "#### §3. Method — [word budget: 1100 words]\n"
+        "- **Purpose**: Define the entropy map and the scan policy over it.\n"
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n"
+        "- **Proposition to argue**: Entropy over the occupancy posterior is the right "
+        "scan-priority signal.\n"
+        "- **Dependent citations**: `bourgault2002information`\n",
+        "#### §3. Method — [word budget: 1100 words]\n"
+        "- **Purpose**: Define the entropy map and the scan policy over it.\n"
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n"
+        "- **Proposition to argue**: Entropy over the occupancy posterior is the right "
+        "scan-priority signal.\n"
+        "- **Dependent citations**: `bourgault2002information`\n\n"
+        "#### §3. Method — [word budget: 1100 words]\n"
+        "- **Purpose**: Define the entropy map and the scan policy over it.\n"
+        "- **Core message**: The entropy map turns sonar returns into a scan-priority field.\n"
+        "- **Proposition to argue**: Entropy over the occupancy posterior is the right "
+        "scan-priority signal.\n"
+        "- **Dependent citations**: `bourgault2002information`\n",
+    )
+    # The duplicated section also duplicates its word budget into the total, so
+    # over-budget is a correct second flag here, not a leak from this mutation.
+    assert codes(text) == ["duplicate-section", "over-budget"]
+
+
+def test_chain_written_with_trailing_periods_produces_no_false_section_off_chain():
+    text = COMPLETE
+    for n, name in (
+        (1, "Introduction"),
+        (2, "Related Work"),
+        (3, "Method"),
+        (4, "Experiments"),
+        (5, "Conclusion"),
+    ):
+        text = text.replace(f"§{n} {name}\n", f"§{n}. {name}\n")
+    assert codes(text) == []
+
+
+def test_over_budget_detail_is_visible_in_the_rendered_html():
+    text = COMPLETE.replace(
+        "#### §3. Method — [word budget: 1100 words]",
+        "#### §3. Method — [word budget: 1600 words]",
+    )
+    outline = ov.parse_outline(text)
+    html = ov.render_html(outline, ov.flags(outline))
+    assert "section budgets sum to 3500 words against a stated total of 3000" in html
+
+
 def test_no_sections_flag_on_garbage_input():
     result = ov.flags(ov.parse_outline("완전히 관계없는 텍스트\n\n# nope\n"))
     assert [f.code for f in result] == ["no-sections"]

@@ -90,7 +90,7 @@ planner's output schema — nothing new is asked of the planner.
 The link text sits *between* cards rather than inside them, because it is a
 property of the transition, not of either section.
 
-### 4.3 Flags — seven, all mechanical
+### 4.3 Flags — nine, all mechanical
 
 The renderer reports absence only. Each flag is decidable by inspection of the
 text, with no judgment:
@@ -111,7 +111,21 @@ text, with no judgment:
    an inconsistency between the outline's two representations of the same data,
    which is mechanical to detect and invisible when reading serially.
 
-7. No section tree parsed at all. Without this the six above are vacuous on a
+7. A necessity-chain entry whose section number has no matching entry in the
+   section tree. This is the reverse direction of flag 2: flag 2 catches a
+   section that never made it onto the chain, but nothing originally caught the
+   opposite — a chain entry naming a section that was never parsed as a section
+   at all, typically because its heading is malformed (a missing `§`, for
+   example). Without this flag a whole section can silently drop out of the
+   tree while the chain still refers to it, and the sheet would report "no
+   mechanical gap found" over an outline that is missing a section — the
+   accelerated-rubber-stamp failure this feature exists to prevent.
+8. A section number that appears more than once in the tree. Duplicate numbers
+   make the per-section flag-to-card association ambiguous — a flag raised
+   against one occurrence can render on both cards — so the renderer reports
+   the duplication itself rather than silently mis-attributing a flag to a
+   healthy section.
+9. No section tree parsed at all. Without this the flags above are vacuous on a
    malformed outline — zero sections means zero per-section flags, so the most
    broken possible input would render as a clean page. This flag is what makes
    §4.6's "renders as a page of flags" true rather than aspirational.

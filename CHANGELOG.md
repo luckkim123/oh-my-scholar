@@ -10,11 +10,12 @@ All notable changes to oh-my-scholar (oms).
 
 - **GATE 1 outline view** — `scholar-outline` now renders `.oms/<slug>/outline/outline.md`
   as a self-contained read-only sheet at `.oms/<slug>/outline/gate1.html` before asking for
-  approval, and reports seven mechanically-detectable structural gaps: a section missing
+  approval, and reports nine mechanically-detectable structural gaps: a section missing
   Purpose / Core message / Proposition to argue / word budget, a section absent from the
-  necessity chain, a chain link with no stated reason, a `researcher recheck needed` marker,
-  a word-budget total over the venue's, a disagreement between a section's citations and the
-  mapping table, and an outline with no section tree at all. The renderer detects *absence*
+  necessity chain, a chain link with no matching section in the tree, a chain link with no
+  stated reason, a `researcher recheck needed` marker, a word-budget total over the venue's,
+  a disagreement between a section's citations and the mapping table, a duplicate section
+  number, and an outline with no section tree at all. The renderer detects *absence*
   only — never quality — so `GAPS=0` is not a verdict that the structure is good. New:
   `scripts/oms_outline_view.py`, `tests/test_oms_outline_view.py`.
 

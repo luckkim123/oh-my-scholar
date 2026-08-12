@@ -114,7 +114,7 @@ def _parse_sections(text: str) -> list[Section]:
 _VENUE_RE = re.compile(r"venue:\s*(.+?)(?:\s{2,}|\s*\|\s*|$)", re.M)
 _PAGE_LIMIT_RE = re.compile(r"page_limit:\s*(\d+)")
 _BUDGET_TOTAL_RE = re.compile(r"word budget total:\s*([\d,]+)")
-_CHAIN_HEAD_RE = re.compile(r"^§\s*([0-9A-Za-z.]+)\s*(.*)$")
+_CHAIN_HEAD_RE = re.compile(r"^§\s*([0-9A-Za-z.]+?)\.?\s*(.*)$")
 _ARROW_RE = re.compile(r"^\s*→\s*(.+?)\s*:\s*(.*)$")
 _TERMINAL_RE = re.compile(r"→\s*paper contribution complete", re.I)
 _MAP_ROW_RE = re.compile(r"^\|\s*§\s*([0-9A-Za-z.]+)\s*\|\s*(.*?)\s*\|\s*$", re.M)
@@ -223,6 +223,14 @@ def flags(outline: Outline) -> list[Flag]:
         if sec.recheck is not None:
             out.append(Flag("recheck", sec.number, f"researcher recheck needed: {sec.recheck}"))
 
+    section_numbers = [sec.number for sec in outline.sections]
+    tree_numbers = set(section_numbers)
+    dupes = sorted({n for n in section_numbers if section_numbers.count(n) > 1})
+    if dupes:
+        out.append(
+            Flag("duplicate-section", None, "duplicate section number(s): " + ", ".join(dupes))
+        )
+
     on_chain = {link.number for link in outline.chain}
     for sec in outline.sections:
         if sec.number not in on_chain:
@@ -235,6 +243,14 @@ def flags(outline: Outline) -> list[Flag]:
             )
 
     for link in outline.chain:
+        if link.number not in tree_numbers:
+            out.append(
+                Flag(
+                    "chain-off-tree",
+                    link.number,
+                    "present in the necessity chain but absent from the section tree",
+                )
+            )
         if not link.terminal and link.why_needed is None:
             out.append(
                 Flag("blank-link", link.number, "the chain link states no reason it is needed")
@@ -352,6 +368,12 @@ def render_html(outline: Outline, defects: list[Flag]) -> str:
             f"<div class='verdict dirty'><b>{len(defects)}</b> structural gap(s) — "
             f"nothing has been drafted yet.</div><div>{listed}</div>"
         )
+        outline_level = [f for f in defects if f.section is None]
+        if outline_level:
+            detail = "<br>".join(
+                f"{_esc(f.code)}: {_esc(f.detail)}" for f in outline_level
+            )
+            parts.append(f"<div class='meta'>{detail}</div>")
     else:
         parts.append(
             "<div class='verdict clean'>No mechanical gap found. "
