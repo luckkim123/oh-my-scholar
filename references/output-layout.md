@@ -96,6 +96,8 @@ outputs/<slug>/
     *.md                              # ideate stage: concept notes (one per method/contribution) — the draft's SSOT
   outline/
     *.md                              # outline stage: section tree, story arc, figure plan
+    gate1.html                        # derived read-only GATE 1 sheet — regenerated from
+                                      # outline.md by scripts/oms_outline_view.py, never edited
   consensus/
     {stage}-{role}.md                 # per-run consensus handoff artifacts (`<stage>-<role>.md`) — written only in `--consensus` mode
   versions/
