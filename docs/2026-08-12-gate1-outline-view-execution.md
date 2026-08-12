@@ -938,17 +938,22 @@ it needs someone who can see a rendered page.** Build all three fields open
 cd ~/oh-my-scholar
 python3 - <<'PY'
 import importlib.util
+import sys
 from pathlib import Path
 
 
 def load(alias, path):
     spec = importlib.util.spec_from_file_location(alias, path)
     mod = importlib.util.module_from_spec(spec)
+    # Register before exec: `from __future__ import annotations` + @dataclass
+    # resolves string annotations through sys.modules[cls.__module__], which
+    # spec_from_file_location never populates. Task 1 hit this for real.
+    sys.modules[alias] = mod
     spec.loader.exec_module(mod)
     return mod
 
 
-ov = load("ov", "scripts/oms_outline_view.py")
+ov = load("oms_outline_view", "scripts/oms_outline_view.py")
 t = load("t", "tests/test_oms_outline_view.py")
 o = ov.parse_outline(t.COMPLETE)
 out = Path(".superpowers/sdd/gate1-preview.html")
