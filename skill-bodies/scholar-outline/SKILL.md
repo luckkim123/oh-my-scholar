@@ -71,6 +71,9 @@ This skill operates in three modes (default `--direct`):
 ### Common — GATE 1
 > ⚠️ The handoff between `--consensus`'s 2c-* sequential stages follows the `<Consensus_Handoff>` convention below (rubber-stamp prevention).
 6. **GATE 1 — request human approval**:
+   - **Render the sheet first**: run `python3 <plugin>/scripts/oms_outline_view.py .oms/<slug>/outline/outline.md`. It writes `.oms/<slug>/outline/gate1.html` and prints one line per structural gap plus a final `GAPS=<n>`. The sheet is a *derived read-only view* — `outline.md` stays the SSOT, so never edit the HTML; revisions go to `outline.md` and the sheet is regenerated.
+   - **Surface it**: when the running harness can publish an artifact, publish `gate1.html` and give the human the link; when it cannot, report the file path so they can open it in a browser. Its absence is a graceful degrade, not an error — the gate still functions on the text outline alone.
+   - **Report the gaps verbatim, do not paper over them**: the script detects *absence* only (missing field, section off the necessity chain, blank chain link, researcher-recheck marker, over-budget total, citation-mapping mismatch, no section tree at all). `GAPS=0` means nothing mechanical is missing — it is **not** a judgment that the structure is good, and must never be presented as one.
    - Present the full outline (for consensus, both plan.md+outline) and specify the following three options:
      - **proceed**: outline approved → can proceed to scholar-draft
      - **revise**: instruct the revisions → re-delegate to the planner then re-run GATE 1

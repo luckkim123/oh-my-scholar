@@ -335,3 +335,20 @@ def test_cli_raises_only_on_a_missing_input_file(tmp_path):
 
     with pytest.raises(SystemExit):
         ov.main([str(tmp_path / "nope.md")])
+
+
+def test_skill_wires_the_view_into_gate_1():
+    from conftest import skill_md
+
+    text = skill_md("scholar-outline")
+    gate = text.index("GATE 1 — request human approval")
+    window = text[gate : gate + 1800]
+    assert "oms_outline_view.py" in window
+    assert "gate1.html" in window
+    assert "proceed" in window and "revise" in window and "abort" in window
+
+
+def test_output_layout_admits_the_generated_sheet():
+    layout = (ROOT / "references" / "output-layout.md").read_text(encoding="utf-8")
+    outline_block = layout[layout.index("  outline/") :][:500]
+    assert "gate1.html" in outline_block
