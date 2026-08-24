@@ -4,6 +4,24 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-08-24
+
+### Changed
+
+- **The figure-procurement rule now looks for the project's own renderer first.** 0.15.0
+  sent the drafter straight to `omx plot`, which was too narrow: it counted the candidate
+  renderers inside omx only. A project that publishes regularly tends to grow its own
+  `tools/paper_figures.py` — tuned to its venue (font-embedded PDF, single-column width,
+  serif at the right point size) in ways a generic verb is not — and pointing the drafter
+  past it would fork the figure style of a paper mid-draft. The rule is now ordered:
+  project renderer (extend it, do not start a second one), then `omx plot` with the paper
+  flags as the fallback for a project that has none, then the shared invariant — the `.tex`
+  references the renderer's own permanent path, never `.oms/<slug>/gen-image/`.
+
+  The concrete path of any one project's renderer stays out of this repo; oms is
+  distributed and must not carry machine or project paths. It carries the *look for one*
+  rule; the project's own store carries where it is.
+
 ## [0.15.0] - 2026-08-24
 
 ### Added
