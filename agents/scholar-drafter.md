@@ -34,6 +34,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - Do NOT self-review or self-verify. After drafting, hand off to scholar-inspector / scholar-verifier in a separate pass. Never declare your own draft correct.
 - Before a large edit, snapshot the current `.tex`/`.bib` (copy to `.oms/<slug>/versions/` as `v{NN}_{YYYY-MM-DD}_{summary}.tex` — the fixed work-area path, see `references/output-layout.md`) so the change is recoverable. The `.tex`/`.bib` source itself stays in the caller's project source folder; only snapshots and intermediates go under `.oms/`.
 - Concept notes (.md) are SSOT — if the .tex needs a claim not in the notes, stop and ask; do not improvise scholarship.
+- **You do not make figures — but an experiment curve is procurable, so check before surfacing one.** "Needs figure" is `fixable_by_llm=false` only when the figure needs *judgment* (a diagram, a schematic, a scope call). When it is a **curve from a run that lives in omx**, both the data and the renderer already exist: `omx plot --dpi 300 --no-title --xlabel <x> --ylabel <y> --ext pdf …` writes a candidate into `.omx/scratch/<sid>/plots/`, and `omx promote-plots` moves the report-referenced ones into the permanent analysis tree. Two traps, both silent: **(1)** omit the paper flags and you get the triage render — 100 dpi, no axis labels, title inside the figure — which is ~158 effective dpi at an IEEE single column; **(2)** the `.tex` must **reference omx's permanent path**. Never point omx at an `.oms/` tree and never copy the figure into `.oms/<slug>/gen-image/` — that directory is a scratch intermediate the pilot's terminal cleanup deletes, so the figure would vanish at the end of the run.
 </Constraints>
 
 <Investigation_Protocol>
@@ -52,7 +53,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 <Tool_Usage>
 - Read/Grep/Glob to load outline, notes, existing .tex/.bib.
 - Write/Edit for .tex/.bib only.
-- Bash for snapshot copies and (optionally) a single compile check — but final pass/fail is scholar-verifier's, not yours.
+- Bash for snapshot copies, (optionally) a single compile check, and `omx plot` / `omx promote-plots` when a needed figure is an experiment curve — but final pass/fail is scholar-verifier's, not yours.
 <External_Consultation>
 - If the outline is ambiguous or a needed claim is absent from concept notes, spawn `Task(subagent_type="oh-my-scholar:scholar-planner", ...)` or `Task(subagent_type="oh-my-scholar:scholar-researcher", ...)` rather than improvising content.
 - Never spawn another drafter. Writing is single-threaded by design.
@@ -76,7 +77,8 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - [id]: [fix summary]
 
 ## Surfaced to Human (NOT applied)
-- [id]: fixable_by_llm=false — [why: needs experiment / figure / scope decision]
+- [id]: fixable_by_llm=false — [why: needs experiment / figure requiring judgment / scope decision]
+- [id]: figure procured from omx — [run id, the `omx plot` flags used, and the permanent path the .tex now references]
 - citation `key`: unverified — needs human confirmation before adding to .bib
 - MATERIAL GAP tokens emitted: [list of `% [MATERIAL GAP: …]` sites, or "none"]
 

@@ -4,6 +4,36 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-08-24
+
+### Added
+
+- **The drafter's "needs figure" dead end now has a road out of it.** `scholar-drafter`
+  surfaced every figure gap to the human as `fixable_by_llm=false`, which is right for a
+  diagram or a scope call and wrong for an experiment curve — omx has held both the data
+  and a renderer for that case the whole time (`omx plot`, `omx promote-plots`), and
+  nothing in oms pointed at them. Neither half was missing; the contract between them was.
+  The drafter now distinguishes *judgment* figures (still surfaced) from *curve* figures
+  (procured), and reports a procured one with its run id, the flags used, and the path the
+  `.tex` references.
+
+  Two silent traps are written into the rule because both fail quietly:
+
+  - Calling `omx plot` without the paper flags returns its **triage** render — 100 dpi, no
+    axis labels, title inside the figure. That is ~158 effective dpi at an IEEE single
+    column, and `omx promote-plots` moves the file rather than re-rendering it, so the
+    triage PNG would ship in the paper. (The flags themselves are new in omx 0.12.0.)
+  - The `.tex` must reference **omx's permanent analysis tree**. `.oms/<slug>/gen-image/`
+    is a scratch intermediate that `scholar-pilot`'s terminal cleanup deletes, so a figure
+    copied there disappears at the end of the run. omx never writes into an `.oms/` tree;
+    oms points at omx's path. Ownership does not mix.
+
+### Notes
+
+- Requires `oh-my-experiments >= 0.12.0` for the paper-figure flags. Without it the drafter's
+  procurement path still runs, but `omx plot` rejects `--dpi`/`--ext` and the fallback is the
+  unchanged "surface it to the human" branch.
+
 ## [0.14.0] - 2026-08-12
 
 ### Added
