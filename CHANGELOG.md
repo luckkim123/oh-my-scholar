@@ -25,10 +25,12 @@ All notable changes to oh-my-scholar (oms).
 
 ### Added
 
-- `tests/test_no_dead_spec_citations.py` — a bare `docs/specs/` path in any tracked
-  `.md`/`.py` now fails. Verified to discriminate: deleting one recovery hint turns the
-  suite red, restoring it turns it green. A companion test asserts the directory is still
-  absent, so the guard deletes itself honestly if `docs/specs/` ever comes back.
+- `tests/test_no_dead_spec_citations.py` — a `docs/specs/` path that does not carry
+  `1940cc6` within 220 chars, in any tracked `.md`/`.py`, now fails. Verified to
+  discriminate: deleting one recovery hint turns the suite red, restoring it turns it
+  green. It also caught this very entry, which cited the dead path twice while describing
+  the guard. A companion test asserts the directory is still absent, so the guard deletes
+  itself honestly if that tree ever comes back.
 
 ## [0.16.0] - 2026-08-25
 
