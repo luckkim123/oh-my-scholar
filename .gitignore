@@ -8,3 +8,7 @@ __pycache__/
 # runtime paper outputs — never commit user documents (large, private, citation-bound)
 outputs/*
 !outputs/.gitkeep
+
+# Claude Code linked worktrees — checkouts of this repo, never repo content.
+# `git add -A` picks them up as gitlinks; 2026-08-25 that shipped 6 of them.
+.claude/worktrees/
