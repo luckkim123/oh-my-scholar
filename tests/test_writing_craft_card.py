@@ -9,7 +9,8 @@ human-gated learn)는 우수하나 *글쓰기 규칙 내용*이 거의 비어 �
 
 이 테스트가 카드의 7섹션 구조·각 차원 핵심 규칙·§7 토큰·venue 변주 명시·범용성(고유명사 누출
 차단)을 강제한다. 출처 anchor 와 비목표(embedding·Manchester bulk-copy·auto-FAIL) 회피도 검증.
-설계: docs/specs/2026-06-01-writing-craft-injection/design.md §3.1.
+설계 문서는 2026-06-06(1940cc6)에 트리에서 삭제됐고 이력에서만 읽힌다:
+`git show 1940cc6^:docs/specs/2026-06-01-writing-craft-injection/design.md` §3.1.
 """
 import re
 from pathlib import Path

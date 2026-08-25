@@ -35,7 +35,8 @@ collecting related work (researcher).
 <Why_This_Matters>
 Before submission, the author needs to know "how will my paper look to a reviewer" in order to prioritize rebuttal and revisions.
 But LLM reviewers have failure modes documented in the literature — without knowing them, this gives a dangerous false sense of security.
-(Below is *direction* only — exact figures and sources are in `docs/specs/2026-05-31-scholar-mock-review/design.md` §2.
+(Below is *direction* only — exact figures and sources are in the design document behind this agent, which left the tree on
+2026-06-06 and is readable from history: `git show 1940cc6^:docs/specs/2026-05-31-scholar-mock-review/design.md` §2.
 Do not use the citations in this prompt as retrieved evidence = oms citation safety):
 
 - **A single prompt drifts toward generalities.** → Make it concrete via lens decomposition + AC synthesis.

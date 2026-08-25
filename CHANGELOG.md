@@ -4,6 +4,32 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-08-25
+
+### Fixed
+
+- **Six citations to a directory deleted eleven weeks earlier.** `docs/specs/` left the
+  tree in `1940cc6` (2026-06-06, "[정리] 문서 영어화 + spec 산출물 삭제"). Every pointer
+  into it survived the deletion. Two of the six sat in files that ship: `agents/
+  scholar-reviewer.md` §Why_This_Matters sent the reviewer to
+  `docs/specs/2026-05-31-scholar-mock-review/design.md` for "exact figures and sources",
+  and `references/rubrics/venue-review-forms.md` sent a reader to the same file for the
+  survey behind every scale in the card. An agent following either got nothing, with no
+  error to say why — a dangling pointer in a distributed card reads as authoritative
+  right up until someone opens it.
+- The repair keeps all six citations and attaches the recovery command
+  (`git show 1940cc6^:<path>`), so they resolve on any clone from the repo's own history
+  rather than pointing outward at a machine-local copy. The three CHANGELOG entries were
+  annotated in place rather than rewritten: they are the record of what those releases
+  were designed against.
+
+### Added
+
+- `tests/test_no_dead_spec_citations.py` — a bare `docs/specs/` path in any tracked
+  `.md`/`.py` now fails. Verified to discriminate: deleting one recovery hint turns the
+  suite red, restoring it turns it green. A companion test asserts the directory is still
+  absent, so the guard deletes itself honestly if `docs/specs/` ever comes back.
+
 ## [0.16.0] - 2026-08-25
 
 ### Added
@@ -782,7 +808,8 @@ All notable changes to oh-my-scholar (oms).
 - **repo/project boundary**: writing-craft.md is a *universal* rule distributed to all users. This-paper/this-user-specific
   expressions go only into per-project `.oms/wiki/pattern/` (light) — never leak into the distributed card (all-file
   proper-noun-0 guard).
-- Design·plan: `docs/specs/2026-06-01-writing-craft-injection/{design,plan}.md`.
+- Design·plan: `docs/specs/2026-06-01-writing-craft-injection/{design,plan}.md` — removed from the tree on 2026-06-06,
+  readable with `git show 1940cc6^:<path>`.
 - ⚠️ Runtime reflection requires a marketplace update + app restart (plugin cache reload).
 
 ## [0.4.0] — 2026-05-31
@@ -796,7 +823,7 @@ All notable changes to oh-my-scholar (oms).
   thesis=multi-contribution dissertation (sub-forms thesis-by-papers vs monograph). Added a structure_type
   field to the venues.md schema + IROS=flat·POSTECH thesis=thesis examples. Rationale: external-context literature survey (IMRaD·Milford·
   Brown H2R·SPJ·IEEE RA-L·T-RO field data·York/Oxbridge thesis guide — source URLs in
-  `docs/specs/2026-05-31-paper-structure-model/design.md`).
+  `docs/specs/2026-05-31-paper-structure-model/design.md` — removed 2026-06-06, readable with `git show 1940cc6^:<path>`).
 
 ### Fixed
 - **Blocked the "technical white paper" anti-pattern** — the previous planner had only a flat (short-paper) structure
@@ -864,7 +891,8 @@ All notable changes to oh-my-scholar (oms).
   Passes `test_plugin_integrity.py` (plugin.json↔skills/ 1:1 enforced).
 
 ### Design / Evidence
-- Design rationale: `docs/specs/2026-05-31-scholar-mock-review/design.md`. Based on a survey of prior work on LLM paper review
+- Design rationale: `docs/specs/2026-05-31-scholar-mock-review/design.md` (removed 2026-06-06, readable with
+  `git show 1940cc6^:<path>`). Based on a survey of prior work on LLM paper review
   (MARG arXiv:2401.04259 — single-prompt generality 60%→ensemble 29%; AI-Scientist Nature 2026 — ensemble+AC
   ~human accuracy; DeepReview ACL 2025 — re-check stage; ICLR 2025 20K real deployment — reliability gate before emit),
   decided the architecture (ensemble 3-lens+AC) and guardrails (anchor enforcement·novelty-question downgrade·injection defense·accept-bias

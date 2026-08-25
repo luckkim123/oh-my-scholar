@@ -164,4 +164,5 @@ venue-scale estimate" rather than guessing a band.
 The scales above (NeurIPS 1-10/1-4/1-5, ICLR discrete set, IROS A~D letters, CVPR labels, journal revision
 vocabulary) were confirmed in the 2026-05-31 survey against primary sources (official reviewer guideline pages·IEEE RAS·arXiv).
 Only the CVPR integer mapping is unfixed because it depends on each year's OpenReview form (labels only verified). For the
-synthesized survey report, see §2·§4 of the design document that prompted this card's creation (`docs/specs/2026-05-31-scholar-mock-review/design.md`).
+synthesized survey report, see §2·§4 of the design document that prompted this card's creation. It left the tree on
+2026-06-06 and is readable from history: `git show 1940cc6^:docs/specs/2026-05-31-scholar-mock-review/design.md`.
