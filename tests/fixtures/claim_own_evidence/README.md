@@ -21,7 +21,10 @@ measurement describes the shipped configuration — each received `results.tex`,
 verbatim text of step 7.6 and its §3 rule, and nothing else. They were told not to open
 `ground_truth.json`; both confirmed they did not. Neither saw the other's answer.
 
-A third grader was dispatched and returned no result, so **n = 2**, not 3.
+**Four graders were dispatched; two returned nothing.** Both silent ones went idle without
+output and stayed silent through explicit retrieval requests — one was asked twice, the other
+was a fresh replacement asked once. No cause was established, so nothing here explains it.
+The measurement is **n = 2**, and the two that answered are the two reported below.
 
 ## Result
 
