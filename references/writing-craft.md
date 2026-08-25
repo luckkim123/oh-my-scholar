@@ -18,10 +18,40 @@
 
 ## §2. TONE — Tone (removing AI slop)
 
-- **no decorative verbs/adjectives (a principle, not a list)**: do not use them if there is no actual meaning payload. Test = "Does this verb/adjective add *content*, or is it *decoration*?". Seed tokens: delve, underscore, showcase, foster, leverage, intricate, pivotal, crucial, comprehensive, meticulous, realm, tapestry, testament. ⚠️ A static list rots (authors start avoiding 'delve'), so enforce the *principle* and use the list only as §7 detection seeds. [Nature Human Behaviour 2025 — LLM surplus vocabulary 66% verbs / 14% adjectives / humanizer]
+- **no decorative verbs/adjectives (a principle, not a list)**: do not use them if there is no actual meaning payload. Test = "Does this verb/adjective add *content*, or is it *decoration*?". Seed tokens: delve, underscore, showcase, foster, leverage, intricate, pivotal, crucial, comprehensive, meticulous, realm, tapestry, testament, seamless, landscape (in the abstract sense). ⚠️ A static list rots (authors start avoiding 'delve'), so enforce the *principle* and use the list only as §7 detection seeds. [Nature Human Behaviour 2025 — LLM surplus vocabulary 66% verbs / 14% adjectives / humanizer]
 - **no copula avoidance**: do not change `is` to `serves as`/`stands as`/`boasts`/`features`. [humanizer]
 - **em-dash cap**: the em-dash (`—`) is not a matter of restraint but nearly prohibited — replace it with a period, comma, colon, or parentheses, or restructure the sentence. At most 1-3 per section. [humanizer / anti-ai-slop]
 - **no structural slop**: forced rule-of-three, synonym cycling, three consecutive sentences of identical length (vary sentence length), negative parallelism ("It's not just X, it's Y"), `-ing` participle padding. [anti-ai-slop]
+- **no significance hype**: a claim about impact is not evidence of impact. Seed phrases: `paves the way for`, `a crucial/pivotal step toward`, `has the potential to revolutionize`, `opens new avenues`, `sheds light on`, `bridges the gap`. Same principle as the decorative-word rule — the phrase is banned when it carries no measured payload, not because the words are forbidden. [humanizer]
+- **no formulaic opener**: `In recent years, X has attracted increasing attention` / `With the rapid development of ...`. An opening sentence that would fit any paper in the field says nothing about this one. [humanizer]
+
+## §2.5 PRESERVE — What §2 must not touch (over-correction guard)
+
+§2 pushes in one direction only: remove. Without a guard on the other side, a
+revise loop converges on stripping things that are *correct academic writing*,
+and the result reads cleaner while saying something false. Everything here is
+exempt from §2 and from §7 detection.
+
+- **Evidence-tied hedging is correct and required.** `suggests` · `is consistent with` ·
+  `we hypothesize that` · `may indicate` · `appears to` stay whenever the claim is
+  genuinely uncertain. Turning *"the results suggest X"* into *"the results prove X"*
+  does not remove AI slop — it **manufactures over-claiming**, which §3 then has to
+  catch. §2.9's target is hedging-by-vagueness (`somewhat`, `to some extent`), which is
+  hedging with no referent; calibrated hedging has one.
+- **Passive voice is fine when the actor is irrelevant** — *"Samples were normalized to
+  total protein."* Rewriting for an agent that does not matter adds a false subject.
+- **First-person plural `we` is standard.** Do not rewrite to avoid it.
+- **Definitions, named methods and metrics, technical terms, equations, and symbols stay
+  verbatim.** A synonym swap here is not a style edit, it is a terminology change — and
+  it is exactly what tortured-phrase screening flags in suspect papers.
+- **Never invent, drop, or alter a number, an equation, or a citation key.** A rewrite
+  preserves every `\cite{...}` and every reported value unchanged.
+- **Coverage is preserved.** If the original had five paragraphs, so does the rewrite.
+  A shorter document is not evidence of a better one.
+
+⚠️ **This section is why writing detection is WARN, not FAIL** (see §7). Every rule in
+§2 has a legitimate exception living here, so a hard gate on §2 would block correct
+prose. Detect, list, and let a human confirm.
 
 ## §3. LOGIC — Argument Construction
 
@@ -29,6 +59,11 @@
 - **refutable contribution bullets**: put contributions before the Intro as **refutable bullets**. NOT "We describe a cool system"; YES "We prove X (Section 4)". This bullet list drives the whole paper. State the problem with examples, not grand claims (molehills not mountains). [Peyton Jones]
 - **forward-reference**: each contribution bullet forward-references its evidence (Section X). ⚠️ "The rest of this paper is structured as follows…" is prohibited — the forward-references in the contribution bullets take over that role. [Peyton Jones]
 - **TEEL paragraph**: a body paragraph = Topic sentence (point first) → Evidence (data, citations) → Explanation (interpretation) → Link (to the next thesis). [academic-research-skills]
+- **claim ↔ own evidence (the results-section counterpart of overgeneralization)**: every empirical claim about *our* method carries (a) an anchor — a `\ref{tab:...}`, a `\ref{fig:...}`, or a reported number — and (b) a verb no stronger than that anchor supports. This is a different axis from claim↔citation (verifier's claim-faithfulness), which only inspects sentences carrying a `\cite`. Results-section over-claiming lives in the sentences that carry none, so nothing was watching them.
+  - *unbacked claim* → add the anchor or soften. NOT "Our method is more robust"; YES "Accuracy drops by 2 points under distribution shift versus 11 for the baseline (Fig. 3)."
+  - *verb stronger than anchor* → downgrade. `demonstrate`/`prove`/`establish`/`confirm`/`guarantee` off a single experiment is over-claiming: NOT "This demonstrates universal superiority"; YES "On these three datasets, our method matches or exceeds the strongest baseline (Table 2)."
+  - *vague magnitude* → a number, and prefer a **range** (`2--6%`) over one averaged value unless the averaging is stated. Attribute each number to its method, metric, and baseline, and lead the comparison with the strongest competitor, not the weakest.
+  - ⚠️ This rule does not license removing hedging — §2.5 governs there. A calibrated verb over a weak anchor is the *correct* outcome, not a defect.
 - **overgeneralization warning — the top failure mode**: a claim broader than its citation basis is the LLM's #1 hallucination (empirically 51%, more common than invented papers). Match the breadth of a claim to the breadth of its basis. [AutoSurvey error taxonomy]
 - **additional LLM academic-writing failure modes (traps the drafter falls into)**: among the externally documented failure modes, beyond the overgeneralization above, watch out separately for — ① **numeric hallucination** (plausible but source-data-inconsistent statistics/numbers) → cross-check every quantitative claim against the results notes ② **method generalization** (describing a standard method instead of the concrete implementation) → the method section writes the actual implementation of *this* system. (③ term confusion = treating related terms interchangeably is the flip side of §1 banana rule — goes there.) ⚠️ Blog source (adopted as drafter rule, not a citation claim — see §source honesty). [manuelcorpas 2026-01 / global wiki reference]
 

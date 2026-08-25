@@ -4,6 +4,71 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-08-25
+
+### Added
+
+- **A PRESERVE section in the writing-craft card — the guard on the other side of §2.**
+  §2 pushes in one direction only: remove the AI tells. With nothing pushing back, a
+  revise loop converges on stripping things that are correct academic writing, and the
+  result reads cleaner while saying something false. The concrete case: rewriting *"the
+  results suggest X"* as *"the results prove X"* does not remove slop, it manufactures
+  over-claiming, which §3 then has to catch. Evidence-tied hedging, actor-irrelevant
+  passive voice, first-person plural `we`, and verbatim definitions/terms/equations are
+  now explicitly exempt from §2 and from §7 detection. This is also the standing answer
+  to "why is writing detection WARN and not FAIL" — every §2 rule has a legitimate
+  exception living here.
+- **A claim ↔ own-evidence axis in verify (WARN).** The existing claim-faithfulness
+  check keys on `\cite`: it asks whether a cited source really supports the claim. That
+  leaves the sentences carrying no citation entirely unwatched — and results-section
+  over-claiming lives precisely there. The new axis collects performance claims with no
+  `\cite` and checks each for an anchor (`\ref{tab:}`, `\ref{fig:}`, or a number) and
+  for a verb no stronger than that anchor supports; `demonstrate`/`prove`/`establish`/
+  `confirm`/`guarantee` off a single experiment is flagged with a suggested downgrade.
+  Wired in three places that must agree: the rule in writing-craft.md §3, the check in
+  scholar-verifier, the axis row in paper-eval.
+  **calibration_status: NOT_CALIBRATED.** The axis has never been run against planted
+  over-claims and a clean control, so its recall and false-positive rate are unknown and
+  the agent card says so out loud. A checker with no measurement behind it has a green
+  light that means nothing — the label exists so a clean result is not read as evidence.
+- **`page_limit_excludes_bibliography` in the venue schema, with the ReferencesStart
+  procedure.** The page check counted the whole compiled PDF, always. For a venue whose
+  limit excludes the bibliography that over-counts, and the false over-length buys a
+  round of typesetting nobody needed. The schema can now say which kind of limit it is;
+  when it excludes the bibliography, verify asks LaTeX where the bibliography starts
+  (`\AddToHook{env/thebibliography/begin}{\label{ReferencesStart}}`, then the page from
+  `main.aux`) instead of guessing from the log. Two traps are written into the card: the
+  `.aux` groups are nested, so a single regex mis-parses them and needs a depth counter;
+  and an absent label reports "not available" rather than falling back to the total,
+  which would answer a different question while looking like an answer.
+
+### Changed
+
+- **Two seed groups added to §2 TONE** — significance hype (`paves the way for`, `has
+  the potential to revolutionize`, …) and the formulaic opener (`In recent years, X has
+  attracted increasing attention`). Seeds, not a blocklist: the §2 principle still governs
+  and the list only feeds §7 detection, because a static list rots.
+
+### Verification
+
+- `pytest tests/` — 644 passed, 1 skipped (was 632 + 1; 12 new tests across
+  `test_writing_craft_card.py`, `test_verify_claim_own_evidence.py`,
+  `test_page_limit_bibliography_mode.py`).
+- The new tests check wiring, not just wording: that the axis reaches all three layers,
+  that it stays WARN, that the NOT_CALIBRATED label is present, and that the
+  missing-label fallback is forbidden in both the card and the agent.
+
+### Notes
+
+- Source of these changes: a survey of eight external paper-writing repos (2026-08-25).
+  Three of the four candidates were adopted; the fourth (a reviewer pre-commitment
+  protocol) is deferred — it is larger and its source is CC BY-NC, so it needs a
+  clean-room pass of its own.
+- The survey's largest single candidate was **rejected on measurement**: the external
+  AI-vocabulary lists are already covered by §2/§7 here, and this card additionally
+  carries the list-rot principle and the WARN-not-FAIL discipline that the external
+  version lacks. Importing it would have added rot, not coverage.
+
 ## [0.15.1] - 2026-08-24
 
 ### Changed

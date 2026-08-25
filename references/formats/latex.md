@@ -12,10 +12,30 @@ Items that yield a mechanical pass/fail. Equivalent to CI for code.
 | undefined references | log's `LaTeX Warning: Reference ... undefined` | 0 = pass |
 | undefined citations | log's `Citation ... undefined` | 0 = pass |
 | overfull hbox | log's `Overfull \hbox` | at or below venue tolerance = pass |
-| page count | compiled PDF page count vs venue `page_limit` | at or below = pass |
+| page count | vs venue `page_limit`. Default: whole compiled PDF. When the venue sets `page_limit_excludes_bibliography: true`, main-text pages only — see the ReferencesStart procedure below | at or below = pass |
 | placeholder leftovers | `\todo`, `[TODO]`, `[FIXME]`, `XXX`, `TBD` grep | 0 = pass |
 
 Compile procedure (multi-pass): `pdflatex → bibtex → pdflatex → pdflatex`, or `latexmk` handles it automatically. The engine follows the venue card's `compile_engine` (pdflatex/xelatex/lualatex).
+
+**Main-text page count (only when `page_limit_excludes_bibliography: true`).** Do not
+try to infer where the bibliography starts from the log — ask LaTeX, which already
+knows. Put one line in the preamble of the venue template:
+
+```latex
+\AddToHook{env/thebibliography/begin}{\label{ReferencesStart}}
+```
+
+After compiling, `main.aux` carries `\newlabel{ReferencesStart}{{...}{P}...}` where `P`
+is the page the bibliography opens on; main-text pages = `P` (the reference-start page
+is not main text, so it is excluded, not subtracted-then-added). Read the total from
+`main.log` as usual and report both numbers.
+
+⚠️ **The `.aux` groups are nested, so a single regex will mis-parse them.** Walk the
+braces with a depth counter and take the **second** top-level group of the `\newlabel`
+line. If the label is absent — the template predates this line, or the compile failed
+before the bibliography — report "main-text page count not available" rather than
+falling back to the total, which would silently answer a different question.
+
 
 ## 2. Numeric and Reference Consistency (verifier)
 

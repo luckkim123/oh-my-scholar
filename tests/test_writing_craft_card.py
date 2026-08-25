@@ -122,3 +122,41 @@ def test_no_project_specific_proper_nouns():
         if bad.search(ln)
     ]
     assert not hits, "배포 카드에 프로젝트 고유명사 잔존(범용성 위반):\n" + "\n".join(hits)
+
+
+def test_preserve_section_guards_over_correction():
+    """§2.5 PRESERVE — §2 의 '제거' 압력에 대한 반대편 가드 (2026-08-25 신설).
+
+    §2 는 한 방향으로만 민다. 가드가 없으면 revise 루프가 정당한 hedging 을 지우는
+    쪽으로 수렴하고, 결과물은 더 깔끔해 보이면서 틀린 말을 한다 — 과주장 제조.
+    이 절이 없으면 §2 를 hard-FAIL 로 만들자는 압력도 막을 근거가 사라진다.
+    """
+    body = CARD.read_text(encoding="utf-8")
+    assert re.search(r"PRESERVE|over-correct", body, re.I), \
+        "§2.5 PRESERVE 절 누락 — §2 의 반대편 가드가 없다"
+    # 보존 대상 4종이 명시돼야 한다
+    assert re.search(r"hedg", body, re.I), "PRESERVE: 근거에 묶인 hedging 보존 규칙 누락"
+    assert re.search(r"passive voice", body, re.I), "PRESERVE: 수동태 허용 규칙 누락"
+    assert re.search(r"first-person plural|`we`", body, re.I), "PRESERVE: 1인칭 복수 we 보존 누락"
+    assert "verbatim" in body.lower(), "PRESERVE: 정의·용어·수식 verbatim 보존 누락"
+    # 오수정의 구체형 — suggest → prove 는 슬롭 제거가 아니라 과주장 제조다
+    assert re.search(r"suggest.*prove|prove.*suggest", body, re.I | re.S), \
+        "PRESERVE: 'suggests→prove' 오수정 사례 누락 (규칙만 있고 사례가 없으면 안 지켜진다)"
+
+
+def test_logic_has_claim_to_own_evidence_axis():
+    """§3 LOGIC — claim↔자기근거 축 (2026-08-25 신설).
+
+    verifier 의 claim-faithfulness 는 claim↔인용 축이라 \\cite 없는 문장은 아예 안
+    본다. 결과 절 과주장은 정확히 그 문장들에서 나므로 별도 축이 필요하다.
+    """
+    body = CARD.read_text(encoding="utf-8")
+    assert re.search(r"own evidence", body, re.I), "§3 claim↔자기근거 축 누락"
+    # 앵커 3종 + 동사 과잉 + 범위 선호
+    assert re.search(r"\\ref\{tab:|\\ref\{fig:", body), "claim↔자기근거: 표·그림 앵커 명시 누락"
+    for verb in ("demonstrate", "prove", "guarantee"):
+        assert verb in body, f"claim↔자기근거: 과잉 동사 씨앗 '{verb}' 누락"
+    assert re.search(r"range", body, re.I), "claim↔자기근거: 평균 단일값보다 범위 선호 규칙 누락"
+    # §2.5 와의 경계 — 이 규칙이 hedging 제거 면허가 되면 안 된다
+    assert re.search(r"does not license removing hedging|§\s*2\.5", body), \
+        "claim↔자기근거: §2.5 와의 경계 명시 누락 (없으면 hedging 제거 면허로 읽힌다)"

@@ -28,6 +28,7 @@ Like code's CI, pass/fail comes out objectively. (Check items from the latex.md 
 | Page/citation count | venue page_limit / min_citations | venues.md |
 | abstract discipline (WARN) | quantitative numbers / equations / multipliers in abstract region residue 0 (qualitative meaning only) | latex.md §3 |
 | writing discipline (WARN) | decorative words / excessive em-dashes / rule-of-three / negative parallelism residue 0 in body | writing-craft.md §7 |
+| claim ↔ own evidence (WARN) | results-section performance claims carrying no `\cite`: each has a `\ref{tab:}`/`\ref{fig:}`/number anchor, and no verb stronger than that anchor | writing-craft.md §3 |
 
 **On FAIL, report what failed and why, with evidence (log lines / grep results).** No "should/probably/seems" — fresh evidence only.
 
