@@ -4,6 +4,52 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-08-25
+
+### Changed
+
+- **The claim↔own-evidence axis is now calibrated per class, and one of the two classes
+  turned out not to work.** 0.16.0 shipped it labelled `NOT_CALIBRATED` because it had
+  never been run against planted over-claims. It has now been:
+  `tests/fixtures/claim_own_evidence/` holds 17 sentences — 8 planted defects, 9 clean, of
+  which 5 are hard negatives — graded blind by two independent Sonnet subagents (the tier
+  `scholar-verifier` is pinned to). Both returned the identical set.
+  - `verb_exceeds_anchor`: **recall 4/4, false positives 0/9** → CALIBRATED. It spared
+    every hard negative: an anchor in the paragraph rather than the sentence, a hedged
+    verb over a weak anchor, a numeral anchor with no `\ref`, a legitimate `demonstrates`
+    spanning three tables, and a correctly hedged limitation. The exceptions hold.
+  - `unanchored`: **0/4** → still NOT_CALIBRATED, and the graders were not at fault.
+    Step 7.6 said to search "the sentence **and its paragraph**" for an anchor, and every
+    real results paragraph contains a `\ref` or a number somewhere. Both graders applied
+    that correctly and concluded the corpus held no instances of the class. Paragraph
+    scope did not weaken the check — it deleted it.
+
+### Fixed
+
+- `writing-craft.md` §3 and verifier step 7.6 gained the missing branch: a paragraph-level
+  anchor no longer satisfies a claim whose **own sentence** carries no numeral and no
+  `\ref` while asserting an unquantified comparative or superlative about our method
+  ("substantially more robust", "generalizes well", "outperforms all prior work") → WARN
+  "unquantified claim". A sentence carrying its own numbers stays anchored with no `\ref`
+  at all, which is what keeps the hard negatives passing.
+- ⚠️ **That fix is not validated.** It was derived from the corpus that exposed the bug,
+  so scoring it there would score a rule against its own training set. The class keeps its
+  `NOT_CALIBRATED` label until a fresh corpus, written without reference to this one, is
+  graded blind.
+
+### Added
+
+- `tests/fixtures/claim_own_evidence/` — corpus, key, grader runs, `score.py`, and a
+  README carrying the method and four named limits of the measurement (n=2, one model,
+  sentence ids handed to the grader, one domain).
+- `tests/test_verify_claim_own_evidence.py` now re-derives the label's numbers from the
+  key and `runs/` instead of matching a string, so editing the corpus without editing the
+  label turns the suite red. Verified to discriminate.
+- `venues.md`: a worked example for `page_limit_excludes_bibliography`, checked against
+  the primary source — IEEE RA-L is `false` ("six pages ... including figures and
+  references"), with the caveat that the RA-L *conference option* is a separate question
+  whose only RAS page declares itself outdated.
+
 ## [0.16.1] - 2026-08-25
 
 ### Fixed

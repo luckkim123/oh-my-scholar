@@ -1,0 +1,57 @@
+% Calibration corpus for scholar-verifier step 7.6 (claim <-> own evidence).
+% Each sentence carries an id comment so a grader can report unambiguously.
+% Ground truth lives in ground_truth.json and is NOT to be shown to a grader.
+
+\section{Method}
+
+% S01
+We train each policy for 300 epochs with a batch size of 4096.
+
+\section{Experiments}
+
+\subsection{Setup}
+
+% S02
+Each configuration is evaluated over 200 episodes with five random seeds.
+% S03
+Prior work reports a 12\% drop under the same distribution shift~\cite{smith2024}.
+
+\subsection{Main results}
+
+% S04
+Table~\ref{tab:main} reports success rate on all six terrains.
+% S05
+Our method leads on five of the six.
+% S06
+Our controller is substantially more robust than the baselines.
+% S07
+Table~\ref{tab:main} demonstrates that our method is universally superior.
+% S08
+The 1.4-point difference in Table~\ref{tab:main} suggests that the auxiliary loss helps, though the effect is within run-to-run variance.
+
+\subsection{Ablations}
+
+% S09
+Success rate rises from 41.2\% to 58.7\% when the auxiliary loss is enabled.
+% S10
+Performance improves considerably once the auxiliary loss is enabled.
+% S11
+In this single ablation, success rate rises from 41\% to 68\%, which proves that curriculum scheduling is necessary for convergence.
+% S12
+The 3.2-point gain in Table~\ref{tab:ablation} establishes the general effectiveness of the proposed regulariser.
+
+\subsection{Transfer}
+
+% S13
+Figure~\ref{fig:shift} confirms that the policy is robust to any distribution shift.
+% S14
+The proposed method generalizes well to unseen terrain.
+% S15
+Across all three benchmarks (Tables~\ref{tab:main}, \ref{tab:ablation}, and~\ref{tab:transfer}), the method matches or exceeds the strongest baseline, which demonstrates that the gain is not benchmark-specific.
+% S16
+Our approach outperforms all prior work in this setting.
+
+\subsection{Limitations}
+
+% S17
+We did not evaluate on hardware, so these numbers may not transfer to the physical platform.

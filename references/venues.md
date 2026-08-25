@@ -27,6 +27,14 @@ page_limit_excludes_bibliography:  # true | false (default false)
                  #   ⚠️ Confirm this against the venue's own author guide before setting it — guessing it wrong is
                  #   worse than leaving the default, because a false `true` hides a genuine over-length.
                  #   When true, verify measures main-text pages via the ReferencesStart label (latex.md §1).
+                 #   Worked example (checked 2026-08-25 against the primary source): IEEE RA-L is `false`.
+                 #   ieee-ras.org/publications/ra-l/ra-l-information-for-authors/ — "Letters will be six pages
+                 #   long in two-column IEEE format ... including figures and references", reinforced by "These
+                 #   page limits include everything needed for publication". Two over-length pages at USD 175
+                 #   each, hard stop at 8. ⚠️ The RA-L *conference option* is a separate question and is NOT
+                 #   settled: the only RAS page giving its rules says of itself that it "applied for the RA-L
+                 #   Conference Option until IROS 2022 and thus is outdated". Do not carry this `false` over to
+                 #   that path without re-checking.
 sections:        # [Introduction, Related Work, Method, ...]  ← flat only. For system/thesis, the planner generates the per-contribution section/chapter skeleton from the number of contributions.
 required_sections: # required sections
 quality_threshold: # verify pass score (0-100, default 80)

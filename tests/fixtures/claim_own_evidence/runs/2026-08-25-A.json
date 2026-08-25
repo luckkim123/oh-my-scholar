@@ -1,0 +1,7 @@
+{
+  "grader": "A",
+  "model": "sonnet",
+  "date": "2026-08-25",
+  "flagged": ["S07", "S11", "S12", "S13"],
+  "note": "Read S04-S08, S09-S12, S13-S16 as three paragraphs and accepted a paragraph-level anchor for every unanchored candidate. Flagged only verb_exceeds_anchor. Correctly spared S15 (three-table anchor) and S08 (hedged)."
+}

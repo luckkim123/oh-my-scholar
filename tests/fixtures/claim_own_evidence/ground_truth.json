@@ -1,0 +1,87 @@
+{
+  "corpus": "results.tex",
+  "axis": "claim <-> own evidence (scholar-verifier step 7.6)",
+  "created": "2026-08-25",
+  "n_items": 17,
+  "n_positive": 8,
+  "n_negative": 9,
+  "note": "A grader sees results.tex and the step 7.6 rule text only. This file is the key and must never be shown to a grader.",
+  "items": {
+    "S01": {
+      "label": "negative",
+      "why": "Method section, out of scope; also not a performance claim."
+    },
+    "S02": {
+      "label": "negative",
+      "why": "Setup detail, not a performance claim."
+    },
+    "S03": {
+      "label": "negative",
+      "why": "Carries \\cite -- 7.5's lane (claim<->citation), explicitly out of 7.6's scope."
+    },
+    "S04": {
+      "label": "negative",
+      "why": "Reports what a table contains; makes no claim about our method."
+    },
+    "S05": {
+      "label": "negative",
+      "why": "HARD. Anchor (\\ref{tab:main}) is in the paragraph, not the sentence. 7.6 says sentence OR paragraph."
+    },
+    "S06": {
+      "label": "positive",
+      "class": "unanchored",
+      "why": "'substantially more robust' with no \\ref and no numeral anywhere near."
+    },
+    "S07": {
+      "label": "positive",
+      "class": "verb_exceeds_anchor",
+      "why": "'demonstrates ... universally superior' off a single table."
+    },
+    "S08": {
+      "label": "negative",
+      "why": "HARD. 'suggests' over a 1.4-point anchor is a calibrated verb -- §2.5 says this is the correct outcome, not a defect."
+    },
+    "S09": {
+      "label": "negative",
+      "why": "HARD. Numeral anchor with no \\ref. 7.6 accepts a reported number as an anchor."
+    },
+    "S10": {
+      "label": "positive",
+      "class": "unanchored",
+      "why": "'improves considerably' -- vague magnitude, no number, no ref. Same claim as S09 stripped of its anchor."
+    },
+    "S11": {
+      "label": "positive",
+      "class": "verb_exceeds_anchor",
+      "why": "'proves ... necessary' off one ablation, despite real numbers."
+    },
+    "S12": {
+      "label": "positive",
+      "class": "verb_exceeds_anchor",
+      "why": "'establishes the general effectiveness' from one table row."
+    },
+    "S13": {
+      "label": "positive",
+      "class": "verb_exceeds_anchor",
+      "why": "'confirms ... any distribution shift' off one figure."
+    },
+    "S14": {
+      "label": "positive",
+      "class": "unanchored",
+      "why": "'generalizes well' with no anchor."
+    },
+    "S15": {
+      "label": "negative",
+      "why": "HARD. 'demonstrates' is legitimate here -- the anchor spans three tables, so the verb does not exceed it."
+    },
+    "S16": {
+      "label": "positive",
+      "class": "unanchored",
+      "why": "'outperforms all prior work' -- universal, unanchored."
+    },
+    "S17": {
+      "label": "negative",
+      "why": "HARD. Limitation, correctly hedged ('may not transfer'). §2.5 protects hedging."
+    }
+  }
+}

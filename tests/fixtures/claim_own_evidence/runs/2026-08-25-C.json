@@ -1,0 +1,7 @@
+{
+  "grader": "C",
+  "model": "sonnet",
+  "date": "2026-08-25",
+  "flagged": ["S07", "S11", "S12", "S13"],
+  "note": "Same paragraph reading as A, stated explicitly: 'unanchored 결함 사례는 이 17문장 안에 없었다 -- 전부 문단 단위까지 확장하면 앵커가 존재했고'. Correctly spared S15 and S08."
+}
