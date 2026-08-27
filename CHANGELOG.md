@@ -4,6 +4,48 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+
+## [0.17.0] - 2026-08-28
+
+Phase 2 of the `.hq/` store unification. Behavior unchanged; the root literal
+stays `.oms` — the `.hq` switch is the next phase.
+
+### Added
+- `hooks/oms_paths.py` gains `LEGACY_ROOT` and derived helpers (`root`,
+  `state_dir`, `notepad_md`, `verified_citations_json`, `wiki_dir`,
+  `venue_yaml`, `GITIGNORE_ENTRY`, `state_dir_default_str`,
+  `wiki_dir_default_str`). The module already existed as a bare
+  directory-ascent helper and carried no root literal; `nearest_ancestor` is
+  untouched.
+- `tests/test_oms_paths_lint.py` — the re-entry lint (AST; a `str` constant
+  containing the root literal with no whitespace is a violation, docstrings
+  excluded, f-string pieces included).
+
+### Changed
+- 18 call sites moved: 7 across `scholar_cite_guard`,
+  `scholar_resume_emit`, and `scholar_stop_guard`; 11 across
+  `integration_smoke`, `oms_doctor`, `oms_state`, `oms_wiki_audit`, and
+  `verify_bib_entry`. The scripts reach `hooks/` through a `sys.path` insert,
+  the pattern the hooks already use among themselves.
+
+### Fixed
+- `scripts/integration_smoke.py` built one diagnostic message from a
+  hardcoded `.oms/venues/...` fragment next to the real path it had already
+  computed. It now uses `venue_file.relative_to(root)` — same output, one
+  fewer place to update. The new lint is what surfaced it.
+
+### Verification
+- 655 passed, 1 skipped (baseline 654); exit code read without a pipe.
+- The lint was checked for discrimination by planting a violation.
+
+### Notes
+- The argparse defaults keep a leading `./` (`"./.oms/state"`) that plain
+  `Path` arithmetic drops silently, so those two stayed string helpers and
+  were compared against the old literals rather than reconstructed as paths.
+- Lint exclusions with measured counts in the test docstring: `tests/`, and
+  `.claude/worktrees/` 254 across 117 files — six registered worktrees of
+  this repo, gitignored.
+
 ## [0.16.2] - 2026-08-25
 
 ### Changed
