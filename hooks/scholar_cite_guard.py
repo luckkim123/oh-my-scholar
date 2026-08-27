@@ -21,7 +21,7 @@ import re
 import sys
 from pathlib import Path
 
-from oms_paths import nearest_ancestor
+from oms_paths import nearest_ancestor, verified_citations_json
 
 WRITE_TOOLS = ("Edit", "Write", "MultiEdit")
 ENTRY_RE = re.compile(r"@\w+\s*\{\s*([^,\s{}]+)\s*,")
@@ -59,7 +59,7 @@ def cite_keys(text: str) -> set:
 
 def allowlisted_keys(start: Path, cwd: str) -> set:
     def has_allowlist(base) -> bool:
-        return (base / ".oms" / "state" / "verified-citations.json").is_file()
+        return verified_citations_json(base).is_file()
 
     # start's parents (exclusive of start itself) take priority; cwd is an extra
     # fallback candidate checked last — same order as the original flat list.
@@ -68,7 +68,7 @@ def allowlisted_keys(start: Path, cwd: str) -> set:
         found = Path(cwd)
     if found is None:
         return set()
-    f = found / ".oms" / "state" / "verified-citations.json"
+    f = verified_citations_json(found)
     try:
         return set(json.loads(f.read_text(encoding="utf-8")).get("keys", {}))
     except (OSError, ValueError):

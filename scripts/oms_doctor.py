@@ -28,6 +28,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sync_version  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
+from oms_paths import root as oms_root  # noqa: E402
+
 VALID_MODELS = {"haiku", "sonnet", "opus"}
 LIBRARY_HOOK_MODULES = {"oms_atomic.py"}
 STATE_EXCLUDE_DIRS = {"state", "wiki", "venues"}
@@ -194,7 +197,7 @@ def check_state(paper_root) -> list:
     state/wiki/venues) against D/.oms/state/pilot-<slug>.json. A slug with a
     terminal/abort pilot state, or with no pilot state at all, is a WARN
     cleanup candidate -- advisory only, never FAIL, doctor never deletes."""
-    oms_dir = Path(paper_root) / ".oms"
+    oms_dir = oms_root(Path(paper_root))
     rows = []
     if not oms_dir.is_dir():
         return rows

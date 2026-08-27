@@ -46,7 +46,8 @@ import re
 import sys
 from pathlib import Path
 
-from oms_paths import nearest_ancestor
+from oms_paths import nearest_ancestor, notepad_md, state_dir
+from oms_paths import root as oms_root
 
 SECTION_RE = re.compile(r"^## Priority Context\s*\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
 PRIORITY_CONTEXT_CHAR_LIMIT = 2000
@@ -58,9 +59,9 @@ def nearest_oms_root(cwd: Path):
     "found"; it just fails open later when actually read), or None."""
     root = nearest_ancestor(
         cwd,
-        lambda c: (c / ".oms" / "state").is_dir() or (c / ".oms" / "notepad.md").exists(),
+        lambda c: state_dir(c).is_dir() or notepad_md(c).exists(),
     )
-    return (root / ".oms") if root is not None else None
+    return oms_root(root) if root is not None else None
 
 
 def load_json(path: Path):

@@ -19,6 +19,7 @@ from urllib.parse import quote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_json  # noqa: E402
+from oms_paths import state_dir_default_str  # noqa: E402
 
 MATCH_THRESHOLD = 0.75
 NO_DOI_THRESHOLD = 0.9
@@ -168,7 +169,7 @@ def main(argv=None) -> int:
     parser.add_argument("--title", default=None)
     parser.add_argument("--author", default=None)
     parser.add_argument("--record", action="store_true")
-    parser.add_argument("--state-dir", default="./.oms/state")
+    parser.add_argument("--state-dir", default=state_dir_default_str())
     args = parser.parse_args(argv)
 
     v = verify(args.key, args.doi, args.title, args.author)

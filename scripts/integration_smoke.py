@@ -36,6 +36,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import oms_doctor  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
+from oms_paths import GITIGNORE_ENTRY, venue_yaml  # noqa: E402
+from oms_paths import wiki_dir as oms_wiki_dir
+
 REQUIRED_WIKI_CATEGORIES = ("convention", "pattern", "decision", "reference")
 
 
@@ -85,21 +89,21 @@ def check_scaffold(workspace_root, slug, venue) -> list:
             rel = path.relative_to(root)
             rows.append(oms_doctor._row("FAIL", f"missing required path: {rel}"))
 
-    wiki_dir = root / ".oms" / "wiki"
+    wiki_dir = oms_wiki_dir(root)
     for cat in REQUIRED_WIKI_CATEGORIES:
         if not (wiki_dir / cat).is_dir():
             rows.append(oms_doctor._row("FAIL", f"missing required path: .oms/wiki/{cat}"))
     if (wiki_dir / "history").exists():
         rows.append(oms_doctor._row("FAIL", ".oms/wiki/history/ must not be created locally (Step 6)"))
 
-    venue_file = root / ".oms" / "venues" / f"{venue}.yaml"
+    venue_file = venue_yaml(root, venue)
     if not venue_file.is_file():
         rows.append(oms_doctor._row("FAIL", f"missing required path: .oms/venues/{venue}.yaml"))
     elif not re.search(r"^key:", venue_file.read_text(encoding="utf-8"), re.MULTILINE):
-        rows.append(oms_doctor._row("FAIL", f".oms/venues/{venue}.yaml has no 'key:' line"))
+        rows.append(oms_doctor._row("FAIL", f"{venue_file.relative_to(root)} has no 'key:' line"))
 
     gitignore = root / ".gitignore"
-    if not gitignore.is_file() or ".oms/" not in gitignore.read_text(encoding="utf-8"):
+    if not gitignore.is_file() or GITIGNORE_ENTRY not in gitignore.read_text(encoding="utf-8"):
         rows.append(oms_doctor._row("FAIL", ".gitignore missing '.oms/' entry"))
 
     if not rows:

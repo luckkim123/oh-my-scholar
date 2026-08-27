@@ -16,6 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_json  # noqa: E402
+from oms_paths import state_dir_default_str  # noqa: E402
 
 STAGES = (
     "research", "deepen", "ideate", "outline", "draft",
@@ -216,32 +217,32 @@ def main(argv=None) -> int:
     p_write.add_argument("--gate-status", default=None)
     p_write.add_argument("--open-fail-ids", default=None)
     p_write.add_argument("--paper-root", default=None)
-    p_write.add_argument("--state-dir", default="./.oms/state")
+    p_write.add_argument("--state-dir", default=state_dir_default_str())
 
     p_read = sub.add_parser("read")
     p_read.add_argument("--slug", default=None)
-    p_read.add_argument("--state-dir", default="./.oms/state")
+    p_read.add_argument("--state-dir", default=state_dir_default_str())
 
     p_revise_start = sub.add_parser("revise-start")
     p_revise_start.add_argument("--slug", required=True)
     p_revise_start.add_argument("--max-rounds", type=int, default=5)
     p_revise_start.add_argument("--ttl-hours", type=int, default=6)
     p_revise_start.add_argument("--force-restart", action="store_true")
-    p_revise_start.add_argument("--state-dir", default="./.oms/state")
+    p_revise_start.add_argument("--state-dir", default=state_dir_default_str())
 
     p_revise_round = sub.add_parser("revise-round")
     p_revise_round.add_argument("--slug", required=True)
-    p_revise_round.add_argument("--state-dir", default="./.oms/state")
+    p_revise_round.add_argument("--state-dir", default=state_dir_default_str())
 
     p_strike = sub.add_parser("strike")
     p_strike.add_argument("--slug", required=True)
     p_strike.add_argument("--defect-id", required=True)
-    p_strike.add_argument("--state-dir", default="./.oms/state")
+    p_strike.add_argument("--state-dir", default=state_dir_default_str())
 
     p_revise_end = sub.add_parser("revise-end")
     p_revise_end.add_argument("--slug", required=True)
     p_revise_end.add_argument("--status", default="done")
-    p_revise_end.add_argument("--state-dir", default="./.oms/state")
+    p_revise_end.add_argument("--state-dir", default=state_dir_default_str())
 
     args = parser.parse_args(argv)
 

@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_text  # noqa: E402
+from oms_paths import wiki_dir_default_str  # noqa: E402
 
 CATEGORIES = ("convention", "pattern", "decision", "reference", "history")
 META_FILENAMES = ("README.md", "INDEX.md")
@@ -383,7 +384,7 @@ def _err(message) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Read-only wiki health audit (mechanical dimensions) + INDEX generation.")
-    ap.add_argument("--root", default="./.oms/wiki")
+    ap.add_argument("--root", default=wiki_dir_default_str())
     ap.add_argument("--write-index", action="store_true")
     args = ap.parse_args(argv)
 

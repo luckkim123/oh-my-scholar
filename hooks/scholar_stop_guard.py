@@ -42,6 +42,7 @@ from pathlib import Path
 
 from oms_atomic import atomic_write_json
 from oms_paths import nearest_ancestor
+from oms_paths import state_dir as oms_state_dir
 
 
 def script_path() -> str:
@@ -50,8 +51,8 @@ def script_path() -> str:
 
 def nearest_state_dir(cwd: Path):
     """First ancestor of cwd (inclusive) containing `.oms/state/`, or None."""
-    root = nearest_ancestor(cwd, lambda c: (c / ".oms" / "state").is_dir())
-    return (root / ".oms" / "state") if root is not None else None
+    root = nearest_ancestor(cwd, lambda c: oms_state_dir(c).is_dir())
+    return oms_state_dir(root) if root is not None else None
 
 
 def load_json(path: Path):
