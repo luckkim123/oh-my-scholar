@@ -4,6 +4,106 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-08-28 - stage 2: the read fallback is gone
+
+store-spec.md §7 stage 2. P4 gave reads a per-file existence fallback
+(`.hq/` if the specific file had been copied there, `.oms/` otherwise) so a
+project could be anchored while its store copy was still in flight. That
+window is now closed: the anchor alone decides, for reads and writes alike.
+
+### Changed
+- `hooks/oms_paths.py` — `_read`/`_write` collapsed into one `_resolve(base,
+  new, legacy)`: anchored -> `.hq/`, unanchored -> `.oms/`, unconditionally.
+  Every getter (`learned_md`, `notepad_md`, `venue_yaml`, `workflows_dir`,
+  `verified_citations_json[_write]`, `state_dir[_write]`, `wiki_dir`,
+  `reading_dir`, `backport_design_dir`, `slug_dir`) now calls the single
+  resolver. `gate_state()`'s `legacy` row keeps its detection (a legacy
+  store with no anchor still warns loudly) but its meaning changes: reads no
+  longer fall back to that store, they simply never find it.
+- `scripts/oms_doctor.py`'s `[state]` check was legacy-only regardless of
+  anchor — a gap this release closes rather than carries forward: it now
+  scans `.hq/work/scholar/<slug>/` + `.hq/runtime/scholar/` once a paper
+  root is anchored, `.oms/<slug>/` + `.oms/state/` otherwise.
+- `.gitignore` drops the repo's own `.oms/` line (store-spec §5's
+  fallback-removal release, §9.4). `.hq/config/` and `.hq/community/` were
+  already tracked from the P4 cutover; this only stops hiding the now-inert
+  legacy directory. `.omc/` and `.sp/` are untouched (third-party).
+- Injected/prompt-facing strings swept off `.oms/` to the real `.hq/` paths
+  (the binding layer: a subagent inherits hooks, not CLAUDE.md, so hook text
+  is what it actually obeys). `hooks/scholar_route_emit.py`'s `CHECKPOINT` —
+  injected into every paper-related turn via `additionalContext` — had five
+  `.oms/` literals (init scaffold, ascended wiki seed, slug-exists check,
+  `read`'s reading-note target, `learn`'s `learned.md`, the wiki-convention
+  SSOT line); all five now name the real `.hq/` layer per `oms_paths.py`'s
+  getters (`config/scholar/`, `community/wiki/`, `community/reading/`,
+  `work/scholar/<slug>/`). 1705 -> 1747 chars (+42).
+  `hooks/scholar_cite_guard.py`'s PreToolUse deny reason (`check_bib`) no
+  longer names a static path at all — it now calls
+  `verified_citations_json_write(cwd)` and reports whatever that actually
+  resolves to for the write in front of it, so the message stays correct
+  through any future re-layout, not just this one.
+  `scripts/integration_smoke.py`'s `check_scaffold` had a live bug of the
+  same shape: the wiki/venue existence checks already resolved through
+  `oms_wiki_dir`/`venue_yaml`, but the FAIL messages hardcoded `.oms/wiki/…`
+  / `.oms/venues/…` regardless of what was actually checked — fixed to
+  report the resolved path's `.relative_to(root)`.
+  Stale docstrings/help text swept to dual "`.hq/X` when anchored, `.oms/Y`
+  otherwise" phrasing in `scholar_stop_guard.py`, `scholar_cite_guard.py`,
+  `scripts/oms_state.py`, `scripts/oms_outline_view.py`,
+  `scripts/oms_wiki_audit.py`, `hooks/oms_atomic.py`.
+  Left alone (already accurate, or genuinely about the legacy store):
+  `scripts/verify_bib_entry.py`'s dual help text (already correct pre-P4);
+  `integration_smoke.py`'s `.gitignore missing '.oms/' or '.hq/' entry`
+  message (checks a scaffolded fixture's own `.gitignore`, not this repo's —
+  the OR is correct for both migrated and unmigrated scaffolds); the R3 #22
+  historical note in `scholar_route_emit.py` and the regression docstring in
+  `tests/test_scholar_route_emit.py` describing a past incident (both date a
+  specific prior state, not a current claim).
+- Widened audit for the shape a string-literal grep cannot see: a value
+  hardcoded to the legacy root through a function call or module attribute
+  instead of a quoted literal. `grep -rn "legacy_root\|LEGACY_ROOT\|oms_dir"
+  hooks/ scripts/` plus a search for any module-level constant or inline
+  `Path(...) / ".oms"` built outside `oms_paths.py` (none found — the
+  re-entry lint already keeps the literal itself confined there).
+  `scripts/oms_wiki_audit.py`'s `--root` default was exactly this shape:
+  `wiki_dir_default_str()`, a function returning the legacy string
+  unconditionally, computed once at `argparse` definition time rather than
+  resolved per invocation — the same defect class `oms_doctor.py`'s
+  `check_state` had, just reached through a different call site.
+  `verify_bib_entry.py`/`oms_state.py` had already been fixed off this
+  pattern (their `--state-dir` resolves at call time); `oms_wiki_audit.py`
+  had not. Fixed the same way: `--root` now defaults to `None` and resolves
+  via `wiki_dir(Path.cwd())` when unset. `wiki_dir_default_str()` — now
+  callerless — is deleted (this edit is what killed its last caller).
+  `state_dir_default_str()` is a second, pre-existing dead function of the
+  same shape, left in place per house rule (unrelated dead code found mid-
+  task is reported, not deleted): it has no live caller anywhere in the repo
+  and nothing pins its return string either, contradicting its own prior
+  docstring's claim that it was kept for that reason — the docstring is
+  corrected to say so; whether to delete it is left to the repo owner.
+
+### Tests
+- `tests/test_oms_store_cutover.py`: the two tests pinning the removed
+  per-file/window behavior are replaced by
+  `test_read_resolves_to_new_store_even_when_only_legacy_exists_once_anchored`,
+  `test_read_stays_legacy_for_an_unanchored_project_with_a_legacy_file`, and
+  `test_write_goes_new_even_when_anchored_but_not_yet_copied`.
+- `tests/test_oms_doctor.py` gains
+  `test_state_scan_uses_hq_layers_once_anchored`.
+- `tests/test_scholar_route_emit.py`'s three tests pinning the old `.oms/`
+  literals inside `CHECKPOINT` updated to the swept `.hq/` text.
+- `tests/test_oms_store_cutover.py` gains
+  `test_oms_wiki_audit_default_root_resolves_new_when_migrated` and
+  `test_oms_wiki_audit_default_root_resolves_legacy_without_anchor` — the
+  round-trip pattern already used for `verify_bib_entry.py`/`oms_state.py`,
+  applied to the newly-fixed `oms_wiki_audit.py` default.
+
+### Notes
+- `.oms/` itself is untouched on disk (store-spec §7 stage 3, purge, is a
+  separate future release) — this repo's own `.oms/learned.md` and
+  `.oms/_backport-design/` stay exactly where they are, now merely visible
+  to `git status` instead of ignored.
+
 ## [0.19.0] - 2026-08-28 - the docs name the store they actually live in
 
 Phase 6 of the `.hq/` store unification. P4 cut oms's *code* over; its prose was

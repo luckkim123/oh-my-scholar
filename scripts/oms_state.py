@@ -1,7 +1,9 @@
-"""R2 #6 — .oms/state/ pipeline mechanism state.
+"""R2 #6 — oms pipeline mechanism state (`.hq/runtime/scholar/` when
+anchored, `.oms/state/` otherwise).
 
-This CLI is the ONLY writer of `.oms/state/pilot-*.json` / `revise-*.json`
-(the verified-citations allowlist stays owned by `verify_bib_entry.py`).
+This CLI is the ONLY writer of `pilot-*.json` / `revise-*.json` under the
+resolved state dir (the verified-citations allowlist stays owned by
+`verify_bib_entry.py`).
 All writes go through `atomic_write_json` (crash-safe, same-volume rename).
 It never touches `.tex`/`.bib`/notepad — those stay outside this file's
 responsibility. Schema documented in `references/output-layout.md` §2.2.
@@ -213,7 +215,8 @@ def _cmd_revise_end(args) -> int:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description="oms .oms/state/ pipeline mechanism state CLI.")
+    parser = argparse.ArgumentParser(
+        description="oms pipeline mechanism state CLI (.hq/runtime/scholar/ when anchored, .oms/state/ otherwise).")
     sub = parser.add_subparsers(dest="verb", required=True)
 
     p_write = sub.add_parser("write")

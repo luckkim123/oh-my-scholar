@@ -1,6 +1,6 @@
-"""P4 cutover acceptance — the four-state gate, new-path resolution, and the
-legacy-only read fallback (om* store-unification P4, oms's `.oms` -> `.hq`
-cutover; mirrors oh-my-project's tests/test_omp_store_cutover.py).
+"""Store cutover acceptance — the four-state gate and anchor-gated resolution
+(om* store-unification, oms's `.oms` -> `.hq` cutover; mirrors oh-my-project's
+tests/test_omp_store_cutover.py).
 
 store-spec.md section 6 requires a fixture for all four gate rows, and it is
 worth saying why each of the three "not normal" rows is here rather than
@@ -14,16 +14,19 @@ folded into one "not on the new store" case:
   corrupt  the row that reverses a blanket fail-open: a store that will not
            parse is not an absent store
 
-The write-gating tests below are the other half. `_write` has three branches
-and the middle one — anchored, but this artifact not copied yet — is
-invisible to a test that only checks "anchored writes new, unanchored writes
-legacy". That window is exactly where the pilot lives between seeding an
-anchor and copying the files, so it gets its own case.
+P4 (stage 1) gave reads a per-file existence fallback and writes a
+three-branch gate protecting the anchored-but-not-yet-copied window. Stage 2
+(store-spec §7) collapses both into one anchor-only `_resolve`: anchored ->
+`.hq/`, unanchored -> `.oms/`, unconditionally, for reads and writes alike.
+The tests that used to pin the old per-file/window behavior are gone;
+`test_read_resolves_to_new_store_even_when_only_legacy_exists_once_anchored`
+and `test_read_stays_legacy_for_an_unanchored_project_with_a_legacy_file`
+below are their stage-2 replacements.
 
 `.oms/state/` fanning out across two layers (config/scholar for
 verified-citations.json, runtime/scholar for everything else) is oms-specific
 and has no omp analogue — it gets its own dedicated tests below rather than
-being folded into the generic per-file-fallback case, since it is the one
+being folded into the generic anchor-resolution case, since it is the one
 place in this repo's mapping table where a single legacy directory splits.
 """
 import importlib.util
@@ -56,6 +59,7 @@ def _load_script(name: str):
 
 vbe = _load_script("verify_bib_entry")
 oms_state_mod = _load_script("oms_state")
+oms_wiki_audit_mod = _load_script("oms_wiki_audit")
 
 
 def _seed_anchor(base, text="id: fixture\n"):
@@ -158,19 +162,24 @@ def test_every_helper_falls_back_when_only_the_legacy_store_exists(tmp_path):
     assert state_dir(tmp_path) == legacy / "state"
 
 
-def test_fallback_is_per_file_not_per_directory(tmp_path):
-    """A machine that pulled the anchor commit has the tracked `config/`
-    layer but not the ignored `runtime/` layer: verified-citations.json must
-    already be new while the state dir (pilot/revise markers) is still
-    legacy."""
+def test_read_resolves_to_new_store_even_when_only_legacy_exists_once_anchored(tmp_path):
+    """Stage 2 (store-spec §7): the anchor alone decides, in both
+    directions. An anchored project whose file has not yet been copied to
+    `.hq/` resolves to the (non-existent) new path anyway -- the per-file
+    existence fallback stage 1 used is gone."""
     _seed_anchor(tmp_path)
-    cfg = tmp_path / ".hq" / "config" / "scholar"
-    cfg.mkdir(parents=True)
-    (cfg / "verified-citations.json").write_text('{"keys": {}}', encoding="utf-8")
-    (tmp_path / ".oms" / "state").mkdir(parents=True)
-    (tmp_path / ".oms" / "state" / "pilot-demo.json").write_text("{}", encoding="utf-8")
-    assert verified_citations_json(tmp_path) == tmp_path / ".hq/config/scholar/verified-citations.json"
-    assert state_dir(tmp_path) == tmp_path / ".oms/state"
+    (tmp_path / ".oms").mkdir()
+    (tmp_path / ".oms" / "learned.md").write_text("# l\n", encoding="utf-8")
+    assert learned_md(tmp_path) == tmp_path / ".hq/config/scholar/learned.md"
+
+
+def test_read_stays_legacy_for_an_unanchored_project_with_a_legacy_file(tmp_path):
+    """No anchor at all: the helper still resolves to the legacy store,
+    unconditionally -- a machine that never migrated keeps working exactly
+    as before."""
+    _seed_legacy(tmp_path)
+    (tmp_path / ".oms" / "learned.md").write_text("# l\n", encoding="utf-8")
+    assert learned_md(tmp_path) == tmp_path / ".oms/learned.md"
 
 
 # --- state/ splits across two layers (oms-specific: no omp analogue) --------
@@ -216,18 +225,19 @@ def test_write_goes_new_when_migrated(tmp_path):
     assert state_dir_write(tmp_path) == tmp_path / ".hq/runtime/scholar"
 
 
-def test_write_stays_legacy_while_anchored_but_not_yet_copied(tmp_path):
-    """The pilot's own window. Seeding the anchor is step 0 and copying the
-    files is step 2; a write landing in the new store in between would be
-    invisible to every reader, which still resolves to the populated old
-    one."""
+def test_write_goes_new_even_when_anchored_but_not_yet_copied(tmp_path):
+    """Stage 2 closes the pilot's old window. Seeding the anchor used to
+    leave writes pinned to a populated legacy store until the copy caught
+    up; now the anchor alone decides, so a write lands in `.hq/` the moment
+    the anchor exists, regardless of what `.oms/` still holds."""
     _seed_legacy(tmp_path)
     (tmp_path / ".oms" / "state" / "verified-citations.json").write_text(
         '{"keys": {}}', encoding="utf-8")
     (tmp_path / ".oms" / "state" / "pilot-demo.json").write_text("{}", encoding="utf-8")
     _seed_anchor(tmp_path)
-    assert verified_citations_json_write(tmp_path) == tmp_path / ".oms/state/verified-citations.json"
-    assert state_dir_write(tmp_path) == tmp_path / ".oms/state"
+    assert verified_citations_json_write(tmp_path) == \
+        tmp_path / ".hq/config/scholar/verified-citations.json"
+    assert state_dir_write(tmp_path) == tmp_path / ".hq/runtime/scholar"
 
 
 def test_write_goes_new_for_a_project_anchored_from_scratch(tmp_path):
@@ -307,3 +317,27 @@ def test_verify_bib_entry_explicit_state_dir_still_respected(tmp_path, monkeypat
     assert (custom / "verified-citations.json").is_file()
     untouched = tmp_path / ".hq/config/scholar/verified-citations.json"
     assert json.loads(untouched.read_text(encoding="utf-8")) == {"keys": {}}
+
+
+# --- the same CLI gap, a second script: oms_wiki_audit.py's --root default --
+# Found in the store-spec §7 stage 2 sweep: `oms_wiki_audit.py` still called
+# the now-removed `wiki_dir_default_str()` for its `--root` default, the
+# literal legacy string, unconditionally -- verify_bib_entry.py/oms_state.py
+# had already been fixed to this pattern, this script had not.
+
+def test_oms_wiki_audit_default_root_resolves_new_when_migrated(tmp_path, monkeypatch):
+    _seed_migrated(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    assert oms_wiki_audit_mod.main(["--write-index"]) == 0
+    target = wiki_dir(tmp_path) / "INDEX.md"
+    assert target == tmp_path / ".hq/community/wiki/INDEX.md"
+    assert target.is_file()
+
+
+def test_oms_wiki_audit_default_root_resolves_legacy_without_anchor(tmp_path, monkeypatch):
+    (tmp_path / ".oms" / "wiki").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
+    assert oms_wiki_audit_mod.main(["--write-index"]) == 0
+    target = wiki_dir(tmp_path) / "INDEX.md"
+    assert target == tmp_path / ".oms/wiki/INDEX.md"
+    assert target.is_file()

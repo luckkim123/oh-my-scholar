@@ -2,7 +2,7 @@
 
 Closes the one edge the 537-function structural pytest suite never
 exercises: skill invocation -> `Task(subagent_type=...)` dispatch -> real
-subagent turn -> `.oms/<slug>/` disk artifact. `scholar-init` is the target
+subagent turn -> `<slug>/` disk artifact. `scholar-init` is the target
 stage — the cheapest stage that still crosses every hop of that edge
 (one skill, one `Task` dispatch, one gated disk write), needs no network
 (`--venue generic` per scholar-init Step 4's own no-network fallback).
@@ -92,13 +92,14 @@ def check_scaffold(workspace_root, slug, venue) -> list:
     wiki_dir = oms_wiki_dir(root)
     for cat in REQUIRED_WIKI_CATEGORIES:
         if not (wiki_dir / cat).is_dir():
-            rows.append(oms_doctor._row("FAIL", f"missing required path: .oms/wiki/{cat}"))
+            rows.append(oms_doctor._row("FAIL", f"missing required path: {(wiki_dir / cat).relative_to(root)}"))
     if (wiki_dir / "history").exists():
-        rows.append(oms_doctor._row("FAIL", ".oms/wiki/history/ must not be created locally (Step 6)"))
+        rows.append(oms_doctor._row(
+            "FAIL", f"{(wiki_dir / 'history').relative_to(root)} must not be created locally (Step 6)"))
 
     venue_file = venue_yaml(root, venue)
     if not venue_file.is_file():
-        rows.append(oms_doctor._row("FAIL", f"missing required path: .oms/venues/{venue}.yaml"))
+        rows.append(oms_doctor._row("FAIL", f"missing required path: {venue_file.relative_to(root)}"))
     elif not re.search(r"^key:", venue_file.read_text(encoding="utf-8"), re.MULTILINE):
         rows.append(oms_doctor._row("FAIL", f"{venue_file.relative_to(root)} has no 'key:' line"))
 

@@ -1,5 +1,6 @@
-"""R4 #23/#25 — read-only wiki health-audit CLI over ONE `.oms/wiki/` tree
-per invocation (no ascent — `references/wiki/README.md`'s two-layer model;
+"""R4 #23/#25 — read-only wiki health-audit CLI over ONE wiki tree
+(`.hq/community/wiki/` when anchored, `.oms/wiki/` otherwise) per invocation
+(no ascent — `references/wiki/README.md`'s two-layer model;
 run once per level, local then global).
 
 Six *mechanical* dimensions, each a pure function over an in-memory
@@ -24,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_text  # noqa: E402
-from oms_paths import wiki_dir_default_str  # noqa: E402
+from oms_paths import wiki_dir  # noqa: E402
 
 CATEGORIES = ("convention", "pattern", "decision", "reference", "history")
 META_FILENAMES = ("README.md", "INDEX.md")
@@ -384,9 +385,18 @@ def _err(message) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Read-only wiki health audit (mechanical dimensions) + INDEX generation.")
-    ap.add_argument("--root", default=wiki_dir_default_str())
+    ap.add_argument("--root", default=None, help=(
+        "defaults to the resolved wiki dir for this project "
+        "(.hq/community/wiki when anchored, .oms/wiki otherwise)"
+    ))
     ap.add_argument("--write-index", action="store_true")
     args = ap.parse_args(argv)
+
+    if args.root is None:
+        # Gate-aware: unspecified must resolve at call time, not parse-definition
+        # time — the directory is anchor-dependent (store-spec §7 stage 2), so a
+        # single literal default cannot name it.
+        args.root = str(wiki_dir(Path.cwd()))
 
     root = Path(args.root)
     if not root.is_dir():

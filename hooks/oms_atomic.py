@@ -20,7 +20,8 @@ def _atomic_write(target, write_fn) -> None:
     """Shared core: write to a same-dir temp file via `write_fn(fileobj)`, fsync,
     then atomically replace `target`. Cleans up the temp file on any failure.
 
-    Creates parent directories as needed (supports nested paths like .oms/<slug>/).
+    Creates parent directories as needed (supports nested paths like
+    .hq/work/scholar/<slug>/).
     """
     target = Path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -54,7 +55,8 @@ def _atomic_write(target, write_fn) -> None:
 def atomic_write_json(target, data) -> None:
     """Atomically write `data` (JSON-serializable) to the `target` path.
 
-    Creates parent directories as needed (supports nested paths like .oms/<slug>/).
+    Creates parent directories as needed (supports nested paths like
+    .hq/work/scholar/<slug>/).
     Preserves non-ASCII (e.g. Korean) without escaping (.oms notes are often Korean).
     """
     _atomic_write(target, lambda f: json.dump(data, f, ensure_ascii=False, indent=2))

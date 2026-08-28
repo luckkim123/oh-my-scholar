@@ -3,8 +3,8 @@ re-injection (#13) — stdlib, read-only, fail-open.
 
 #9: on any SessionStart (startup/resume/clear/compact), ascend from the payload
 `cwd` to the nearest ancestor whose gate-resolved `state/` dir or `notepad.md`
-exists (new-store `.hq/` first, legacy `.oms/` fallback per oms_paths.py —
-whichever exists first counts as "the root", first hit only, never look past
+exists (anchor-gated per oms_paths.py — `.hq/` for an anchored project,
+`.oms/` otherwise, store-spec §7 stage 2; first hit only, never look past
 it) and summarize any IN-SCOPE non-terminal pilot stage
 (`pilot-<slug>.json`, `stage != "terminal"` and `gate_status != "abort"`) plus
 its live revise-loop marker (`revise-<slug>.json`, `active is True` and

@@ -65,19 +65,19 @@ def test_read_discuss_stages_described_in_checkpoint():
     out = context_of(run_hook({"prompt": "논문 작업"}))
     assert "read(" in out
     assert "discuss(" in out
-    assert ".oms/reading/" in out
+    assert ".hq/community/reading/" in out
     assert "자동 적용 금지" in out  # D9: outline 델타는 제안만, 자동 적용 금지
 
 
 def test_init_stage_is_bootstrap_zero():
     """③-d init 0단계가 STAGE 토큰 줄과 안내문에 명시돼야 (scholar-init).
 
-    새 논문 시작 = 부트스트랩이라는 의미와, 이미 .oms/<slug>/ 가 있으면
+    새 논문 시작 = 부트스트랩이라는 의미와, 이미 .hq/work/scholar/<slug>/ 가 있으면
     init 이 아니라는 멱등성 단서가 라우팅에 박혀야 한다."""
     out = context_of(run_hook({"prompt": "새 논문 쓸래 폴더 만들어줘"}))
     assert "init" in out
     assert "부트스트랩" in out          # 0단계 의미
-    assert ".oms/" in out               # 전역/로컬 .oms 언급
+    assert ".hq/" in out                # 전역/로컬 .hq 언급
     # 이미 초기화된 폴더면 init 아님 (멱등성 단서)
     assert "있으면 init 아님" in out
 
@@ -162,14 +162,14 @@ def test_oms_mandatory_does_not_block_session():
 
 def test_context_states_knowledge_ssot_first_rule():
     """⑧ 지식 SSOT 우선 규율: 양식·구조 판단 시 소스/일반론/기억보다
-    프로젝트의 .oms/wiki/convention/ 과 references/ 를 먼저 읽으라는 contract.
+    프로젝트의 .hq/community/wiki/convention/ 과 references/ 를 먼저 읽으라는 contract.
 
     회귀 배경: 양식(가로 전면 그림 허용 여부) 질문에 .cls 부재만 보고
     '신뢰할 출처 없음'으로 단정한 뒤에야 .oms/wiki 양식 카드를 뒤늦게 찾은
     사고. wiki 에 답이 있는데 일반론으로 추측·단정하는 것을 결함으로 명시하고,
     wiki 확인 전에는 '출처 없음' 선언조차 금지하도록 contract 에 못박는다."""
     out = context_of(run_hook({"prompt": "이 논문 양식에 가로로 긴 그림 전면 배치 되나?"}))
-    assert ".oms/wiki/convention/" in out
+    assert ".hq/community/wiki/convention/" in out
     assert "references/" in out
     assert "먼저" in out   # 소스/일반론보다 wiki 를 '먼저'
     assert "결함" in out   # wiki 두고 일반론 단정 = 결함 명시

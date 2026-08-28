@@ -2,9 +2,6 @@
 __pycache__/
 *.pyc
 
-# runtime state — per-project, not committed
-.oms/
-
 # runtime paper outputs — never commit user documents (large, private, citation-bound)
 outputs/*
 !outputs/.gitkeep

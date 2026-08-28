@@ -5,7 +5,8 @@ in scope of the session cwd, and no exemption fires — the blunt "never let
 the model stop" loop is deliberately out of scope (advancement-plan §6).
 
 Scope: ascend from the payload `cwd` to the NEAREST ancestor (inclusive)
-containing `.oms/state/` (first hit only — never look past it). A marker in
+containing the gate-resolved `state/` dir (`.hq/runtime/scholar/` when
+anchored, `.oms/state/` otherwise — first hit only, never look past it). A marker in
 that dir is in scope only when it carries `paper_root` and `cwd` equals or
 is a descendant of it (hand-written markers missing `paper_root` are out of
 scope, never guessed into scope).
@@ -50,7 +51,8 @@ def script_path() -> str:
 
 
 def nearest_state_dir(cwd: Path):
-    """First ancestor of cwd (inclusive) containing `.oms/state/`, or None."""
+    """First ancestor of cwd (inclusive) containing the gate-resolved `state/`
+    dir (`.hq/runtime/scholar/` when anchored, `.oms/state/` otherwise), or None."""
     root = nearest_ancestor(cwd, lambda c: oms_state_dir(c).is_dir())
     return oms_state_dir(root) if root is not None else None
 

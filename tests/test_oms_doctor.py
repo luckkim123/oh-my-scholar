@@ -124,6 +124,31 @@ def test_state_scan_warns_on_terminal_slug(tmp_path):
     assert not _rows(rows, "FAIL")
 
 
+def test_state_scan_uses_hq_layers_once_anchored(tmp_path):
+    """store-spec §7 stage 2: an anchored paper root has no reason to hold
+    `.oms/` content at all, so `check_state` must scan `.hq/work/scholar/`
+    and `.hq/runtime/scholar/` — not the legacy tree — once anchored."""
+    (tmp_path / ".hq").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".hq" / ".anchor").write_text("id: fixture\n", encoding="utf-8")
+    work = tmp_path / ".hq" / "work" / "scholar"
+    runtime = tmp_path / ".hq" / "runtime" / "scholar"
+    (work / "terminal-slug").mkdir(parents=True)
+    (work / "live-slug").mkdir(parents=True)
+    runtime.mkdir(parents=True)
+    (runtime / "pilot-terminal-slug.json").write_text(
+        json.dumps({"stage": "terminal", "gate_status": "approved"}), encoding="utf-8",
+    )
+    (runtime / "pilot-live-slug.json").write_text(
+        json.dumps({"stage": "draft", "gate_status": "pending"}), encoding="utf-8",
+    )
+
+    rows = od.check_state(tmp_path)
+    warns = _rows(rows, "WARN")
+    assert any("terminal-slug" in r["message"] for r in warns)
+    assert not any("live-slug" in r["message"] for r in warns)
+    assert not _rows(rows, "FAIL")
+
+
 def test_doctor_read_only():
     src = SCRIPT.read_text(encoding="utf-8")
     assert "atomic_write_json" not in src

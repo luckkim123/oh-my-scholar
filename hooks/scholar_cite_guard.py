@@ -4,7 +4,8 @@ The single highest-leverage gap in the advancement plan: nothing structurally
 stopped a fabricated `@article{...}` from landing in `.bib` (the PostToolUse
 hook only reminds, after the fact). This hook denies, BEFORE the write:
   (a) new `.bib` entry keys with no verification record in the allowlist
-      `.oms/state/verified-citations.json` (written by
+      (`.hq/config/scholar/verified-citations.json` when anchored,
+      `.oms/state/verified-citations.json` otherwise — written by
       `scripts/verify_bib_entry.py --record` after a real Crossref/OpenAlex
       lookup — see that script), and
   (b) new `\\cite{K}` keys in `.tex` with no entry in any sibling `.bib`.
@@ -21,7 +22,7 @@ import re
 import sys
 from pathlib import Path
 
-from oms_paths import nearest_ancestor, verified_citations_json
+from oms_paths import nearest_ancestor, verified_citations_json, verified_citations_json_write
 
 WRITE_TOOLS = ("Edit", "Write", "MultiEdit")
 ENTRY_RE = re.compile(r"@\w+\s*\{\s*([^,\s{}]+)\s*,")
@@ -113,12 +114,13 @@ def check_bib(path: Path, new_text: str, old_text, cwd: str) -> int:
     if not unverified:
         return 0
     keys = ", ".join(sorted(unverified))
+    target = verified_citations_json_write(Path(cwd) if cwd else path.parent)
     return deny(
         f"[oms cite-guard] new .bib entr{'ies' if len(unverified) > 1 else 'y'} without a "
         f"verification record: {keys}. A citation must be verified against the real source "
         f"BEFORE it enters .bib — never fabricate or guess entries. Run: python3 "
         f"{script_path()} --key <key> --doi <doi> --title \"<title>\" --record  "
-        f"(records VERIFIED keys into .oms/state/verified-citations.json), or have the human "
+        f"(records VERIFIED keys into {target}), or have the human "
         f"explicitly confirm the source. Then retry this write."
     )
 

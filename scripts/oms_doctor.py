@@ -10,7 +10,8 @@ nothing checked cross-surface agreement. `sync_version` is this doctor's
 [version] section (imported sibling-style, same idiom `oms_state.py` uses
 for `hooks/oms_atomic.py`); doctor generalizes the same "nothing checks
 surface agreement" failure mode to hooks/agents/skills registration and,
-optionally, stale `.oms/<slug>/` pilot state.
+optionally, stale slug-workspace pilot state (`.hq/work/scholar/<slug>/`
+once anchored, `.oms/<slug>/` otherwise -- store-spec §7 stage 2).
 
 Card routing (plan-mandated): the omha card at `<OMHA_ROOT>/cards/oms.json`
 is a foreign repo surface whose version bump rides a separate
@@ -29,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sync_version  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
-from oms_paths import legacy_root as oms_root  # noqa: E402
+from oms_paths import has_anchor, legacy_root as oms_root, state_dir as resolve_state_dir, work_dir  # noqa: E402
 
 VALID_MODELS = {"haiku", "sonnet", "opus"}
 LIBRARY_HOOK_MODULES = {"oms_atomic.py"}
@@ -193,18 +194,22 @@ def check_skills(repo_root) -> list:
 
 # ------------------------------------------------------------------ [state]
 def check_state(paper_root) -> list:
-    """Optional, only with --paper-root D: scan D/.oms/<slug>/ dirs (excluding
-    state/wiki/venues) against D/.oms/state/pilot-<slug>.json. A slug with a
-    terminal/abort pilot state, or with no pilot state at all, is a WARN
-    cleanup candidate -- advisory only, never FAIL, doctor never deletes."""
-    oms_dir = oms_root(Path(paper_root))
+    """Optional, only with --paper-root D: scan D's slug workspaces --
+    `.hq/work/scholar/<slug>/` when D carries a parseable anchor,
+    `D/.oms/<slug>/` otherwise (store-spec §7 stage 2 -- same gate
+    `oms_paths.py`'s resolvers use, excluding state/wiki/venues) against the
+    matching pilot state dir. A slug with a terminal/abort pilot state, or
+    with no pilot state at all, is a WARN cleanup candidate -- advisory
+    only, never FAIL, doctor never deletes."""
+    paper_root = Path(paper_root)
+    slugs_dir = work_dir(paper_root) if has_anchor(paper_root) else oms_root(paper_root)
     rows = []
-    if not oms_dir.is_dir():
+    if not slugs_dir.is_dir():
         return rows
 
-    state_dir = oms_dir / "state"
+    state_dir = resolve_state_dir(paper_root)
     slugs = sorted(
-        d.name for d in oms_dir.iterdir()
+        d.name for d in slugs_dir.iterdir()
         if d.is_dir() and d.name not in STATE_EXCLUDE_DIRS
     )
     for slug in slugs:
@@ -229,7 +234,7 @@ def check_state(paper_root) -> list:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Read-only categorized packaging self-diagnosis (never writes).")
     ap.add_argument("--repo-root", default=".")
-    ap.add_argument("--paper-root", default=None, help="optional: also scan D/.oms/<slug>/ for cleanup candidates")
+    ap.add_argument("--paper-root", default=None, help="optional: also scan D's slug workspaces for cleanup candidates")
     args = ap.parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
 

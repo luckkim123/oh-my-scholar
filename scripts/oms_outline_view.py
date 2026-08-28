@@ -1,4 +1,5 @@
-"""GATE 1 outline view — render .oms/<slug>/outline/outline.md as a read-only sheet.
+"""GATE 1 outline view — render outline.md (`.hq/work/scholar/<slug>/outline/`
+when anchored, `.oms/<slug>/outline/` otherwise) as a read-only sheet.
 
 The outline is the SSOT and is opened read-only. Content problems never raise:
 a malformed or missing field becomes a flag, because a parser that throws on a
@@ -436,7 +437,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Render an oms outline.md as a read-only GATE 1 sheet."
     )
-    parser.add_argument("outline", help="path to .oms/<slug>/outline/outline.md")
+    parser.add_argument(
+        "outline",
+        help="path to outline.md (.hq/work/scholar/<slug>/outline/ when anchored, .oms/<slug>/outline/ otherwise)",
+    )
     parser.add_argument("-o", "--output", default=None, help="output .html path")
     args = parser.parse_args(argv)
 

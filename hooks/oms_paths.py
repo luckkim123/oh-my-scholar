@@ -16,26 +16,24 @@ Reference: ~/oh-my-orchestrator/skills/harness/references/store-spec.md
 P2 (2026-08-28, 3a80b02) moved every existing inline `.oms` computation
 behind named helpers — a pure move, legacy-only, no `.hq`, no file moves.
 
-P4 (2026-08-28) switches this module from "legacy only" to the cutover
-shape, mirroring oh-my-project's hooks/omp_paths.py (P3). Three rules govern
-every helper below, and they are not interchangeable:
+P4 (2026-08-28) switched this module from "legacy only" to the cutover
+shape: writes went anchor-gated, reads resolved new-then-legacy per file so
+a project mid-copy (anchor seeded, files not yet moved) kept working.
 
-**1. The anchor is the switch, not the release.** A write goes to `.hq/`
-when — and only when — the project root carries a parseable `.hq/.anchor`.
-Without one it goes to `.oms/`, exactly where it went before. Making the
-write unconditional at release time would split-brain every project that
-has a `.oms/` and no anchor yet: reads would still resolve to the legacy
-store (the only one with content) while writes landed in a new one nobody
-reads.
+Stage 2 (store-spec §7) removes that per-file read fallback. **Reads and
+writes now resolve identically — the anchor alone decides, in both
+directions.** Two rules govern every helper below:
 
-**2. Reads resolve per file, new first, legacy second.** Not per directory:
-a machine that pulled the anchor commit gets the tracked layers (`config/`,
-`community/`) but never the ignored ones (`work/`, `runtime/`), so its own
-`.oms/state/` markers must still be readable while
-`.hq/config/scholar/learned.md` is already live. Existence of the specific
-path is the only test; absence of the new one is not evidence of anything.
+**1. The anchor is the switch, full stop.** A project carrying a parseable
+`.hq/.anchor` resolves every path to `.hq/`; a project without one resolves
+every path to `.oms/`, exactly as always. `has_anchor(base)` is the entire
+test — no existence check on either side, and no protected window for an
+anchor whose store has not been copied yet. Store-spec §7 makes that window
+closing a per-anchor, human decision ("the decision to advance an anchor
+past stage 1 belongs to the user, not to a script"); this release is that
+decision for this repo.
 
-**3. The layer is per file, never per directory** (§3). `.oms/state/` fans
+**2. The layer is per file, never per directory** (§3). `.oms/state/` fans
 out across two layers: `verified-citations.json` alone is `config/scholar/`
 (⑤(b) fails — losing it costs a re-verification pass); everything else in
 `state/` (`pilot-*.json`, `revise-*.json`) is `runtime/scholar/` (⑤ —
@@ -181,7 +179,10 @@ def gate_state(base: Path) -> str:
     marker.
 
     off      no legacy store, no anchor   — not an oms project; hooks exit 0
-    legacy   legacy store, no anchor      — warn, read via fallback
+    legacy   legacy store, no anchor      — warn: this project never got a
+             `.hq/.anchor`, so every read below resolves to `.oms/` only
+             (stage 2 removed the `.hq/`-first fallback; there is nothing
+             left to fall back FROM here regardless)
     normal   anchor present and parseable
     corrupt  anchor present, unparseable  — loud, never silent
     """
@@ -195,66 +196,48 @@ def gate_state(base: Path) -> str:
     return GATE_LEGACY if has_legacy_store(base) else GATE_OFF
 
 
-# --- resolution: read new-then-legacy, write anchor-gated -------------------
+# --- resolution: anchor-gated, identically for reads and writes ------------
 
-def _read(new: Path, legacy: Path) -> Path:
-    """Rule 2. Existence of the specific new path is the whole test."""
-    return new if new.exists() else legacy
-
-
-def _write(base: Path, new: Path, legacy: Path) -> Path:
-    """Rule 1. The anchor, not the release, decides — and an anchored root
-    whose files have not been copied yet keeps writing where the content
-    still is.
-
-    The middle branch is the one that matters: seeding an anchor is a
-    separate step from copying the store (store-spec section 7 stage 1 is
-    copy *then* switch), so between the two an anchored root has a populated
-    legacy path and an empty new one. Writing to the new path there would
-    orphan every write from a reader that still resolves to the legacy path.
-    Only when neither path holds this artifact — a project anchored from
-    scratch — does the new path win by default.
-    """
-    if not has_anchor(base):
-        return legacy
-    if new.exists():
-        return new
-    return legacy if legacy.exists() else new
+def _resolve(base: Path, new: Path, legacy: Path) -> Path:
+    """Rule 1. `has_anchor(base)` is the entire test — no existence check on
+    either side. Reads and writes call this the same way; there is no longer
+    a distinct read-side or write-side branch to keep in sync."""
+    return new if has_anchor(base) else legacy
 
 
 # --- config/scholar/ layer ---------------------------------------------------
 
 def learned_md(base: Path) -> Path:
-    return _read(config_dir(base) / "learned.md", legacy_root(base) / "learned.md")
+    return _resolve(base, config_dir(base) / "learned.md", legacy_root(base) / "learned.md")
 
 
 def notepad_md(base: Path) -> Path:
     """`notepad.md` fails ⑤(a) — scholar-pilot rewrites `## Priority Context`
     only on GATE transitions, not every turn — so it lands in `config/`
     rather than `runtime/` (store-spec §9.3)."""
-    return _read(config_dir(base) / "notepad.md", legacy_root(base) / "notepad.md")
+    return _resolve(base, config_dir(base) / "notepad.md", legacy_root(base) / "notepad.md")
 
 
 def venue_yaml(base: Path, venue: str) -> Path:
-    return _read(config_dir(base) / "venues" / f"{venue}.yaml",
-                 legacy_root(base) / "venues" / f"{venue}.yaml")
+    return _resolve(base, config_dir(base) / "venues" / f"{venue}.yaml",
+                    legacy_root(base) / "venues" / f"{venue}.yaml")
 
 
 def workflows_dir(base: Path) -> Path:
-    return _read(config_dir(base) / "workflows", legacy_root(base) / "workflows")
+    return _resolve(base, config_dir(base) / "workflows", legacy_root(base) / "workflows")
 
 
 def verified_citations_json(base: Path) -> Path:
     """The cite-guard allowlist. `state/verified-citations.json` under the
     legacy store, `config/scholar/verified-citations.json` once migrated —
-    NOT `runtime/scholar/`, see the module docstring's rule 3."""
-    return _read(config_dir(base) / "verified-citations.json",
-                 legacy_root(base) / "state" / "verified-citations.json")
+    NOT `runtime/scholar/`, see the module docstring's rule 2."""
+    return _resolve(base, config_dir(base) / "verified-citations.json",
+                    legacy_root(base) / "state" / "verified-citations.json")
 
 
 def verified_citations_json_write(base: Path) -> Path:
-    return _write(base, config_dir(base) / "verified-citations.json",
-                  legacy_root(base) / "state" / "verified-citations.json")
+    return _resolve(base, config_dir(base) / "verified-citations.json",
+                    legacy_root(base) / "state" / "verified-citations.json")
 
 
 # --- runtime/scholar/ layer --------------------------------------------------
@@ -264,27 +247,27 @@ def state_dir(base: Path) -> Path:
     session-mechanism state (⑤: rewritten every session, loss harmless).
     Resolved as a directory, unlike `verified_citations_json` which used to
     live in this same `.oms/state/` directory but fails ⑤(b) and stays in
-    `config/scholar/` instead (module docstring rule 3)."""
-    return _read(runtime_dir(base), legacy_root(base) / "state")
+    `config/scholar/` instead (module docstring rule 2)."""
+    return _resolve(base, runtime_dir(base), legacy_root(base) / "state")
 
 
 def state_dir_write(base: Path) -> Path:
-    return _write(base, runtime_dir(base), legacy_root(base) / "state")
+    return _resolve(base, runtime_dir(base), legacy_root(base) / "state")
 
 
 # --- community/ layer ---------------------------------------------------------
 
 def wiki_dir(base: Path) -> Path:
-    return _read(community_dir(base) / "wiki", legacy_root(base) / "wiki")
+    return _resolve(base, community_dir(base) / "wiki", legacy_root(base) / "wiki")
 
 
 def reading_dir(base: Path) -> Path:
-    return _read(community_dir(base) / "reading", legacy_root(base) / "reading")
+    return _resolve(base, community_dir(base) / "reading", legacy_root(base) / "reading")
 
 
 def backport_design_dir(base: Path) -> Path:
-    return _read(community_dir(base) / "_backport-design",
-                 legacy_root(base) / "_backport-design")
+    return _resolve(base, community_dir(base) / "_backport-design",
+                    legacy_root(base) / "_backport-design")
 
 
 # --- work/scholar/<slug>/ layer -----------------------------------------------
@@ -292,7 +275,7 @@ def backport_design_dir(base: Path) -> Path:
 def slug_dir(base: Path, slug: str) -> Path:
     """A paper workspace `<slug>/` — versions/renders/research/outline/tmp/
     per-run scaffolding (④, store-spec §9.3)."""
-    return _read(work_dir(base) / slug, legacy_root(base) / slug)
+    return _resolve(base, work_dir(base) / slug, legacy_root(base) / slug)
 
 
 # --- relative-string forms ----------------------------------------------------
@@ -314,12 +297,9 @@ def state_dir_default_str() -> str:
     `oms_state.py` no longer call this function — their `--state-dir` now
     defaults to `None` and resolves at call time via
     `verified_citations_json_write(Path.cwd())` / `state_dir_write(Path.cwd())`
-    respectively. This function is KEPT (not deleted) only because its exact
-    string is pinned by existing tests.
+    respectively. Has no live caller left (checked repo-wide 2026-08-28,
+    store-spec §7 stage 2 sweep) and nothing pins its string either — kept
+    only as a historical marker of the pattern the callers moved away from;
+    a deletion call belongs to whoever owns that decision.
     """
     return f"./{LEGACY_ROOT}/state"
-
-
-def wiki_dir_default_str() -> str:
-    """argparse `--root` default (oms_wiki_audit.py), exactly as today: `'./.oms/wiki'`."""
-    return f"./{LEGACY_ROOT}/wiki"
