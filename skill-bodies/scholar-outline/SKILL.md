@@ -57,7 +57,7 @@ This skill operates in three modes (default `--direct`):
    - Input: research map, concept notes path, instruction to reference the venue card (`references/venues.md`)
    - Instruction: section tree (purpose·core message·word budget·dependency citation key) + story arc necessity chain + word budget total within page_limit×500 + citations only from the researcher-verified list + mark missing citations as "researcher re-check needed"
 4. Receive the planner output — section tree·story arc·word budget summary·full citation-dependency mapping·unverified citation request list.
-5. Save the output to the workspace `.oms/<slug>/outline/outline.md` (output-layout.md §2 fixed path). ⚠️ Do not put it in the source folder (`paper/…`) — the outline is the *input* (scaffolding) to the draft, not a citation-bound source asset.
+5. Save the output to the workspace `.hq/work/scholar/<slug>/outline/outline.md` (output-layout.md §2 fixed path). ⚠️ Do not put it in the source folder (`paper/…`) — the outline is the *input* (scaffolding) to the draft, not a citation-bound source asset.
 
 ### `--consensus` path (4-agent sequential — never parallel)
 > ⚠️ The 2c-1~2c-4 below MUST be sequential. After awaiting each step's Task result, issue the next Task. Do not invoke two Tasks in the same parallel batch. (Execution_Policy triple wording)
@@ -66,12 +66,12 @@ This skill operates in three modes (default `--direct`):
 2c-3. **[architect responsibility within planner]**: not a separate agent — the planner already performed it in 2c-2 via steelman/antithesis (T1 boundary convention: do not create a new architect agent). If external consultation is *truly* needed, only via the inspector's `<External_Consultation>` path.
 2c-4. **inspector** (`scholar-inspector`): formative critique of 2c-2's plan.md+outline (4 critic techniques). Does not issue PASS/FAIL — improvement points only. *With the 2c-2 result as input*.
 2c-5. **re-review loop**: if the inspector raises critical/important, re-delegate to the planner (back to 2c-2) then re-critique. **Max = venue.max_review_rounds (default 5 if the key is absent in venues.md)**. On reaching 5, take the best version and proceed to GATE 1 with "consensus not reached — N rounds, list of remaining findings" stated explicitly.
-2c-6. **2 separate saves**: `plan.md` (RALPLAN-DR+ADR, decision process) + `outline.md` (Final single-arc section tree, decision result). Both in the workspace `.oms/<slug>/outline/` (output-layout.md §2). ⚠️ source folder (`paper/…`) prohibited.
+2c-6. **2 separate saves**: `plan.md` (RALPLAN-DR+ADR, decision process) + `outline.md` (Final single-arc section tree, decision result). Both in the workspace `.hq/work/scholar/<slug>/outline/` (output-layout.md §2). ⚠️ source folder (`paper/…`) prohibited.
 
 ### Common — GATE 1
 > ⚠️ The handoff between `--consensus`'s 2c-* sequential stages follows the `<Consensus_Handoff>` convention below (rubber-stamp prevention).
 6. **GATE 1 — request human approval**:
-   - **Render the sheet first**: run `python3 <plugin>/scripts/oms_outline_view.py .oms/<slug>/outline/outline.md`. It writes `.oms/<slug>/outline/gate1.html` and prints one line per structural gap plus a final `GAPS=<n>`. The sheet is a *derived read-only view* — `outline.md` stays the SSOT, so never edit the HTML; revisions go to `outline.md` and the sheet is regenerated.
+   - **Render the sheet first**: run `python3 <plugin>/scripts/oms_outline_view.py .hq/work/scholar/<slug>/outline/outline.md`. It writes `.hq/work/scholar/<slug>/outline/gate1.html` and prints one line per structural gap plus a final `GAPS=<n>`. The sheet is a *derived read-only view* — `outline.md` stays the SSOT, so never edit the HTML; revisions go to `outline.md` and the sheet is regenerated.
    - **Surface it**: when the running harness can publish an artifact, publish `gate1.html` and give the human the link; when it cannot, report the file path so they can open it in a browser. Its absence is a graceful degrade, not an error — the gate still functions on the text outline alone.
    - **Report the gaps verbatim, do not paper over them**: the script detects *absence* only (missing field, section off the necessity chain, chain link off the section tree, blank chain link, researcher-recheck marker, over-budget total, citation-mapping mismatch, duplicate section number, no section tree at all). `GAPS=0` means nothing mechanical is missing — it is **not** a judgment that the structure is good, and must never be presented as one.
    - Present the full outline (for consensus, both plan.md+outline) and specify the following three options:
@@ -91,7 +91,7 @@ The outline designed by the planner (section tree·story arc·word budget summar
 > The handoff convention between the `--consensus` 4-agent stages (isomorphic with docs-plan). **Default (SSOT) = .md files**, MCP is an *if-available* optional accelerator (decision1=C: OMS being 0 MCP / standalone is its identity).
 
 **Default path (.md — works without MCP)**:
-- Write each consensus stage's *structured output* (the planner's steelman/antithesis/tradeoff/ADR, the inspector's findings, etc.) to the workspace `.oms/<slug>/consensus/<stage>-<role>.md`. E.g., `consensus/planner-adr.md`, `consensus/inspector-findings.md`. Each file has a structured header (role / stage / timestamp) + body.
+- Write each consensus stage's *structured output* (the planner's steelman/antithesis/tradeoff/ADR, the inspector's findings, etc.) to the workspace `.hq/work/scholar/<slug>/consensus/<stage>-<role>.md`. E.g., `consensus/planner-adr.md`, `consensus/inspector-findings.md`. Each file has a structured header (role / stage / timestamp) + body.
 - **Rubber-stamp prevention (mechanical)**: the next stage proceeds only after *confirming that the previous role's .md file exists on disk*. If absent, refuse to proceed ("previous stage output missing — sequencing violation"). Directory isolation = namespace substitute. Since consensus is sequential there is no concurrent-write race, and one directory is sufficient.
 - `<slug>`·paths are **relative to the work root** (based on the caller's cwd / the specified project root) — no specific-user absolute paths.
 

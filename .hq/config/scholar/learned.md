@@ -1,9 +1,9 @@
-# `.oms/learned.md` — heavy-channel observation ledger (append-only)
+# `.hq/config/scholar/learned.md` — heavy-channel observation ledger (append-only)
 
 > **What this is**: the staging ledger for oms's **heavy channel** — candidate *defaults*
 > (venue required sections, ordering, self-cite ceiling, global habits) awaiting promotion into
 > `references/venues.md` through the **human gate**. This file is the oms backport of omp's
-> `.omp/learned.md`. The promotion dynamics, the `≥3` repetition bar, the `user_stated` bypass,
+> `.hq/config/project/learned.md`. The promotion dynamics, the `≥3` repetition bar, the `user_stated` bypass,
 > and the citation-safe invariant are all defined in `references/learning-protocol.md` — read
 > that card first; this file only *holds* observations, it does not define the rules.
 

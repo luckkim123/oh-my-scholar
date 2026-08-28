@@ -26,11 +26,11 @@ def test_drafter_has_skeleton_step_before_prose():
 
 
 def test_skeleton_output_path_in_workspace():
-    """② skeleton 산출물은 .oms/<slug>/ 작업장(소스 폴더 오염 금지)."""
+    """② skeleton 산출물은 .hq/work/scholar/<slug>/ 작업장(소스 폴더 오염 금지)."""
     body = DRAFTER.read_text(encoding="utf-8")
-    # skeleton 산출물이 .oms/<slug>/ 에 — output-layout 준수
-    assert re.search(r"\.oms/<slug>/", body), \
-        "skeleton 산출물 경로(.oms/<slug>/) 명시 누락"
+    # skeleton 산출물이 .hq/work/scholar/<slug>/ 에 — output-layout 준수
+    assert re.search(r"\.hq/work/scholar/<slug>/", body), \
+        "skeleton 산출물 경로(.hq/work/scholar/<slug>/) 명시 누락"
 
 
 def test_drafter_has_silent_self_audit_step():

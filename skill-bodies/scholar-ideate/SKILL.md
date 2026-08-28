@@ -9,7 +9,7 @@ description: |
 # scholar-ideate — Concept organization & concept note (.md) finalization
 
 <Purpose>
-Take research notes as input and organize each method/contribution into concept notes (methodology/*.md). Save location is the workspace `.oms/<slug>/methodology/*.md` (output-layout.md §2 fixed path). The code's "blueprint/pseudocode" — before the actual implementation (.tex draft), pre-finalize concepts, sources, and equation meaning into .md.
+Take research notes as input and organize each method/contribution into concept notes (methodology/*.md). Save location is the workspace `.hq/work/scholar/<slug>/methodology/*.md` (output-layout.md §2 fixed path). The code's "blueprint/pseudocode" — before the actual implementation (.tex draft), pre-finalize concepts, sources, and equation meaning into .md.
 
 This is the "concept pre-finalization" stage: if you don't solidify the logic and equations here before draft(.tex), the drafter has to fill in claims, which raises hallucination risk. This is the execution point of scholar-draft's `.md SSOT first` principle.
 </Purpose>
@@ -41,13 +41,13 @@ This is the "concept pre-finalization" stage: if you don't solidify the logic an
 1. Check the research notes (research landscape map / gap list). If missing, stop → guide to scholar-research first.
 2. Finalize the list of methods/contributions to organize (derived from the paper topic and research gaps).
 3. Delegate via `Task(subagent_type="oh-my-scholar:scholar-researcher", ...)` (or delegate to planner):
-   - Input: research note paths (`.oms/<slug>/research/*.md`), the method/contribution list, related reference notes (if any)
+   - Input: research note paths (`.hq/work/scholar/<slug>/research/*.md`), the method/contribution list, related reference notes (if any)
    - Instructions: write each method/contribution as a concept note (.md), specify equation meaning/assumptions/sources (English notation), flag unverified sources, comply with ad-block
 4. Receive outputs:
    - Concept note content per method/contribution (each .md file)
    - Whether equation meaning/assumptions/sources are specified
    - List of unverified flags (needs human check)
-5. The caller saves the concept notes to the workspace `.oms/<slug>/methodology/*.md` (output-layout.md §2). ⚠️ Do not put them in the source folder (`paper/…`) — concept notes are the SSOT (*input*) of the draft, not a citation-bound source asset.
+5. The caller saves the concept notes to the workspace `.hq/work/scholar/<slug>/methodology/*.md` (output-layout.md §2). ⚠️ Do not put them in the source folder (`paper/…`) — concept notes are the SSOT (*input*) of the draft, not a citation-bound source asset.
 6. If there are unverified flags, request human confirmation, then update the notes.
 7. After confirming the concept notes are complete → prepare to hand off to scholar-outline or scholar-draft.
 </Steps>

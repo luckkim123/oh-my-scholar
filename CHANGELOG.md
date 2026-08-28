@@ -4,6 +4,41 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-08-28 - the docs name the store they actually live in
+
+Phase 6 of the `.hq/` store unification. P4 cut oms's *code* over; its prose was
+never swept, so 187 sentences still told the reader that state lives under
+`.oms/`.
+
+### Changed
+- Every present-tense location claim now names its `.hq/` layer: `learned.md`,
+  `venues/`, `workflows/`, `verified-citations.json` -> `config/scholar/`;
+  `wiki/`, `reading/`, `_backport-design/` -> `community/`; `<slug>/**` ->
+  `work/scholar/<slug>/`. 26 files across `references/`, `skill-bodies/`,
+  `skills/`, `agents/`, and `README.md`.
+- Two claims were **false rather than merely stale** and were reworded, not
+  swapped: "the wiki area is gitignored" (under the new layout `community/` and
+  `config/` are tracked -- only `work/` and `runtime/` are ignored), and a
+  "sibling of" adjacency between `notepad.md` and `state/`, which now sit in
+  different layers.
+- `references/output-layout.md`'s directory tree and `.gitignore` checklist were
+  restructured rather than token-swapped: single files split across two layers,
+  so a substitution alone would have been incoherent.
+- 16 test assertions in 10 files followed the paths they pin. **Nothing was
+  loosened** -- no regex widened to match both roots, no skip/xfail, and the
+  collected count is unchanged (681). A test pinning a path is a second opinion
+  about where things live; none of them turned out to be right against the doc.
+
+### Notes
+- History and the documented dual-read resolution were left untouched: the
+  legacy store is still on disk and still consulted until the fallback-removal
+  release, so prose describing that mechanism is current and correct. Each
+  `learned.md`'s own migration banner stays exactly as written.
+- Ground truth came from `hooks/oms_paths.py`, not only the spec prose -- the
+  code is more exhaustive, and it is what revealed `notepad.md` -> `config/` and
+  `reading/` -> `community/reading/`, neither of which store-spec's oms table
+  spells out.
+
 ## [0.18.0] - 2026-08-28
 
 Phase 4 of the `.hq/` store unification — oms's cutover. Writes go to `.hq/`

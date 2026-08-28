@@ -11,7 +11,7 @@ Ported from the workspace source workflow (`.oms/workflows/wiki-audit.js`) that 
 python3 <plugin>/scripts/oms_wiki_audit.py --root <wiki-tree>
 ```
 
-- `.oms/wiki/` exists at two levels (`references/wiki/README.md`'s local + global model) and the script takes exactly one `--root` per invocation — no ascent built in. Run it **once per level**: once against the local `.oms/wiki/`, once against the parent global `.oms/wiki/` (found by ascent, same discovery method as `wiki_query`).
+- `.hq/community/wiki/` exists at two levels (`references/wiki/README.md`'s local + global model) and the script takes exactly one `--root` per invocation — no ascent built in. Run it **once per level**: once against the local `.hq/community/wiki/`, once against the parent global `.hq/community/wiki/` (found by ascent, same discovery method as `wiki_query`).
 - `--write-index` regenerates `<root>/INDEX.md` — a derived artifact, never hand-edited. Run it only *after* the findings from a plain run have been reviewed, not blind.
 - Exit codes: `0` clean, `1` a FAIL-severity mechanical finding exists, `2` `--root` does not exist or another usage error.
 - The script's `--help` and module docstring are the SSOT for what the mechanical dimensions check and how each is defined — this card does not re-list them.

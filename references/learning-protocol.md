@@ -58,7 +58,7 @@ ordering ("related work before method"), a self-citation ceiling, a per-venue pa
 habit. Because a promoted default silently shapes every future paper for that venue, it is a
 heavy, consequential decision. It therefore travels the gated path:
 
-1. Observations accrue in `.oms/learned.md` (any read-only stage may append; see §2).
+1. Observations accrue in `.hq/config/scholar/learned.md` (any read-only stage may append; see §2).
 2. `scholar-learn` reuses `scholar-inspector` (read-only) to judge which observations are ripe
    (§3) and to draft the `venues.md` edit + the specificity recompute (§4).
 3. **A human approves the promotion.** This is the single most important gate in oms.
@@ -81,7 +81,7 @@ approval ≠ enforcement — the three-way separation that forbids self-approval
 A **pattern or decision** is a note about how this user works that is useful to *remember* but
 is not an enforceable default: "the user reviews the conclusion first", "prefers terse prose",
 "this framing of the contribution landed well". These are cheap. They auto-append to
-`.oms/wiki/<category>/*.md` during any stage, with **no approval gate**, and are recalled next
+`.hq/community/wiki/<category>/*.md` during any stage, with **no approval gate**, and are recalled next
 session by **deterministic grep** over `wiki/` (§5). A wiki note is *context*, never an
 enforced default — it can inform a future default proposal, but it cannot itself change what a
 stage assumes. That promotion (wiki insight → candidate default) only happens by re-entering
@@ -144,19 +144,19 @@ running skill — capture it the same turn, before moving on:
    `user_overridden: false`; if the feedback *contradicts* an existing default, the existing
    default's candidate is marked `user_overridden: true` (the user's "no" is durable, §3).
 4. **Do it without being asked.** Writing the note is part of honoring the correction. Paper
-   knowledge goes to *this harness's* `.oms/`, never to a distributed/user-scope config.
+   knowledge goes to *this harness's* `.hq/`, never to a distributed/user-scope config.
 
-### 1.4 Two wiki levels — local (this paper) vs global (parent `.oms/`)
+### 1.4 Two wiki levels — local (this paper) vs global (parent `.hq/`)
 
-The light channel `wiki/` exists at **two levels**, both `.oms/`-relative (no absolute path,
+The light channel `wiki/` exists at **two levels**, both `.hq/`-relative (no absolute path,
 no env var, no XDG — preserves "never to a distributed/user-scope config" above):
 
-- **Local** = `<cwd>/.oms/wiki/` — knowledge specific to *this paper* (its reject patterns,
+- **Local** = `<cwd>/.hq/community/wiki/` — knowledge specific to *this paper* (its reject patterns,
   its decisions). Stays with the paper.
-- **Global** = the nearest **ancestor `.oms/wiki/`** found by ascent (cwd → parent, first
-  `.oms/` excluding self; git's `.git`-lookup pattern) — assets this *user* reuses across
+- **Global** = the nearest **ancestor `.hq/community/wiki/`** found by ascent (cwd → parent, first
+  `.hq/` excluding self; git's `.git`-lookup pattern) — assets this *user* reuses across
   **every** paper. Discovered, not configured: when the user runs from a papers-parent folder
-  (e.g. their workspace), that folder's `.oms/` is the global level.
+  (e.g. their workspace), that folder's `.hq/` is the global level.
 
 **What may rise to global** (the only things that leak upward — this is how the anti-pattern is
 honored, not violated): reusable assets only —
@@ -171,7 +171,7 @@ honored, not violated): reusable assets only —
 | this paper's topic/gap | ❌ stays local | paper-specific, not reusable |
 | **citation / `.bib`** | ❌ **permanently forbidden** | hallucination risk — §6.F invariant, never promoted to global |
 
-The global level is *the parent folder's `.oms/`* (still work-root-relative), **not** a
+The global level is *the parent folder's `.hq/`* (still work-root-relative), **not** a
 distributed config — and only reusable assets cross up. Paper-specific knowledge and citations
 stay local/forbidden. `wiki_query` merges both levels (`references/wiki/README.md`), tagging
 `[wiki:local]`/`[wiki:global]`; the call site never changes.
@@ -180,7 +180,7 @@ stay local/forbidden. `wiki_query` merges both levels (`references/wiki/README.m
 
 ## 2. The `learned.md` observation format (heavy-channel staging)
 
-`.oms/learned.md` is an append-only ledger of candidate defaults awaiting promotion. Stages
+`.hq/config/scholar/learned.md` is an append-only ledger of candidate defaults awaiting promotion. Stages
 append; only `scholar-learn` (via the human gate) consumes/retires entries.
 
 Each observation is one block:
@@ -425,7 +425,7 @@ wiki. This is the load-bearing oms invariant — violating it makes oms citation
 
 1. **operation** — the user writes 3 IROS papers. Each time `scholar-inspect` flags "no
    ablation section" and the user adds one. `scholar-pilot`'s wiki-capture appends to
-   `.oms/wiki/convention/iros-*.md`; by the 3rd, the note's `confidence` reaches `high`. In
+   `.hq/community/wiki/convention/iros-*.md`; by the 3rd, the note's `confidence` reaches `high`. In
    parallel, the disposition "reviews conclusion first" lands in `wiki/pattern/working-style.md`
    (light, no gate).
 2. **observation** — the same pattern is staged in `learned.md` as `OBS-0003`, `scope: iros`,
@@ -454,12 +454,12 @@ before acting:
 
 ```
 1st (authority — read first, every time):
-   .oms/<slug>/outline/outline.md        ← current section structure, story arc,
+   .hq/work/scholar/<slug>/outline/outline.md        ← current section structure, story arc,
                                              contribution↔section mapping, word budget
-   .oms/<slug>/methodology/*.md          ← each method/equation's source, meaning, assumptions
+   .hq/work/scholar/<slug>/methodology/*.md          ← each method/equation's source, meaning, assumptions
 
 2nd (secondary — supporting only, may be stale):
-   .oms/<slug>/research/*.md             ← related-work map / gaps (can be outdated post-ideate)
+   .hq/work/scholar/<slug>/research/*.md             ← related-work map / gaps (can be outdated post-ideate)
    research_summary/ · code_survey/*     ← code/repo inventory notes (NOT authority on
                                              chapter-axis or scope; structure redesigns
                                              leave their chapter numbers stale)
@@ -487,7 +487,7 @@ paper what `venues.md` defaults are to the user's whole corpus.)
 
 ## See also
 
-- `references/output-layout.md` — where `.oms/` files live; the paper-slug / wiki layout.
+- `references/output-layout.md` — where `.hq/` files live; the paper-slug / wiki layout.
 - `references/venues.md` — the human venue catalog (heavy-channel promotion target).
 - `references/wiki/README.md` — light-channel categories + append/confidence discipline.
 - omp `references/learning-protocol.md` — the upstream this is backported from (same two-channel

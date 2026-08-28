@@ -119,7 +119,7 @@ def test_moderator_move_scans_research_and_reading_notes():
 
 # --------------------------------------------------------- exit: wiki decision/ + research-log
 def test_body_writes_wiki_decision_note():
-    assert ".oms/wiki/decision/" in BODY
+    assert ".hq/community/wiki/decision/" in BODY
     assert "create-if-absent" in BODY
 
 

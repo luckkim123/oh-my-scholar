@@ -35,8 +35,8 @@ It bridges two layers: **`.md` (concept SSOT) → `.tex` (paper)**.
 
 ```
 [Stage 0 — bootstrap]
-  scholar-init       folder·venue·topic → directory scaffold + .oms/ workspace  (research /init)
-       ━━━ GATE 0: scaffold approval (idempotent — skip if .oms/<slug>/ already exists) ━━━
+  scholar-init       folder·venue·topic → directory scaffold + .hq/ workspace  (research /init)
+       ━━━ GATE 0: scaffold approval (idempotent — skip if .hq/work/scholar/<slug>/ already exists) ━━━
 [.md layer — concept SSOT]
   scholar-research   RQ·related work·gap          (requirements gathering)
   scholar-deepen     claim-ambiguity gate (qualitative)   (spec clarification)
@@ -55,7 +55,7 @@ It bridges two layers: **`.md` (concept SSOT) → `.tex` (paper)**.
        ━━━ GATE 3: submission confirmation ━━━
   scholar-pilot      full orchestration        (autopilot)
 [on-demand — no fixed stage, usable any time]
-  scholar-read       external paper → structured reading note (.oms/reading/, never a citation source)
+  scholar-read       external paper → structured reading note (.hq/community/reading/, never a citation source)
   scholar-discuss    standing Socratic discussion partner (Contrarian·Simplifier·Ontologist; no .tex/.bib)
 [meta — evolution]
   scholar-learn      observation → promote venue defaults (human gate) — more specialized to this user the more you use it
@@ -74,7 +74,7 @@ A paper is citation-bound, so hallucinations are not caught as compile errors. T
 - Across 13 models / 40 domains / 375K citations, fabrication runs **14–95%** by model and domain ([GhostCite, arXiv:2602.06718](https://arxiv.org/abs/2602.06718)).
 - Human review does not catch it: ~**100 confirmed hallucinated citations in accepted NeurIPS 2025 papers** (GPTZero), each missed by 3–5 reviewers; 77% of reviewers admit not checking references thoroughly.
 
-Since v0.6.0 principle 2 is **enforced, not just stated**: a PreToolUse interlock (`hooks/scholar_cite_guard.py`) denies unverified new `.bib` entries and dangling `\cite` keys before they land, and `scripts/verify_bib_entry.py` verifies DOI existence + retraction status via publisher-registered retraction notices in Crossref `update-to` relations, plus OpenAlex's `is_retracted` flag, recording human-gated VERIFIED keys into the `.oms/state/verified-citations.json` allowlist.
+Since v0.6.0 principle 2 is **enforced, not just stated**: a PreToolUse interlock (`hooks/scholar_cite_guard.py`) denies unverified new `.bib` entries and dangling `\cite` keys before they land, and `scripts/verify_bib_entry.py` verifies DOI existence + retraction status via publisher-registered retraction notices in Crossref `update-to` relations, plus OpenAlex's `is_retracted` flag, recording human-gated VERIFIED keys into the `.hq/config/scholar/verified-citations.json` allowlist.
 
 ## Agents
 

@@ -49,7 +49,7 @@ Systematically survey the related-work landscape before writing a paper and iden
    - List of verified citations (those with confirmed author/year/title)
    - Gap list (what existing methods fail to solve)
    - List of unverified flags (need human confirmation)
-4. The caller saves the output as a .md research note in the workspace — `.oms/<slug>/research/*.md` (fixed path per output-layout.md §2). ⚠️ Do not place it in the source folder (`paper/…`) — a research note is the *input* (scaffolding) for the draft, not a citation-bound source asset.
+4. The caller saves the output as a .md research note in the workspace — `.hq/work/scholar/<slug>/research/*.md` (fixed path per output-layout.md §2). ⚠️ Do not place it in the source folder (`paper/…`) — a research note is the *input* (scaffolding) for the draft, not a citation-bound source asset.
 5. If there are unverified flags, ask a human to confirm and then update the note.
 </Steps>
 

@@ -7,12 +7,12 @@
 **Design principle**: the layout is a *deterministic, fixed structure* — it does not vary by task.
 The user sees exactly one finished copy in `outputs/` (the compiled PDF); everything the user does
 not need to look at directly (version snapshots, page renders, generated figures, compile temp)
-lives in the `.oms/` work area, cleaned at a terminal state or on request.
+lives in the `.hq/` work area, cleaned at a terminal state or on request.
 
 **Citation-bound asset protection (OMS identity)**: the `.tex`/`.bib` **source** is the user's
 asset and stays in *the caller's project source folder* (the paper directory under the work root).
-`outputs/` holds **only the compiled `.pdf`**; `.oms/` holds **only version snapshots and
-intermediates**. The source is never moved into `.oms/`.
+`outputs/` holds **only the compiled `.pdf`**; `.hq/` holds **only version snapshots and
+intermediates**. The source is never moved into `.hq/`.
 
 All paths are **relative to the work root** (the caller's working directory or an explicitly named
 project root) — never hardcoded to any one machine or absolute path.
@@ -24,18 +24,18 @@ project root) — never hardcoded to any one machine or absolute path.
 | Area | What goes in | Who reads it | Cleaned? |
 |:---|:---|:---|:---:|
 | `outputs/<slug>/` | **The one copy the user sees** (`<slug>.pdf`, the compiled output) + optional verify evidence | the user | ❌ never touched automatically (user asset) |
-| `.oms/<slug>/` | Everything the user rarely needs directly — `.md` stage notes (research/methodology/outline), version snapshots, page renders, gen-image, compile temp | Claude (analysis) | ✅ confirmed-then-cleaned at terminal |
+| `.hq/work/scholar/<slug>/` | Everything the user rarely needs directly — `.md` stage notes (research/methodology/outline), version snapshots, page renders, gen-image, compile temp | Claude (analysis) | ✅ confirmed-then-cleaned at terminal |
 
 **Core**: `outputs/` is the "display shelf — this is the result right now," exactly one compiled
-PDF. `.oms/` is the "workbench." Both the `.md` stage notes (the draft's *inputs*) and the version
+PDF. `.hq/` is the "workbench." Both the `.md` stage notes (the draft's *inputs*) and the version
 snapshots count as work-product and live on the workbench. This structurally prevents the output
 folder from bloating — and keeps the project source folder holding *only* the citation-bound
 `.tex`/`.bib`, never scaffolding.
 
 **Source location (critical)**: the `.tex`/`.bib` source is **neither** in `outputs/` **nor** in
-`.oms/` — it stays in the project source folder the caller designates. OMS compiles *from* that
+`.hq/` — it stays in the project source folder the caller designates. OMS compiles *from* that
 source *to* `outputs/<slug>/<slug>.pdf`, and snapshots *of* that source into
-`.oms/<slug>/versions/`.
+`.hq/work/scholar/<slug>/versions/`.
 
 ---
 
@@ -82,14 +82,14 @@ then fixed for the life of the job (never re-asked).
 ## 2. Fixed directory structure (invariant — does not vary)
 
 ```
-<project source folder>/                # caller-designated — NOT under outputs/ or .oms/
+<project source folder>/                # caller-designated — NOT under outputs/ or .hq/
   <slug>.tex  sections/*.tex  references.bib   # the user's source asset (citation-bound)
 
 outputs/<slug>/
   <slug>.pdf                          # the one copy the user sees (compiled PDF). The PASS copy.
   verify-evidence.md                  # (optional) verification evidence table — for the user
 
-.oms/<slug>/                          # work area — everything the user rarely needs directly
+.hq/work/scholar/<slug>/                          # work area — everything the user rarely needs directly
   research/
     *.md                              # research stage: related-work map, gap analysis, axis notes
   methodology/
@@ -116,20 +116,21 @@ outputs/<slug>/
   reviews-log.md                      # (optional) scholar-mock-review verdict history — append-only, create-if-absent, never touches .tex/.bib
   research-log.md                     # (optional) dated project narrative memory — append-only, create-if-absent, never a .bib source (see §2.4)
 
-.oms/state/                           # cross-slug mechanism state (NOT per-job)
-  verified-citations.json             # cite-guard allowlist — written ONLY by scripts/verify_bib_entry.py --record (atomic, oms_atomic)
+.hq/config/scholar/verified-citations.json    # cite-guard allowlist — written ONLY by scripts/verify_bib_entry.py --record (atomic, oms_atomic)
+
+.hq/runtime/scholar/                  # cross-slug mechanism state (NOT per-job)
   pilot-<slug>.json                   # pilot pipeline stage state — written ONLY by scripts/oms_state.py write (atomic, oms_atomic)
   revise-<slug>.json                  # revise-loop round/strike ledger — written ONLY by scripts/oms_state.py revise-* (atomic, oms_atomic)
 
-.oms/wiki/                            # project-wide accrual — NOT per-job (sibling of <slug>/, carries across sessions)
+.hq/community/wiki/                            # project-wide accrual — NOT per-job (carries across sessions)
   convention/ pattern/ decision/ reference/ history/  # auto-appended reject patterns / decisions / dispositions — history/ is global-level only (see references/wiki/README.md)
   INDEX.md                            # generated by scripts/oms_wiki_audit.py --write-index, never hand-edited
 
-.oms/reading/                         # personal reading corpus — NOT per-job (sibling of wiki/, outlives any one paper project — see §2.5)
+.hq/community/reading/                         # personal reading corpus — NOT per-job (sibling of wiki/, outlives any one paper project — see §2.5)
   <citekey>.md                        # one structured deep-read note per external paper — written ONLY by the calling session (scholar-read)
                                        # NOT CITABLE — secondary memo, never a .bib source (invariant 2); <citekey> is a filename convention, NOT a BibTeX key
 
-.oms/notepad.md                       # cross-slug workbench notepad (NOT per-job, like state/) — see §2.3
+.hq/config/scholar/notepad.md                       # cross-slug workbench notepad (NOT per-job, like `.hq/runtime/scholar/`) — see §2.3
 ```
 
 ### 2.1 Invariance rules
@@ -140,7 +141,7 @@ outputs/<slug>/
     the `.md`-stage skills (`scholar-research`, `scholar-ideate`, `scholar-outline`). These are the
     draft's *inputs* (concept SSOT, gap map, section plan), **not** the citation-bound `.tex`/`.bib`
     source. They are work-product (scaffolding for the draft), so they live on the workbench
-    (`.oms/`), **never inside the project source folder** (`paper/…`). Putting them next to the
+    (`.hq/`), **never inside the project source folder** (`paper/…`). Putting them next to the
     `.tex`/`.bib` would mix scaffolding with the user's citation-bound asset — exactly what §0's
     source-protection rule forbids.
   - **`.tex` pipeline layer** (`versions/ renders/ gen-image/ tmp/`) — snapshots and compile
@@ -151,18 +152,18 @@ outputs/<slug>/
 - A new kind of intermediate maps into one of the existing subdirectories (no inventing a new
   top-level folder). Only a genuinely new category that maps to none of them is added by amending
   this convention.
-- Two narrative-memory files sit directly under `.oms/<slug>/` (not inside either layer's
+- Two narrative-memory files sit directly under `.hq/work/scholar/<slug>/` (not inside either layer's
   subdirectories, so the two-layer split above doesn't cover them) and are equally invariant in
   name/place: `reviews-log.md` (mock-review verdict history) and `research-log.md` (dated project
   narrative memory — see §2.4). Both are append-only, create-if-absent, written by the calling
   session, and **KEEP** at T18 cleanup (§5).
-- `.oms/reading/` sits **outside** the per-slug `.oms/<slug>/` tree (sibling of `.oms/wiki/`, not
+- `.hq/community/reading/` sits **outside** the per-slug `.hq/work/scholar/<slug>/` tree (sibling of `.hq/community/wiki/`, not
   per-job) — a reading note outlives any one paper project. It is equally invariant in name/place;
   see §2.5 for the entry format.
 
 ### 2.2 State schema (pipeline mechanism state)
 
-`.oms/state/` holds cross-slug **mechanism state** — not paper content, not citations. Both shapes
+`.hq/runtime/scholar/` holds cross-slug **mechanism state** — not paper content, not citations. Both shapes
 below are written **only via `scripts/oms_state.py`** (atomic, `oms_atomic.atomic_write_json`); no
 other script or skill writes these files directly.
 
@@ -210,9 +211,9 @@ the same Stop guard (a live marker means the loop is still running) and the revi
 **Cleanup fate**: both files are per-slug mechanism state, not paper content — at pilot terminal
 (GATE 3 confirm) they are removable together with the slug's work area (see §5 table).
 
-### 2.3 notepad tiers (`.oms/notepad.md`)
+### 2.3 notepad tiers (`.hq/config/scholar/notepad.md`)
 
-`.oms/notepad.md` is a **cross-slug workbench notepad** (sibling of `.oms/state/`, not per-job —
+`.hq/config/scholar/notepad.md` is a **cross-slug workbench notepad** (cross-slug like `.hq/runtime/scholar/`, not per-job —
 see §2). It is a single `.md` file with three fixed sections (`## <name>`), each with its own
 write/prune contract:
 
@@ -231,10 +232,10 @@ write/prune contract:
 - `## Manual` is the human's own space in the same file — automation must not touch it, ever
   (no write, no prune), regardless of age.
 
-### 2.4 research-log entry format (`.oms/<slug>/research-log.md`)
+### 2.4 research-log entry format (`.hq/work/scholar/<slug>/research-log.md`)
 
-`.oms/<slug>/research-log.md` is a **durable, dated, append-only project narrative memory** — "what
-we tried / decided / dropped, and why" — sibling of `reviews-log.md` directly under `.oms/<slug>/`.
+`.hq/work/scholar/<slug>/research-log.md` is a **durable, dated, append-only project narrative memory** — "what
+we tried / decided / dropped, and why" — sibling of `reviews-log.md` directly under `.hq/work/scholar/<slug>/`.
 Written **only by the calling session** (never a dispatched agent), create-if-absent, append-only
 (never rewritten, never pruned).
 
@@ -262,10 +263,10 @@ opts out, mirroring `--no-wiki`.
 
 **Cleanup fate**: KEEP — see §5.
 
-### 2.5 reading note format (`.oms/reading/<citekey>.md`)
+### 2.5 reading note format (`.hq/community/reading/<citekey>.md`)
 
-`.oms/reading/` is a **personal reading corpus** — sibling of `.oms/wiki/`, NOT under any one
-`.oms/<slug>/` — because a deep-read note outlives any one paper project (produced by the R5
+`.hq/community/reading/` is a **personal reading corpus** — sibling of `.hq/community/wiki/`, NOT under any one
+`.hq/work/scholar/<slug>/` — because a deep-read note outlives any one paper project (produced by the R5
 `scholar-read` skill, T2). Written **only by the calling session** (never the dispatched
 `scholar-researcher` agent, same writer-identity carve-out as `reviews-log.md`/`research-log.md`),
 create-if-absent, one file per external paper.
@@ -293,7 +294,7 @@ dispatches a single `scholar-researcher` `mode=deep-read` call, and writes the n
 
 ## 3. Version filename rule (deterministic)
 
-Version snapshots under `.oms/<slug>/versions/`:
+Version snapshots under `.hq/work/scholar/<slug>/versions/`:
 
 **`v{NN}_{YYYY-MM-DD}_{summary}.{tex|bib}`**
 
@@ -311,7 +312,7 @@ Examples:
 
 - **Only before a large edit** (section rewrite, structural change, many sections affected). Not for
   a one-line tweak or a single citation fix — keeps the version count bounded.
-- A snapshot **copies** the source `.tex`/`.bib` to `.oms/<slug>/versions/v{NN}_{date}_{summary}.ext`
+- A snapshot **copies** the source `.tex`/`.bib` to `.hq/work/scholar/<slug>/versions/v{NN}_{date}_{summary}.ext`
   (copy, not move — the source stays in the project folder and work continues on it).
 - `NN` = max existing version number + 1; if empty, `v01`.
 
@@ -329,7 +330,7 @@ order = version number order = sort order, always.
 `{YYYY-MM-DD}_{purpose}.png` — purpose is kebab. e.g. `2026-05-30_architecture-fig.png`.
 
 - **Separate from any image tool's own default path**: in a *paper workflow* the caller explicitly
-  directs generated-figure intermediates to `.oms/<slug>/gen-image/`.
+  directs generated-figure intermediates to `.hq/work/scholar/<slug>/gen-image/`.
 - ⚠️ A generated figure is an *intermediate* — the figure that ships in the paper is referenced from
   the `.tex` source and is a citation-bound asset decision, never auto-fabricated.
 
@@ -353,21 +354,21 @@ order = version number order = sort order, always.
 
 | Target | Clean | Note |
 |:---|:---:|:---|
-| `.oms/<slug>/renders/` | ✅ all | Claude analysis, regenerable |
-| `.oms/<slug>/gen-image/` | ✅ all | except figures the user asks to keep |
-| `.oms/<slug>/tmp/` | ✅ all | LaTeX compile intermediates (.aux/.log/…) |
-| `.oms/<slug>/versions/` | ✅ **all but the latest 1 + user-designated milestones** | keep the near-final snapshot, prune the middle |
-| `.oms/<slug>/consensus/` | ✅ all | per-run `--consensus` mode handoff artifacts — a workspace, T18 cleanup target |
-| `.oms/state/pilot-*.json` / `revise-*.json` | ✅ clean | at terminal, after GATE 3 (mechanism state, not paper content) |
-| `.oms/<slug>/reviews-log.md` | ❌ **KEEP** | durable mock-review verdict history — lives in `.oms/<slug>/` but is never aggregated or deleted at T18 (unlike renders/gen-image/tmp/versions/consensus) |
-| `.oms/<slug>/research-log.md` | ❌ **KEEP** | durable dated project narrative memory (tried/decided/dropped, §2.4) — lives in `.oms/<slug>/` but is never aggregated or deleted at T18; never a `.bib` source |
-| `.oms/reading/*.md` | ❌ **KEEP** | personal reading corpus (§2.5) — sibling of `.oms/wiki/`, outside any one slug's T18 cleanup scope entirely; never a `.bib` source |
+| `.hq/work/scholar/<slug>/renders/` | ✅ all | Claude analysis, regenerable |
+| `.hq/work/scholar/<slug>/gen-image/` | ✅ all | except figures the user asks to keep |
+| `.hq/work/scholar/<slug>/tmp/` | ✅ all | LaTeX compile intermediates (.aux/.log/…) |
+| `.hq/work/scholar/<slug>/versions/` | ✅ **all but the latest 1 + user-designated milestones** | keep the near-final snapshot, prune the middle |
+| `.hq/work/scholar/<slug>/consensus/` | ✅ all | per-run `--consensus` mode handoff artifacts — a workspace, T18 cleanup target |
+| `.hq/runtime/scholar/pilot-*.json` / `revise-*.json` | ✅ clean | at terminal, after GATE 3 (mechanism state, not paper content) |
+| `.hq/work/scholar/<slug>/reviews-log.md` | ❌ **KEEP** | durable mock-review verdict history — lives in `.hq/work/scholar/<slug>/` but is never aggregated or deleted at T18 (unlike renders/gen-image/tmp/versions/consensus) |
+| `.hq/work/scholar/<slug>/research-log.md` | ❌ **KEEP** | durable dated project narrative memory (tried/decided/dropped, §2.4) — lives in `.hq/work/scholar/<slug>/` but is never aggregated or deleted at T18; never a `.bib` source |
+| `.hq/community/reading/*.md` | ❌ **KEEP** | personal reading corpus (§2.5) — sibling of `.hq/community/wiki/`, outside any one slug's T18 cleanup scope entirely; never a `.bib` source |
 | `outputs/<slug>/<slug>.pdf` | ❌ never | user asset — excluded from tally and deletion, mentioned only |
 | `<project>/…tex/.bib` source | ❌ never | citation-bound source asset — outside cleanup scope entirely |
 
 ### 5.3 Safe procedure
 
-1. **Tally** the cleanup targets under `.oms/<slug>/`: size and count.
+1. **Tally** the cleanup targets under `.hq/work/scholar/<slug>/`: size and count.
 2. **Ask the user [clean / keep]** — never auto-delete. Default conservative (keep).
 3. On "clean" → **delete via a recoverable path** (never permanent `rm`). Environment-adaptive:
    - macOS: use the `trash` CLI if present, else move to `~/.Trash`
@@ -391,27 +392,27 @@ order = version number order = sort order, always.
 ## 6. Implementation checklist (consumers of this card)
 
 - [ ] `scholar-research` / `scholar-ideate` / `scholar-outline` write their `.md` notes into
-      `.oms/<slug>/research|methodology|outline/` — **never** into the project source folder (`paper/…`)
-- [ ] `scholar-draft` / `scholar-pilot` / `scholar-drafter` snapshot source into `.oms/<slug>/versions/`
-- [ ] `scholar-outline` writes per-run consensus handoff artifacts into `.oms/<slug>/consensus/` (`--consensus` mode only); T18 cleans them at terminal
-- [ ] the `.tex`/`.bib` source stays in the project source folder (never moved into `.oms/`)
+      `.hq/work/scholar/<slug>/research|methodology|outline/` — **never** into the project source folder (`paper/…`)
+- [ ] `scholar-draft` / `scholar-pilot` / `scholar-drafter` snapshot source into `.hq/work/scholar/<slug>/versions/`
+- [ ] `scholar-outline` writes per-run consensus handoff artifacts into `.hq/work/scholar/<slug>/consensus/` (`--consensus` mode only); T18 cleans them at terminal
+- [ ] the `.tex`/`.bib` source stays in the project source folder (never moved into `.hq/`)
 - [ ] `outputs/<slug>/<slug>.pdf` is the only compiled copy the user sees
-- [ ] page renders go under `.oms/<slug>/renders/`, compile temp under `.oms/<slug>/tmp/`
-- [ ] `.gitignore` excludes `.oms/` and `outputs/*` (keep `outputs/.gitkeep`)
+- [ ] page renders go under `.hq/work/scholar/<slug>/renders/`, compile temp under `.hq/work/scholar/<slug>/tmp/`
+- [ ] `.gitignore` excludes `.hq/work/`, `.hq/runtime/`, and `outputs/*` (`.hq/config/`, `.hq/community/` stay tracked; keep `outputs/.gitkeep`)
 - [ ] slug rule (§1.1) applied at research/intake (non-ASCII → ask once for an ASCII slug)
 - [ ] terminal cleanup (§5) goes through AskUserQuestion + trash + excludes the PDF and the source
-- [ ] **`.tex`↔`.oms` sync** (`learning-protocol.md` §8): after `scholar-draft`/`scholar-revise` makes a
+- [ ] **`.tex`↔`.hq` sync** (`learning-protocol.md` §8): after `scholar-draft`/`scholar-revise` makes a
       structure-affecting `.tex` change (section move/merge/split, title change, major equation, \cite added),
-      `.oms/<slug>/outline/outline.md` + relevant `.oms/<slug>/methodology/*.md` (+ decision log if present)
+      `.hq/work/scholar/<slug>/outline/outline.md` + relevant `.hq/work/scholar/<slug>/methodology/*.md` (+ decision log if present)
       are updated to match the `.tex` **in the same task** — a "revise PASS" is not complete until they agree
-- [ ] `.oms/wiki/INDEX.md` is regenerated via `scripts/oms_wiki_audit.py --write-index` after wiki notes
+- [ ] `.hq/community/wiki/INDEX.md` is regenerated via `scripts/oms_wiki_audit.py --write-index` after wiki notes
       change — never hand-edited (`references/wiki/README.md` § Frontmatter standard)
-- [ ] `scholar-mock-review` appends one dated entry per completed review to `.oms/<slug>/reviews-log.md`
+- [ ] `scholar-mock-review` appends one dated entry per completed review to `.hq/work/scholar/<slug>/reviews-log.md`
       (create-if-absent, append-only, never touches `.tex`/`.bib`) — written by the calling session, not the
       dispatched `scholar-reviewer` agent (§5 KEEP fate — never aggregated for T18 cleanup)
-- [ ] `scholar-pilot` appends one dated entry per pipeline run to `.oms/<slug>/research-log.md`
+- [ ] `scholar-pilot` appends one dated entry per pipeline run to `.hq/work/scholar/<slug>/research-log.md`
       (create-if-absent, append-only, never a `.bib` source, format in §2.4; `--no-log` opts out) —
       written by the calling session at Step 10, alongside the wiki-capture step (§5 KEEP fate)
-- [ ] `scholar-read` writes one `.oms/reading/<citekey>.md` note per external paper (create-if-absent,
+- [ ] `scholar-read` writes one `.hq/community/reading/<citekey>.md` note per external paper (create-if-absent,
       NOT CITABLE header first line, format in §2.5) — written by the calling session, never the
       dispatched `scholar-researcher` agent; never a `.bib` source; no `--record` (§5 KEEP fate)

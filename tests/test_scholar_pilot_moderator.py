@@ -63,8 +63,8 @@ def test_moderator_sits_between_outline_mode_branching_and_gate1():
 def test_moderator_dispatch_inputs():
     sec = _step4_section()
     assert "proposed outline" in sec
-    assert ".oms/<slug>/research/*.md" in sec
-    assert ".oms/reading/" in sec
+    assert ".hq/work/scholar/<slug>/research/*.md" in sec
+    assert ".hq/community/reading/" in sec
 
 
 def test_moderator_output_shape():

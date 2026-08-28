@@ -47,7 +47,7 @@ def test_pilot_has_interruption_and_resume_section():
 
 
 def test_layout_documents_notepad_tiers():
-    assert ".oms/notepad.md" in LAYOUT
+    assert ".hq/config/scholar/notepad.md" in LAYOUT
     idx = LAYOUT.index("notepad tiers")
     section = LAYOUT[idx:idx + 2000]
     for tier in ("Priority Context", "Working Notes", "Manual"):

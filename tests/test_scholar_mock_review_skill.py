@@ -292,7 +292,7 @@ def test_layout_checklist_has_mock_review_row():
 
 
 def test_layout_wiki_block_untouched_by_this_task():
-    """Task 3's territory — this task must not touch the .oms/wiki/ tree block."""
-    idx = LAYOUT.index(".oms/wiki/")
+    """Task 3's territory — this task must not touch the .hq/community/wiki/ tree block."""
+    idx = LAYOUT.index(".hq/community/wiki/")
     wiki_block = LAYOUT[idx: idx + 400]
     assert "reviews-log.md" not in wiki_block

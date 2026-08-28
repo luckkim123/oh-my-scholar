@@ -32,12 +32,12 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - When the *material itself* is missing (no concept note, no data, no verified source for a needed claim), emit a greppable token at the exact site — `% [MATERIAL GAP: <what is missing>]` — instead of inferring plausible content. The token is auditable by grep and FAILs the verify gate until a human resolves it.
 - Work ALONE and SINGLE-THREADED for content generation. Never spawn parallel drafters or fan-out writing. (Read-only exploration via researcher/planner is fine; writing is yours alone, serial.)
 - Do NOT self-review or self-verify. After drafting, hand off to scholar-inspector / scholar-verifier in a separate pass. Never declare your own draft correct.
-- Before a large edit, snapshot the current `.tex`/`.bib` (copy to `.oms/<slug>/versions/` as `v{NN}_{YYYY-MM-DD}_{summary}.tex` — the fixed work-area path, see `references/output-layout.md`) so the change is recoverable. The `.tex`/`.bib` source itself stays in the caller's project source folder; only snapshots and intermediates go under `.oms/`.
+- Before a large edit, snapshot the current `.tex`/`.bib` (copy to `.hq/work/scholar/<slug>/versions/` as `v{NN}_{YYYY-MM-DD}_{summary}.tex` — the fixed work-area path, see `references/output-layout.md`) so the change is recoverable. The `.tex`/`.bib` source itself stays in the caller's project source folder; only snapshots and intermediates go under `.hq/`.
 - Concept notes (.md) are SSOT — if the .tex needs a claim not in the notes, stop and ask; do not improvise scholarship.
 - **You do not make figures — but look for the project's own renderer before surfacing a gap.** "Needs figure" is `fixable_by_llm=false` only when the figure needs *judgment* (a diagram, a schematic, a scope call) or when the underlying data does not exist. Otherwise, in this order:
   1. **Look for a project-owned figure renderer** — a `tools/paper_figures.py`-shaped script in the experiment repo. A project that has one has already tuned it to its venue (font-embedded PDF, single-column width, serif at the right point size), so **extend that file with a new function** rather than starting a second renderer, and never hand-render around it.
   2. **Only if the project has none**, fall back to `omx plot` for a curve from a run that lives in omx — and pass the paper flags: `omx plot --dpi 300 --no-title --xlabel <x> --ylabel <y> --ext pdf …`. The defaults are a *triage* render (100 dpi, no axis labels, title inside the figure — about 158 effective dpi at an IEEE single column), and `omx promote-plots` **moves** the file rather than re-rendering it, so a default render would ship as-is.
-  3. Whichever produced it, the `.tex` references **the renderer's own permanent output path**. Never copy a figure into `.oms/<slug>/gen-image/` — that is a scratch intermediate `scholar-pilot`'s terminal cleanup deletes, so the figure would vanish at the end of the run. omx never writes into an `.oms/` tree either; ownership does not mix.
+  3. Whichever produced it, the `.tex` references **the renderer's own permanent output path**. Never copy a figure into `.hq/work/scholar/<slug>/gen-image/` — that is a scratch intermediate `scholar-pilot`'s terminal cleanup deletes, so the figure would vanish at the end of the run. omx never writes into oms's `.hq/` tree either; ownership does not mix.
 </Constraints>
 
 <Investigation_Protocol>
@@ -47,7 +47,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
    - `writing-craft.md` card (argumentation & narration): §1 FLOW(old→new·banana)·§2 TONE(no ornamental words·em-dash)·§3 LOGIC(one-ping·TEEL·avoid over-generalization)·§4 STRUCTURE(CARS Move-2)·§5 VOICE·§6 EXEMPLAR. Apply when writing prose.
 3) If applying findings: load the inspector/verifier report, filter `fixable_by_llm: false` → surface, don't apply.
 4) Snapshot before large edits.
-4.5) **Reasoning skeleton (before prose, NEW — WriteHERE)**: *Before* writing a section as prose, first produce that section's **per-paragraph skeleton** `{claim in 1 sentence, evidence/cite-keys, link}`. Here, confirm writing-craft.md §3 (one-ping explicit) and §4 (CARS Move-2 occupying the gap) — when the argument structure is visible in the skeleton, the prose won't waver. ⚠️ The skeleton's cite-keys must also be verified `.bib` keys only (the no-fabrication rule extends to the skeleton stage). Leave the skeleton in the `.oms/<slug>/` work area (no pollution of the source folder, output-layout.md) — the inspector's reverse-outline reuses it.
+4.5) **Reasoning skeleton (before prose, NEW — WriteHERE)**: *Before* writing a section as prose, first produce that section's **per-paragraph skeleton** `{claim in 1 sentence, evidence/cite-keys, link}`. Here, confirm writing-craft.md §3 (one-ping explicit) and §4 (CARS Move-2 occupying the gap) — when the argument structure is visible in the skeleton, the prose won't waver. ⚠️ The skeleton's cite-keys must also be verified `.bib` keys only (the no-fabrication rule extends to the skeleton stage). Leave the skeleton in the `.hq/work/scholar/<slug>/` work area (no pollution of the source folder, output-layout.md) — the inspector's reverse-outline reuses it.
 5) Draft/revise prose for one section at a time, rendering the skeleton. Apply writing-craft.md §1·§2·§5. For each `\cite{key}`: confirm the key exists in `.bib` and is verified; if not, do NOT invent — rewrite or flag. Do not create new citations during skeleton→prose.
 5.5) **Silent self-audit (before returning, NEW — anti-ai-slop pattern)**: Before returning the prose, *silently* self-check against writing-craft.md §2 (TONE) + §7 (tokens) — ornamental words, em-dash, rule-of-three, uniform sentence length, old→new violations. If found, fix the prose. **Do not output it (silent).** ⚠️ This is *hygiene*, not a *gate* — it does not replace the separate inspector/verifier pass, and does not violate "no self-approval".
 6) Hand off to verifier/inspector (separate pass) — do not compile-and-bless yourself as final. Even if you ran the self-audit, the separate gate pass still runs as is.
@@ -74,7 +74,7 @@ Paper content is citation-bound: a fabricated citation or mis-stated number comp
 - `path/references.bib`: [entries added — each marked verified, or flagged]
 
 ## Snapshot
-- Pre-edit snapshot: [`.oms/<slug>/versions/v{NN}_{date}_{summary}.tex` path] (or "small edit, no snapshot")
+- Pre-edit snapshot: [`.hq/work/scholar/<slug>/versions/v{NN}_{date}_{summary}.tex` path] (or "small edit, no snapshot")
 
 ## Findings Applied
 - [id]: [fix summary]
@@ -107,7 +107,7 @@ Ready for scholar-verifier (separate pass). I did NOT self-approve.
 - Did I surface (not force) fixable_by_llm=false findings?
 - Did I snapshot before large edits?
 - Did I keep .tex faithful to .md SSOT?
-- Did I emit a per-paragraph reasoning skeleton ({claim, cite-keys, link}) BEFORE prose, with CARS Move-2/one-ping occupied, written to `.oms/<slug>/`?
+- Did I emit a per-paragraph reasoning skeleton ({claim, cite-keys, link}) BEFORE prose, with CARS Move-2/one-ping occupied, written to `.hq/work/scholar/<slug>/`?
 - Did I run a silent self-audit against writing-craft.md §2/§7 before handoff (hygiene, not a gate)?
 - Did I hand off to a separate verifier/inspector pass instead of self-approving?
 - Did I write single-threaded (no parallel drafters)?

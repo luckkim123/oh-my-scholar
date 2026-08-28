@@ -106,7 +106,7 @@ def test_output_layout_checklist_has_sync_item():
     checklist = re.search(r"## 6\. Implementation checklist.*", body, re.DOTALL)
     assert checklist, "output-layout.md §6 Implementation checklist 없음"
     text = checklist.group(0)
-    assert ".tex" in text and ".oms" in text, "checklist 에 .tex↔.oms 동기화 항목 부재"
+    assert ".tex" in text and ".hq" in text, "checklist 에 .tex↔.hq 동기화 항목 부재"
     assert "outline" in text and "methodology" in text, \
         "checklist 동기화 항목에 outline·methodology 대상 누락"
     assert "learning-protocol.md" in text or "§8" in text, \

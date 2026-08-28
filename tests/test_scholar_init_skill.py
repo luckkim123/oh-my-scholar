@@ -35,7 +35,7 @@ def test_has_gate_zero_idempotency():
     """③ GATE 0 멱등성 — 이미 .oms/<slug>/ 있으면 멈춤 (재초기화 손실 경고)."""
     body = read()
     assert "게이트 0" in body or "GATE 0" in body or "gate 0" in body
-    assert ".oms/<slug>/" in body
+    assert ".hq/work/scholar/<slug>/" in body
     assert "재초기화" in body or "re-initializ" in body  # 손실 경고
 
 
@@ -61,8 +61,8 @@ def test_scaffold_matches_design_3_3():
     for item in ("sections/", "figures/", "refs/", "data/",
                  "preamble.tex", "meta.md"):
         assert item in body, f"scaffold 항목 '{item}' 누락"
-    # .oms 작업장 + 논문별 wiki 4-카테고리
-    assert ".oms/<slug>/" in body
+    # .hq 작업장 + 논문별 wiki 4-카테고리
+    assert ".hq/work/scholar/<slug>/" in body
     assert "convention/" in body and "pattern/" in body
 
 

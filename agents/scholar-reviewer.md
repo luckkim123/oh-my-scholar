@@ -98,7 +98,7 @@ misses real ones.
    job), but do not imply a calibrated scale exists when the table is empty.
 2) **Query accumulated patterns (wiki_query, 2 tiers)**: with the abstract function `wiki_query(category="convention")`, query reject patterns / review
    tendencies for the same venue/type accumulated by previous sessions (reflect them if present). The implementation is deterministic 2-tier grep:
-   local (`this paper's cwd/.oms/wiki/`) + global (the nearest ancestor `.oms/wiki/`, ascent). Mark the source
+   local (`this paper's cwd/.hq/community/wiki/`) + global (the nearest ancestor `.hq/community/wiki/`, ascent). Mark the source
    as `[wiki:local]`/`[wiki:global]`. If absent, use your own judgment only (not an error). ⚠️ wiki is a secondary note —
    not used as a citation source, and citation/.bib is permanently forbidden from global promotion (`references/wiki/README.md`).
    Also `wiki_query(category="reference")` for a `venue-review-examples-<venue>.md` note (user-collected real

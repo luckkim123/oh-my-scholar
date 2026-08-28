@@ -147,21 +147,21 @@ def test_readme_citation_lookup_mcp_absence_changes_nothing():
 # --------------------------------------------------------- output-layout.md: five categories
 def test_output_layout_wiki_block_has_all_five_categories():
     body = _read(LAYOUT)
-    sec = section(body, r"^\.oms/wiki/", r"^\.oms/notepad\.md")
+    sec = section(body, r"^\.hq/community/wiki/", r"^\.hq/config/scholar/notepad\.md")
     for cat in ("convention/", "pattern/", "decision/", "reference/", "history/"):
         assert cat in sec, f"{cat} missing from .oms/wiki/ block"
 
 
 def test_output_layout_wiki_block_notes_history_is_global_only():
     body = _read(LAYOUT)
-    sec = section(body, r"^\.oms/wiki/", r"^\.oms/notepad\.md")
+    sec = section(body, r"^\.hq/community/wiki/", r"^\.hq/config/scholar/notepad\.md")
     assert re.search(r"history/.{0,60}global", sec, re.I) or re.search(r"global.{0,60}history/", sec, re.I), \
         "history/ must be annotated as global-level only"
 
 
 def test_output_layout_wiki_block_has_index_line():
     body = _read(LAYOUT)
-    sec = section(body, r"^\.oms/wiki/", r"^\.oms/notepad\.md")
+    sec = section(body, r"^\.hq/community/wiki/", r"^\.hq/config/scholar/notepad\.md")
     assert "INDEX.md" in sec
     assert "scripts/oms_wiki_audit.py --write-index" in sec
     assert "never hand-edited" in sec

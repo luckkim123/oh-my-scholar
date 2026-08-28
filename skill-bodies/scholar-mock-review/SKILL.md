@@ -47,7 +47,7 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 - ⚠️ **Read-only** — the reviewer does not modify .tex/.bib. Adjudication only. Edits go to scholar-revise.
   **Carve-out (verdict history)**: after the Area Chair verdict (Step 3), the orchestrating SKILL flow — **the calling session**, never the dispatched `scholar-reviewer` agent
   (`agents/scholar-reviewer.md:6` sets `disallowedTools: Write, Edit, NotebookEdit`, so an agent-side attempt would silently never write) — appends one
-  dated entry to `.oms/<slug>/reviews-log.md` (create-if-absent, append-only, never touches .tex/.bib). This is
+  dated entry to `.hq/work/scholar/<slug>/reviews-log.md` (create-if-absent, append-only, never touches .tex/.bib). This is
   read-only w.r.t. the paper — the reviews-log append is workbench metadata, not a draft edit, so it does not widen
   the rule above.
 - ⚠️ **3-lens parallel dispatch is safe** — because it is read-only (same as inspect). If cost is a concern, a single reviewer running
@@ -77,7 +77,7 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 4. **Verdict-history append + meta-review (calling session, not the dispatched agent)** — after Step 3's AC synthesis
    completes, the orchestrating SKILL flow itself (**this calling session** — never
    `Task(subagent_type="oh-my-scholar:scholar-reviewer", ...)`, which is read-only) appends one dated entry to
-   `.oms/<slug>/reviews-log.md`: date, venue, lens set, per-axis venue-scale scores, final verdict, top weakness
+   `.hq/work/scholar/<slug>/reviews-log.md`: date, venue, lens set, per-axis venue-scale scores, final verdict, top weakness
    types (one line each, anchors kept), rebuttal flag (`true` when `--with-rebuttal` ran, else `false`) + a
    one-line delta summary when it did — **append-only, create-if-absent**, never touching
    `.tex`/`.bib` (see `references/output-layout.md` §2 for the file's place in the per-slug tree).
@@ -122,7 +122,7 @@ Looking at the same .tex, inspect says "fix this" (on the author's side), while 
 - Calibration note (how accept-bias was corrected)
 - ⚠️ "Mock review — not a replacement for real peer review" disclaimer + novelty-no-access caveat
 - Next-step guidance (revise / verify)
-- Verdict-history log confirmation: `.oms/<slug>/reviews-log.md` entry appended (date/venue/scores/verdict/weakness-types/rebuttal-flag)
+- Verdict-history log confirmation: `.hq/work/scholar/<slug>/reviews-log.md` entry appended (date/venue/scores/verdict/weakness-types/rebuttal-flag)
 - Meta-review report (only when Step 4's gate fires — **at least 3** log entries or explicit user request): recurring
   weakness types, **"always-moderate"** drift flag (if triggered), proposed lens-prompt tweaks — presented at a
   **human gate**, never auto-applied

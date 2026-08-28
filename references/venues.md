@@ -125,6 +125,6 @@ learned_refs: [OBS-0003, OBS-0011]   # provenance: which observation it came fro
 
 ## Notes
 
-- venue files live at `.oms/venues/<key>.yaml` or in the user's project. oms treats this card as the schema SSOT, while the actual values are per-project.
+- venue files live at `.hq/config/scholar/venues/<key>.yaml` or in the user's project. oms treats this card as the schema SSOT, while the actual values are per-project.
 - No absolute-path coupling like `template_dir` is kept here (avoiding paper-write coupling points ①④). A venue is purely declarative constraints.
 - ⭐ **self-specialization**: `specificity`/`origins`/`learned_refs` are the on-disk trace of "the more you use it, the more specialized to this user." The dynamics are owned by `references/learning-protocol.md` (2-channel, promotion criteria, specificity formula) as SSOT. Heavy-channel promotion always goes through the human gate.

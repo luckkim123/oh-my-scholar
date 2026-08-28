@@ -54,10 +54,10 @@ def test_md_stage_skills_have_no_source_folder_misdirection():
 
 
 def test_md_stage_skills_point_to_work_area():
-    """③ 각 `.md`-stage 스킬이 자기 산출물의 작업장 경로(`.oms/<slug>/<folder>`)를 가리킨다.
+    """③ 각 `.md`-stage 스킬이 자기 산출물의 작업장 경로(`.hq/work/scholar/<slug>/<folder>`)를 가리킨다.
 
     올바른 경로의 *존재* 검증 — ②(나쁜 패턴 부재)와 짝."""
     for skill, folder in MD_STAGE.items():
         body = skill_md(skill)
-        assert re.search(rf"\.oms/<slug>/{folder}", body), \
-            f"{skill} 이 작업장 경로 `.oms/<slug>/{folder}` 를 가리키지 않음"
+        assert re.search(rf"\.hq/work/scholar/<slug>/{folder}", body), \
+            f"{skill} 이 작업장 경로 `.hq/work/scholar/<slug>/{folder}` 를 가리키지 않음"

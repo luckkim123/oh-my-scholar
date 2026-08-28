@@ -135,14 +135,14 @@ def test_body_appends_research_log_context_read():
 # =========================================================== output-layout.md §2 / §2.1 / §2.5 / §5 / §6
 def test_layout_tree_has_reading_entry():
     sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
-    assert ".oms/reading/" in sec2
+    assert ".hq/community/reading/" in sec2
     assert "<citekey>.md" in sec2
 
 
 def test_layout_invariance_mentions_reading_sibling_of_wiki():
     sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     inv = layout_section(sec2, r"### 2\.1 Invariance rules", r"### 2\.2")
-    assert ".oms/reading/" in inv
+    assert ".hq/community/reading/" in inv
     assert "sibling of" in inv
 
 
@@ -158,15 +158,15 @@ def test_layout_has_reading_note_format_subsection():
 
 def test_layout_cleanup_table_has_reading_keep_row():
     sec5 = layout_section(LAYOUT, r"^## 5\. Terminal cleanup", r"^## 6\.")
-    reading_lines = [ln for ln in sec5.splitlines() if ".oms/reading" in ln]
-    assert reading_lines, "§5 cleanup table missing .oms/reading/ row"
+    reading_lines = [ln for ln in sec5.splitlines() if ".hq/community/reading" in ln]
+    assert reading_lines, "§5 cleanup table missing .hq/community/reading/ row"
     assert any("KEEP" in ln for ln in reading_lines)
 
 
 def test_layout_checklist_has_reading_row():
     sec6 = layout_section(LAYOUT, r"^## 6\. Implementation checklist", r"\Z")
     assert "scholar-read" in sec6
-    assert ".oms/reading" in sec6
+    assert ".hq/community/reading" in sec6
     assert "calling session" in sec6
 
 
