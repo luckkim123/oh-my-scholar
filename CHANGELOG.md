@@ -98,11 +98,30 @@ window is now closed: the anchor alone decides, for reads and writes alike.
   round-trip pattern already used for `verify_bib_entry.py`/`oms_state.py`,
   applied to the newly-fixed `oms_wiki_audit.py` default.
 
+### Verification
+- `python3.12 -m pytest -q` → **684 passed, 1 skipped**. Baseline before this
+  release: 680 passed, 1 skipped.
+- The 0.20.0 commit message says 682. It is stale, and how it got that way is
+  worth recording: the release was staged and committed while the widened
+  attribute audit was still in flight, so `git add hooks/ scripts/ tests/`
+  swept in the `oms_wiki_audit.py` default-root fix and its two new tests
+  after the number in the message had been measured. The code in the commit is
+  complete and correct — only that one figure lags it. Corrected here rather
+  than by amending a pushed commit: rewriting the history would erase the
+  evidence that it happened.
+
 ### Notes
 - `.oms/` itself is untouched on disk (store-spec §7 stage 3, purge, is a
   separate future release) — this repo's own `.oms/learned.md` and
   `.oms/_backport-design/` stay exactly where they are, now merely visible
   to `git status` instead of ignored.
+- **Correction to 0.19.0's Notes.** That entry kept `state_dir_default_str()`
+  on the stated grounds that "its exact string … is pinned by existing tests".
+  No test calls that function — the claim was checked this round and is false;
+  the only references are in comments. The function is still dead and still
+  kept, but now for the honest reason: it predates this campaign, nothing calls
+  it, and unrelated dead code is not this campaign's to delete. Its own
+  docstring made the same false claim and has been corrected in place.
 
 ## [0.19.0] - 2026-08-28 - the docs name the store they actually live in
 
