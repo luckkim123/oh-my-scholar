@@ -19,7 +19,7 @@ from urllib.parse import quote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_json  # noqa: E402
-from oms_paths import state_dir_default_str  # noqa: E402
+from oms_paths import verified_citations_json_write  # noqa: E402
 
 MATCH_THRESHOLD = 0.75
 NO_DOI_THRESHOLD = 0.9
@@ -169,14 +169,25 @@ def main(argv=None) -> int:
     parser.add_argument("--title", default=None)
     parser.add_argument("--author", default=None)
     parser.add_argument("--record", action="store_true")
-    parser.add_argument("--state-dir", default=state_dir_default_str())
+    parser.add_argument(
+        "--state-dir", default=None,
+        help="defaults to the resolved store path for this project "
+             "(.hq/config/scholar when anchored, .oms/state otherwise)",
+    )
     args = parser.parse_args(argv)
 
     v = verify(args.key, args.doi, args.title, args.author)
     print(f"VERDICT={v.verdict} key={args.key} source={v.source} detail={v.detail}")
 
     if args.record and v.verdict == "VERIFIED":
-        record(args.key, v, state_dir=args.state_dir)
+        state_dir = args.state_dir
+        if state_dir is None:
+            # Gate-aware: an anchored+copied project must land the allowlist
+            # where verified_citations_json()'s read side already looks, or a
+            # freshly-verified key becomes invisible to it (the split-brain
+            # this whole fix closes).
+            state_dir = str(verified_citations_json_write(Path.cwd()).parent)
+        record(args.key, v, state_dir=state_dir)
 
     if v.verdict == "VERIFIED":
         return 0

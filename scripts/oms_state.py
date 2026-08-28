@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_atomic import atomic_write_json  # noqa: E402
-from oms_paths import state_dir_default_str  # noqa: E402
+from oms_paths import state_dir_write  # noqa: E402
 
 STAGES = (
     "research", "deepen", "ideate", "outline", "draft",
@@ -27,6 +27,11 @@ REVISE_STATUSES = ("done", "stopped", "abort")
 MAX_ROUNDS_RANGE = (1, 20)
 TTL_HOURS_RANGE = (1, 168)
 SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
+_STATE_DIR_HELP = (
+    "defaults to the resolved store path for this project "
+    "(.hq/runtime/scholar when anchored, .oms/state otherwise)"
+)
 
 
 def load(state_dir, name) -> dict:
@@ -217,34 +222,40 @@ def main(argv=None) -> int:
     p_write.add_argument("--gate-status", default=None)
     p_write.add_argument("--open-fail-ids", default=None)
     p_write.add_argument("--paper-root", default=None)
-    p_write.add_argument("--state-dir", default=state_dir_default_str())
+    p_write.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     p_read = sub.add_parser("read")
     p_read.add_argument("--slug", default=None)
-    p_read.add_argument("--state-dir", default=state_dir_default_str())
+    p_read.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     p_revise_start = sub.add_parser("revise-start")
     p_revise_start.add_argument("--slug", required=True)
     p_revise_start.add_argument("--max-rounds", type=int, default=5)
     p_revise_start.add_argument("--ttl-hours", type=int, default=6)
     p_revise_start.add_argument("--force-restart", action="store_true")
-    p_revise_start.add_argument("--state-dir", default=state_dir_default_str())
+    p_revise_start.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     p_revise_round = sub.add_parser("revise-round")
     p_revise_round.add_argument("--slug", required=True)
-    p_revise_round.add_argument("--state-dir", default=state_dir_default_str())
+    p_revise_round.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     p_strike = sub.add_parser("strike")
     p_strike.add_argument("--slug", required=True)
     p_strike.add_argument("--defect-id", required=True)
-    p_strike.add_argument("--state-dir", default=state_dir_default_str())
+    p_strike.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     p_revise_end = sub.add_parser("revise-end")
     p_revise_end.add_argument("--slug", required=True)
     p_revise_end.add_argument("--status", default="done")
-    p_revise_end.add_argument("--state-dir", default=state_dir_default_str())
+    p_revise_end.add_argument("--state-dir", default=None, help=_STATE_DIR_HELP)
 
     args = parser.parse_args(argv)
+    if args.state_dir is None:
+        # Gate-aware: unspecified must resolve at call time, not parse-definition
+        # time — the directory is anchor-dependent and split across two layers
+        # in the new store (verified-citations.json vs pilot/revise markers), so
+        # a single literal default cannot name it (store-spec §3, per-file layers).
+        args.state_dir = str(state_dir_write(Path.cwd()))
 
     if args.verb == "write":
         return _cmd_write(args)

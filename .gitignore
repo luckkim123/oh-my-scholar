@@ -12,3 +12,9 @@ outputs/*
 # Claude Code linked worktrees — checkouts of this repo, never repo content.
 # `git add -A` picks them up as gitlinks; 2026-08-25 that shipped 6 of them.
 .claude/worktrees/
+
+# .hq unified store: work/ is regenerable output, runtime/ is session state,
+# locks, logs, and anything sensitive. community/ and config/ stay tracked
+# (store-spec §3, §5). The `**/` prefix is required because anchors nest.
+**/.hq/work/
+**/.hq/runtime/

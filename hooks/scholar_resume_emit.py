@@ -2,9 +2,10 @@
 re-injection (#13) — stdlib, read-only, fail-open.
 
 #9: on any SessionStart (startup/resume/clear/compact), ascend from the payload
-`cwd` to the nearest ancestor `.oms/` (a `.oms/state/` dir or an
-`.oms/notepad.md` — whichever exists first counts as "the root", first hit
-only, never look past it) and summarize any IN-SCOPE non-terminal pilot stage
+`cwd` to the nearest ancestor whose gate-resolved `state/` dir or `notepad.md`
+exists (new-store `.hq/` first, legacy `.oms/` fallback per oms_paths.py —
+whichever exists first counts as "the root", first hit only, never look past
+it) and summarize any IN-SCOPE non-terminal pilot stage
 (`pilot-<slug>.json`, `stage != "terminal"` and `gate_status != "abort"`) plus
 its live revise-loop marker (`revise-<slug>.json`, `active is True` and
 `status == "live"`), if any — same `paper_root`-containment scoping as the
@@ -32,7 +33,8 @@ Silence + exit 0 = nothing to advise — the common case (a plain non-paper
 session) pays zero injection tax, deliberately unlike the route hook.
 
 Read-only: this hook never writes anything (no atomic-write helper import, no
-file writes) — it only reads `.oms/state/*.json` and `.oms/notepad.md`.
+file writes) — it only reads `state/*.json` and `notepad.md`, wherever
+oms_paths.py's gate-aware resolution finds them.
 Fail-open everywhere: missing cwd, unreadable/corrupt state or notepad
 (including notepad-is-a-directory or undecodable bytes) contribute nothing.
 
@@ -47,21 +49,21 @@ import sys
 from pathlib import Path
 
 from oms_paths import nearest_ancestor, notepad_md, state_dir
-from oms_paths import root as oms_root
 
 SECTION_RE = re.compile(r"^## Priority Context\s*\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
 PRIORITY_CONTEXT_CHAR_LIMIT = 2000
 
 
 def nearest_oms_root(cwd: Path):
-    """First ancestor of cwd (inclusive) whose `.oms/` has a `state/` dir or a
-    `notepad.md` (existence only — a corrupt/mistyped notepad still counts as
-    "found"; it just fails open later when actually read), or None."""
-    root = nearest_ancestor(
+    """First ancestor of cwd (inclusive) whose gate-resolved `state/` dir or
+    `notepad.md` exists (existence only — a corrupt/mistyped notepad still
+    counts as "found"; it just fails open later when actually read), or None.
+    Returns the PROJECT ROOT (base), not a store subdirectory — `state_dir()`/
+    `notepad_md()` do their own new-then-legacy resolution from there."""
+    return nearest_ancestor(
         cwd,
         lambda c: state_dir(c).is_dir() or notepad_md(c).exists(),
     )
-    return oms_root(root) if root is not None else None
 
 
 def load_json(path: Path):
@@ -128,8 +130,8 @@ def collect_pilot_lines(state_dir: Path, cwd: Path):
     return lines
 
 
-def read_notepad(oms_dir: Path):
-    path = oms_dir / "notepad.md"
+def read_notepad(base: Path):
+    path = notepad_md(base)
     if not path.is_file():
         return None
     try:
@@ -179,15 +181,15 @@ def main() -> int:
         if not cwd_raw:
             return 0  # cannot scope -- never guess
         cwd = Path(cwd_raw).resolve()
-        oms_dir = nearest_oms_root(cwd)
-        if oms_dir is None:
+        base = nearest_oms_root(cwd)
+        if base is None:
             return 0
 
-        pilot_lines = collect_pilot_lines(oms_dir / "state", cwd)
+        pilot_lines = collect_pilot_lines(state_dir(base), cwd)
 
         priority_body = None
         if payload.get("source") == "compact":
-            priority_body = priority_context_body(read_notepad(oms_dir))
+            priority_body = priority_context_body(read_notepad(base))
 
         context = compose_context(pilot_lines, priority_body)
         if context is None:

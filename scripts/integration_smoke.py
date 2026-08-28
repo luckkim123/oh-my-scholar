@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import oms_doctor  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
-from oms_paths import GITIGNORE_ENTRY, venue_yaml  # noqa: E402
+from oms_paths import GITIGNORE_ENTRY, HQ_GITIGNORE_ENTRY, venue_yaml  # noqa: E402
 from oms_paths import wiki_dir as oms_wiki_dir
 
 REQUIRED_WIKI_CATEGORIES = ("convention", "pattern", "decision", "reference")
@@ -103,8 +103,9 @@ def check_scaffold(workspace_root, slug, venue) -> list:
         rows.append(oms_doctor._row("FAIL", f"{venue_file.relative_to(root)} has no 'key:' line"))
 
     gitignore = root / ".gitignore"
-    if not gitignore.is_file() or GITIGNORE_ENTRY not in gitignore.read_text(encoding="utf-8"):
-        rows.append(oms_doctor._row("FAIL", ".gitignore missing '.oms/' entry"))
+    gi_text = gitignore.read_text(encoding="utf-8") if gitignore.is_file() else ""
+    if GITIGNORE_ENTRY not in gi_text and HQ_GITIGNORE_ENTRY not in gi_text:
+        rows.append(oms_doctor._row("FAIL", ".gitignore missing '.oms/' or '.hq/' entry"))
 
     if not rows:
         rows.append(oms_doctor._row("PASS", f"{slug}/ scaffold matches output-layout.md §2"))

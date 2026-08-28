@@ -1,16 +1,22 @@
-"""Re-entry lint (om* store-unification P2, store-spec.md §9.5): no new code may
-hardcode the `.oms` legacy-root string literal outside `hooks/oms_paths.py` —
-the ONE allowed declaration site (`LEGACY_ROOT`). P2 moved every existing
-inline `.oms`/... computation behind named helpers in that module; this test
-is the guard that stops the literal from creeping back in.
+"""Re-entry lint (om* store-unification P2/P4, store-spec.md §9.5): no new
+code may hardcode EITHER root string literal — the legacy `.oms` or the
+unified `.hq` — outside `hooks/oms_paths.py`, the ONE allowed declaration
+site (`LEGACY_ROOT` / `HQ_ROOT`). P2 moved every existing inline `.oms`/...
+computation behind named helpers in that module; this test is the guard that
+stops the literal from creeping back in.
 
-Exact rule (from the P2 contract):
+P4 widened this from one literal to two. Guarding only the legacy root would
+have left the new root free to spread through the hooks during the very
+refactor that exists to prevent exactly that — the cutover is when a root
+string is most likely to be re-typed, not least.
+
+Exact rule (from the P2 contract, unchanged in shape by the P4 widening):
 - Parse each target `.py` with `ast`; inspect every `ast.Constant` whose
   value is `str` (this also walks `JoinedStr`/f-string literal pieces, since
   `ast.walk` descends into them).
-- VIOLATION = the string contains the root literal (`.oms`) AND contains no
-  whitespace character. A path never has a space; prose always does
-  (".omp/STRUCTURE.md·rules.json 갱신은 " has a space -> not a violation;
+- VIOLATION = the string contains a root literal (`.oms` or `.hq`) AND
+  contains no whitespace character. A path never has a space; prose always
+  does (".omp/STRUCTURE.md·rules.json 갱신은 " has a space -> not a violation;
   ".oms/state/verified-citations.json" has none -> violation).
 - Docstrings are excluded explicitly: the first statement of a Module,
   FunctionDef, AsyncFunctionDef, or ClassDef, when it is `Expr(Constant(str))`.
@@ -36,6 +42,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 LEGACY_ROOT = ".oms"
+HQ_ROOT = ".hq"
+ROOT_LITERALS = (LEGACY_ROOT, HQ_ROOT)
 PATHS_MODULE = ROOT / "hooks" / "oms_paths.py"
 EXCLUDE_TOP_DIRS = {"tests", "references", ".claude", "__pycache__", ".git"}
 
@@ -70,7 +78,11 @@ def _docstring_node_ids(tree: ast.AST) -> set:
     return ids
 
 
-def _violations_in_source(text: str, filename: str = "<string>", root_literal: str = LEGACY_ROOT):
+def _is_violation(value: str) -> bool:
+    return any(r in value for r in ROOT_LITERALS) and not any(ch.isspace() for ch in value)
+
+
+def _violations_in_source(text: str, filename: str = "<string>"):
     """Return [(lineno, string)] violations in `text`. Raises SyntaxError on bad source."""
     tree = ast.parse(text, filename=filename)
     doc_ids = _docstring_node_ids(tree)
@@ -80,7 +92,7 @@ def _violations_in_source(text: str, filename: str = "<string>", root_literal: s
             if id(node) in doc_ids:
                 continue
             s = node.value
-            if root_literal in s and not any(ch.isspace() for ch in s):
+            if _is_violation(s):
                 out.append((node.lineno, s))
     return out
 
@@ -101,8 +113,9 @@ def test_no_legacy_root_reentry():
     violations = []
     for f in _target_files():
         violations.extend(_violations_in_file(f))
-    assert not violations, "legacy root literal (.oms) re-entry outside hooks/oms_paths.py:\n" + "\n".join(
-        f"{p}:{ln}: {s!r}" for p, ln, s in violations
+    assert not violations, (
+        f"root literal ({' or '.join(repr(r) for r in ROOT_LITERALS)}) re-entry outside "
+        "hooks/oms_paths.py:\n" + "\n".join(f"{p}:{ln}: {s!r}" for p, ln, s in violations)
     )
 
 
@@ -135,4 +148,14 @@ def test_meta_function_docstring_is_excluded():
 
 def test_meta_prose_with_space_is_not_a_violation():
     v = _violations_in_source('MSG = "records into .oms/state/verified-citations.json (records)"\n')
+    assert v == []
+
+
+def test_meta_hq_literal_bites():
+    v = _violations_in_source('X = ".hq/config/scholar/learned.md"\n')
+    assert len(v) == 1 and v[0][1] == ".hq/config/scholar/learned.md"
+
+
+def test_meta_hq_prose_with_space_is_not_a_violation():
+    v = _violations_in_source('MSG = "이 앵커는 .hq 루트를 가리킨다"\n')
     assert v == []

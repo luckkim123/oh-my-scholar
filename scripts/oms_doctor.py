@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sync_version  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
-from oms_paths import root as oms_root  # noqa: E402
+from oms_paths import legacy_root as oms_root  # noqa: E402
 
 VALID_MODELS = {"haiku", "sonnet", "opus"}
 LIBRARY_HOOK_MODULES = {"oms_atomic.py"}
