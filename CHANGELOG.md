@@ -4,6 +4,82 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-08-28
+
+Phase 4 of the `.hq/` store unification — oms's cutover. Writes go to `.hq/`
+under an anchored project root; reads resolve new-then-legacy **per file**, so
+a partially-migrated project keeps working. `.oms/` is still read and is not
+deleted (store-spec §7 stage 1).
+
+### Added
+- `hooks/oms_paths.py` — the four-state gate (`gate_state` + `GATE_OFF`/
+  `GATE_LEGACY`/`GATE_NORMAL`/`GATE_CORRUPT`), anchor parsing (`parse_anchor_id`,
+  `AnchorError`, `has_anchor`, `has_legacy_store`, `has_store`), the layer roots
+  (`config_dir`/`community_dir`/`runtime_dir`/`work_dir`, harness slot
+  `scholar`), `migrated_jsonl`, and the read/write resolvers `_read`/`_write`.
+- Per-layer helpers: `learned_md`, `notepad_md`, `venue_yaml`, `workflows_dir`,
+  `verified_citations_json`/`_write`, `state_dir`/`_write`, `wiki_dir`,
+  `reading_dir`, `backport_design_dir`, `slug_dir`, plus `HQ_GITIGNORE_ENTRY`.
+- `tests/test_oms_store_cutover.py` — 23 fixtures: all four gate rows (four
+  corrupt variants + corrupt-beats-legacy), new-path resolution, legacy-only
+  fallback, per-file-not-per-directory fallback, four-branch write gating, the
+  `state/`-splits-across-two-layers pair, and CLI round-trips.
+- `.gitattributes` — `merge=union` on `.hq/config/migrated.jsonl`, an
+  append-only ledger every machine writes to.
+- `.gitignore` — `**/.hq/work/` and `**/.hq/runtime/`; `config/` and
+  `community/` stay tracked.
+
+### Changed
+- **Policy shift, approved at this cutover**: `.oms/` was ignored wholesale, so
+  `learned.md` and `_backport-design/` were invisible to git. Under the new
+  layout `config/` and `community/` are tracked and both are committed
+  (store-spec §5). `learned.md`'s own "gitignored work area" banner was wrong
+  the moment it moved and is corrected in the same change.
+- `.oms/state/` **splits across two layers.** `verified-citations.json` goes to
+  `config/scholar/` because losing it costs a re-verification pass (§3's ⑤(b)),
+  while `pilot-*.json` and `revise-*.json` are session state and go to
+  `runtime/scholar/`. This is the per-file-not-per-directory rule made
+  concrete, and `verified_citations_json()` and `state_dir()` are two separate
+  helpers because of it.
+- `oms_paths.root` renamed to `legacy_root`. The name `root` implied one store.
+- `scholar_resume_emit.nearest_oms_root` returns the project root instead of a
+  joined `.oms/` path; its callers use `notepad_md`/`state_dir`, which are
+  gate-aware. The manual `oms_dir / "state"` join is gone.
+
+### Fixed
+- **`--state-dir`'s literal default made every CLI write bypass the gate.**
+  `verify_bib_entry.py --record` and all six `oms_state.py` subcommands
+  defaulted to the string `./.oms/state`, so on an anchored-and-copied project
+  they wrote to the legacy path while `verified_citations_json()` read the new
+  one — a newly verified citation never reached the allowlist and cite-guard
+  then blocked the very citation that had just been verified. The vault had
+  already reached that state, so this was live, not hypothetical. Both CLIs now
+  default to `None` and resolve through the gate-aware write helpers; an
+  explicit `--state-dir` is still honored verbatim.
+
+  Worth stating plainly: the refactor did not create this. A single default
+  string could name one directory, and P4 split that directory across two
+  layers — the refactor is what made the existing coupling impossible to keep.
+
+### Verification
+- `python3.12 -m pytest -q` → **exit 0, 680 passed, 1 skipped** (exit code read
+  from `$?`, never through a pipe).
+- Every new fixture was **discrimination-checked**: a defect planted, exit 1
+  reproduced, the defect removed, exit 0 reproduced. Eight defects — `_write`
+  collapsed to two branches, `_read` always returning the new path, `gate_state`
+  treating corrupt as legacy, `verified_citations_json` routed per-directory
+  instead of per-file, the lint narrowed back to one literal, a live `.hq` bait
+  literal, and both CLI defaults reverted to the literal string.
+- `tests/test_oms_paths_lint.py` now blocks **both** root literals. Blocking
+  only the old one lets the new one spread during the transition.
+
+### Notes
+- `state_dir_default_str()` is no longer called by either script. It is kept
+  because its exact string (`./.oms/state`, leading `./` included) is pinned by
+  existing tests — a pure `Path` reassembly silently drops that prefix.
+- Prose and prompt-string literals still name `.oms`. That axis is P6 by
+  `finding/011`, deliberately not P4.
+
 
 ## [0.17.0] - 2026-08-28
 

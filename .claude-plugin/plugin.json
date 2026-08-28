@@ -1,6 +1,6 @@
 {
   "name": "oh-my-scholar",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Multi-agent orchestration harness specialized for academic paper work (LaTeX .tex + .bib, concept notes .md) — treats paper writing like code: spec→outline→draft→inspect→verify→revise with citation-integrity guardrails",
   "author": { "name": "kimseungmin" },
   "license": "MIT",
