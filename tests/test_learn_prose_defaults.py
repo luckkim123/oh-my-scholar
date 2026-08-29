@@ -1,9 +1,11 @@
-"""Tests for the learn bifurcation — venue.prose_defaults 승격 + light wiki 이원화.
+"""Tests for the learn bifurcation — venue.prose_defaults 승격 + light 채널 이원화.
 
 배경(2026-06-01): writing-style 규칙(flow/tone)을 venue 기본값으로 승격할 길이 없었다 —
 candidate_default.target enum 이 구조·포맷(required_sections·section_order·self_citation_max_ratio)
 만 허용. 처방(사용자 결정 "강제기본값+light 이원화"): enum 에 venue.prose_defaults 추가(보편
-명제를 venue-강제 승격) + user/venue 특이 표현은 light wiki convention/(advisory). 둘 다 사람 게이트.
+명제를 venue-강제 승격) + user/venue 특이 표현은 light 채널 topic:convention post(advisory).
+둘 다 사람 게이트. (r7 2026-08-30: light 채널 저장 형태가 wiki 페이지트리에서 post 스토어로
+전환됐다 — 이 파일의 검증 대상은 이원화 로직 자체라 영향 없음.)
 
 ⚠️ 회귀: citation/.bib 는 영구 비승격(§6.F). 설계: design.md §3.6.
 """
@@ -30,14 +32,14 @@ def test_venues_schema_has_prose_defaults_and_voice():
 
 
 def test_light_channel_for_user_specific_phrasing():
-    """③ light 채널(wiki convention/) — user/venue 특이 표현은 advisory."""
+    """③ light 채널(topic: convention post) — user/venue 특이 표현은 advisory."""
     body = PROTOCOL.read_text(encoding="utf-8")
-    # 이원화: 보편 명제 = 강제 default / 특이 표현 = light wiki
+    # 이원화: 보편 명제 = 강제 default / 특이 표현 = light 채널
     assert re.search(r"prose_defaults.{0,200}(보편|universal)", body, re.S) or \
         re.search(r"(보편|universal).{0,200}prose_defaults", body, re.S), \
         "prose_defaults 가 *보편 명제* 강제용임이 명시 안 됨"
     assert re.search(r"특이.{0,30}표현|표현 선호|phrasing", body), \
-        "user/venue 특이 표현이 light wiki(advisory)로 간다는 이원화 명시 누락"
+        "user/venue 특이 표현이 light 채널(advisory)로 간다는 이원화 명시 누락"
 
 
 def test_prose_defaults_human_gated():
@@ -57,7 +59,7 @@ def test_citation_permanently_non_promotable_regression():
         "회귀: citation 영구 비승격 규약 사라짐"
     # citation 을 target 으로 명명하면 거부하는 가드 잔존
     assert re.search(r"target.{0,40}citation.{0,40}(거부|reject|forbidden)|citation.*bib.*거부", body, re.S | re.I) or \
-        "citations never enter the wiki" in body, \
+        "citations never enter the post store" in body, \
         "회귀: citation target 거부 가드 사라짐"
 
 

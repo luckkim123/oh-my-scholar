@@ -117,10 +117,11 @@ def test_moderator_move_scans_research_and_reading_notes():
     assert "reading/*.md" in sub
 
 
-# --------------------------------------------------------- exit: wiki decision/ + research-log
-def test_body_writes_wiki_decision_note():
-    assert ".hq/community/wiki/decision/" in BODY
-    assert "create-if-absent" in BODY
+# --------------------------------------------------------- exit: topic:decision post + research-log
+def test_body_writes_decision_post():
+    """Rewired r7 2026-08-30: the exit summary is now `hq post --topic decision`, not an
+    append into `.hq/community/wiki/decision/` (the retired page-tree form)."""
+    assert "hq post --topic decision" in BODY
 
 
 def test_body_wiki_write_has_confidence_frontmatter_and_low_rule():

@@ -96,13 +96,14 @@ misses real ones.
    In `venue-review-forms.md`, check which items this venue uses to view that lens, and note whether that form's
    **per-form calibration table** is populated — this lens issues no number either way (that stays the AC's
    job), but do not imply a calibrated scale exists when the table is empty.
-2) **Query accumulated patterns (wiki_query, 2 tiers)**: with the abstract function `wiki_query(category="convention")`, query reject patterns / review
-   tendencies for the same venue/type accumulated by previous sessions (reflect them if present). The implementation is deterministic 2-tier grep:
-   local (`this paper's cwd/.hq/community/wiki/`) + global (the nearest ancestor `.hq/community/wiki/`, ascent). Mark the source
-   as `[wiki:local]`/`[wiki:global]`. If absent, use your own judgment only (not an error). ⚠️ wiki is a secondary note —
-   not used as a citation source, and citation/.bib is permanently forbidden from global promotion (`references/wiki/README.md`).
-   Also `wiki_query(category="reference")` for a `venue-review-examples-<venue>.md` note (user-collected real
-   reviews for this venue, private, never shipped) — read it when present for calibration tone, same 2-tier
+2) **Query accumulated patterns (`hq query --ascend`)**: run `hq query --keyword <term> --ascend --topic convention --json`
+   to query reject patterns / review tendencies for the same venue/type accumulated by previous sessions (reflect them if
+   present). `--ascend` covers local (`this paper's own .hq/community/posts/`) + global (every ancestor
+   `.hq/community/posts/`) in one call. Mark the source by each result's `anchor`. If absent, use your own judgment only
+   (not an error). ⚠️ a post is a secondary note — not used as a citation source, and citation/.bib is permanently
+   forbidden from global promotion (`references/knowledge/README.md`).
+   Also `hq query --ascend --topic reference --subject venue-review-examples-<venue>` for a post (user-collected real
+   reviews for this venue, private, never shipped) — read it when present for calibration tone, same ascent
    merge, no new mechanism; absent is not an error.
 3) **Lens evaluation — first read**: read the whole paper once from the assigned lens's viewpoint.
 4) **Aspect checklist first (Reviewer2 pattern)**: before writing any strength/weakness, enumerate this venue

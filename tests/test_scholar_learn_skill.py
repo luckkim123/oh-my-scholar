@@ -1,4 +1,6 @@
-"""Tests for the wiki -> reference-card anchoring verb in scholar-learn (R4 #26, Task 6).
+"""Tests for the post store -> reference-card anchoring verb in scholar-learn (R4 #26,
+Task 6; heading/store vocabulary rewired r7 2026-08-30 for the wiki -> post-store form
+change — the verb itself is unchanged).
 
 Background: scholar-learn's <Steps> gains a new Step 6 (after the existing Step 5 commit
 step; the old Step 6 "Follow-up guidance" renumbers to Step 7) — a third lane, separate
@@ -33,7 +35,7 @@ ROOT = Path(__file__).parent.parent
 BODY = skill_md("scholar-learn")
 LEARNING = (ROOT / "references" / "learning-protocol.md").read_text(encoding="utf-8")
 
-STEP6_HEADING = "6. **Wiki → reference-card anchoring"
+STEP6_HEADING = "6. **Post store → reference-card anchoring"
 STEP7_HEADING = "7. **Follow-up guidance"
 OLD_STEP6_HEADING = "6. **Follow-up guidance"
 

@@ -2,7 +2,7 @@
 name: scholar-learn
 description: |
   Observation → venue default promotion (oms's core evolution gate) — during operation, the observations
-  accumulated in `.hq/config/scholar/learned.md` and the auto-accumulated patterns in `.hq/community/wiki/` are reviewed read-only
+  accumulated in `.hq/config/scholar/learned.md` and the auto-accumulated patterns in `.hq/community/posts/` are reviewed read-only
   by scholar-inspector to judge which ones qualify for promotion into the enforced defaults of
   `references/venues.md` (required sections, ordering, self-cite caps, etc.). The heavy channel (defaults)
   must always pass a human approval gate, and each promotion raises venue specificity, advancing one step from

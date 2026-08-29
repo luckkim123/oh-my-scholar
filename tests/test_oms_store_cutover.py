@@ -39,9 +39,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "hooks"))
 from oms_paths import (  # noqa: E402
     GATE_CORRUPT, GATE_LEGACY, GATE_NORMAL, GATE_OFF, AnchorError,
-    gate_state, learned_md, notepad_md, parse_anchor_id, state_dir,
+    gate_state, learned_md, notepad_md, parse_anchor_id, posts_dir, state_dir,
     state_dir_write, venue_yaml, verified_citations_json,
-    verified_citations_json_write, wiki_dir,
+    verified_citations_json_write,
 )
 
 
@@ -59,7 +59,6 @@ def _load_script(name: str):
 
 vbe = _load_script("verify_bib_entry")
 oms_state_mod = _load_script("oms_state")
-oms_wiki_audit_mod = _load_script("oms_wiki_audit")
 
 
 def _seed_anchor(base, text="id: fixture\n"):
@@ -83,7 +82,7 @@ def _seed_migrated(base):
     venues = cfg / "venues"
     venues.mkdir(parents=True, exist_ok=True)
     (venues / "generic.yaml").write_text("key: x\n", encoding="utf-8")
-    (base / ".hq" / "community" / "wiki").mkdir(parents=True, exist_ok=True)
+    (base / ".hq" / "community" / "posts").mkdir(parents=True, exist_ok=True)
     rt = base / ".hq" / "runtime" / "scholar"
     rt.mkdir(parents=True, exist_ok=True)
     (rt / "pilot-demo.json").write_text("{}", encoding="utf-8")
@@ -141,25 +140,48 @@ def test_every_helper_resolves_to_the_new_store_when_migrated(tmp_path):
     assert notepad_md(tmp_path) == hq / "config/scholar/notepad.md"
     assert verified_citations_json(tmp_path) == hq / "config/scholar/verified-citations.json"
     assert venue_yaml(tmp_path, "generic") == hq / "config/scholar/venues/generic.yaml"
-    assert wiki_dir(tmp_path) == hq / "community/wiki"
+    assert posts_dir(tmp_path) == hq / "community/posts"
     assert state_dir(tmp_path) == hq / "runtime/scholar"
 
 
 def test_every_helper_falls_back_when_only_the_legacy_store_exists(tmp_path):
+    """posts_dir() is deliberately absent from this batch — r7 (2026-08-30) gave it
+    no legacy fallback at all (spec: "wiki_dir() 게터를 posts_dir() 로 교체 (legacy
+    fallback 없음)"), unlike every other helper here. Its own behavior is covered by
+    test_posts_dir_has_no_legacy_fallback below."""
     _seed_legacy(tmp_path)
     (tmp_path / ".oms" / "learned.md").write_text("# l\n", encoding="utf-8")
     (tmp_path / ".oms" / "venues").mkdir()
     (tmp_path / ".oms" / "venues" / "generic.yaml").write_text("key: x\n", encoding="utf-8")
     (tmp_path / ".oms" / "state" / "verified-citations.json").write_text(
         '{"keys": {}}', encoding="utf-8")
-    (tmp_path / ".oms" / "wiki").mkdir()
     legacy = tmp_path / ".oms"
     assert learned_md(tmp_path) == legacy / "learned.md"
     assert notepad_md(tmp_path) == legacy / "notepad.md"
     assert verified_citations_json(tmp_path) == legacy / "state/verified-citations.json"
     assert venue_yaml(tmp_path, "generic") == legacy / "venues/generic.yaml"
-    assert wiki_dir(tmp_path) == legacy / "wiki"
     assert state_dir(tmp_path) == legacy / "state"
+
+
+def test_posts_dir_has_no_legacy_fallback(tmp_path):
+    """r7 (2026-08-30): posts_dir() always resolves to `.hq/community/posts` — anchored
+    or not, migrated or not. A store still holding wiki pages under `.oms/wiki/` (or
+    `.hq/community/wiki/`) converts once with omo's convert-wiki-form.py rather than
+    being read in place; posts_dir() itself never looks at either legacy location."""
+    hq_posts = tmp_path / ".hq" / "community" / "posts"
+
+    # no anchor, no legacy store at all
+    assert posts_dir(tmp_path) == hq_posts
+
+    # legacy store present, unanchored — still resolves to .hq/, unlike every
+    # other helper's fallback-to-legacy behavior
+    _seed_legacy(tmp_path)
+    (tmp_path / ".oms" / "wiki").mkdir()
+    assert posts_dir(tmp_path) == hq_posts
+
+    # anchored — same answer, now for the ordinary reason
+    _seed_anchor(tmp_path)
+    assert posts_dir(tmp_path) == hq_posts
 
 
 def test_read_resolves_to_new_store_even_when_only_legacy_exists_once_anchored(tmp_path):
@@ -319,25 +341,13 @@ def test_verify_bib_entry_explicit_state_dir_still_respected(tmp_path, monkeypat
     assert json.loads(untouched.read_text(encoding="utf-8")) == {"keys": {}}
 
 
-# --- the same CLI gap, a second script: oms_wiki_audit.py's --root default --
-# Found in the store-spec §7 stage 2 sweep: `oms_wiki_audit.py` still called
-# the now-removed `wiki_dir_default_str()` for its `--root` default, the
-# literal legacy string, unconditionally -- verify_bib_entry.py/oms_state.py
-# had already been fixed to this pattern, this script had not.
-
-def test_oms_wiki_audit_default_root_resolves_new_when_migrated(tmp_path, monkeypatch):
-    _seed_migrated(tmp_path)
-    monkeypatch.chdir(tmp_path)
-    assert oms_wiki_audit_mod.main(["--write-index"]) == 0
-    target = wiki_dir(tmp_path) / "INDEX.md"
-    assert target == tmp_path / ".hq/community/wiki/INDEX.md"
-    assert target.is_file()
-
-
-def test_oms_wiki_audit_default_root_resolves_legacy_without_anchor(tmp_path, monkeypatch):
-    (tmp_path / ".oms" / "wiki").mkdir(parents=True)
-    monkeypatch.chdir(tmp_path)
-    assert oms_wiki_audit_mod.main(["--write-index"]) == 0
-    target = wiki_dir(tmp_path) / "INDEX.md"
-    assert target == tmp_path / ".oms/wiki/INDEX.md"
-    assert target.is_file()
+# test_oms_wiki_audit_default_root_resolves_new_when_migrated and
+# test_oms_wiki_audit_default_root_resolves_legacy_without_anchor removed (r7,
+# 2026-08-30): both exercised `scripts/oms_wiki_audit.py`'s own `--root` default
+# against `wiki_dir()`'s gate-aware resolution -- the exact "a script's own CLI
+# default silently diverges from the shared helper" defect class the section above
+# this one guards against. The script is `git rm`'d with the retired wiki form, and
+# `posts_dir()` has no gate-aware resolution left to diverge from (see
+# test_posts_dir_has_no_legacy_fallback above) -- nothing in this repo still owns a
+# `--root`/`--state-dir`-style flag whose default could drift from `posts_dir()`, so
+# this defect class has no successor to test for.

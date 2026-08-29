@@ -1,7 +1,7 @@
 """R6 U3 (#37) — tests for `scripts/bib_coupling.py` (stdlib, zero-network,
 zero-embeddings bibliographic coupling over per-paper `.bib` reference lists).
 
-Import-under-test idiom matches `tests/test_oms_wiki_audit.py` (importlib
+Import-under-test idiom matches `tests/test_oms_state.py` (importlib
 loader off the file path, not a package import).
 """
 import importlib.util

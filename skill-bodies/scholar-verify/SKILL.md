@@ -54,7 +54,7 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
      - **Uncited-claim scan (WARN)**: claim-shaped sentences without \cite — WARN list, human judges (never auto-cite).
      - **Blind-review anonymization (WARN)**: only when the mapped venue form/venues.md indicates double-blind — grep for `\author`/`\thanks`/acknowledgment blocks, self-identifying phrases, non-anonymized repo/grant IDs. No such indication → N/A. WARN with locations, never auto-edits.
      - **Venue meta consistency (read-only)**: specificity ↔ origin ↔ learned_refs integrity (mismatch = WARN, not repaired)
-     - **Open wiki gaps (WARN — family wiki-status convention)**: if a wiki root exists (check first — the script exits 2 rather than reporting N/A on a missing root), run `python3 scripts/oms_wiki_audit.py --root <wiki-root>` and read its `open_gaps` dimension (equivalently `grep -rlE '^status:\s*open-gap' <wiki-root>`). Every note flagged `status: open-gap` must be either addressed in this draft or explicitly deferred in the verdict — an open gap left silent (neither) is a WARN, not a clean PASS. This is the carry-forward boundary: a reviewer/audit finding recorded in the wiki cannot drop out of the next submission without a human deciding to defer it. WARN only (does not count toward FAIL); N/A if no wiki root exists.
+     - **Open post-store gaps (WARN — family status convention)**: enumerate open corrections with `hq query --keyword open-gap --ascend --json` (hq's `status:` enum has no `open-gap` value, so the marker rides in `--keywords open-gap` at post time; a result whose own `status` field already reads `resolved` is closed, not open). Every open one must be either addressed in this draft or explicitly deferred in the verdict — an open gap left silent (neither) is a WARN, not a clean PASS. This is the carry-forward boundary: a reviewer/audit finding recorded in the post store cannot drop out of the next submission without a human deciding to defer it (close it with `hq edit --status resolved`). WARN only (does not count toward FAIL); no ancestor anchor or no matches → N/A.
 3. Receive the verifier output — collate per-item PASS/FAIL.
 4. If there are FAIL items, classify by fixable_by_llm:
    - fixable_by_llm=true → can be passed to scholar-revise
@@ -65,13 +65,13 @@ Inspect drafted/revised .tex/.bib through a mechanical pass/fail gate. Delegate 
    - does each `learned`-origin item have `learned_refs` provenance (§6.C no silent changes)
    - on mismatch, **WARN only** — not FAIL. ⚠️ verify only **reads** the meta, never repairs it
      (meta repair is `scholar-learn`'s human-gate job). Same as the auto-fix-forbidden principle.
-7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline, claim-faithfulness, uncited-claim scan, blind-review anonymization, open wiki gaps) does not count toward FAIL** — reported only, human judgment).
+7. Output the final verdict (PASS: all items pass / FAIL: number of failed items. **WARN (meta consistency, abstract discipline, claim-faithfulness, uncited-claim scan, blind-review anonymization, open post-store gaps) does not count toward FAIL** — reported only, human judgment).
 
 **Categorized report (#34 preflight-style)**: scholar-verifier's per-item report reads as a submission checklist — the same PASS/FAIL/WARN rows are grouped under 5 fixed category headers (language / citations / formatting-metadata / tables-figures / declarations), each showing the worst severity among its rows. Presentation only — no check is added, removed, or reweighted, except the new blind-review anonymization (WARN) check, which lands under `declarations` and only runs for venues the mapped venue form/venues.md marks double-blind.
 </Steps>
 
 <Output>
-- Per-item results, grouped under 5 categories (language / citations / formatting-metadata / tables-figures / declarations) with a worst-severity roll-up per category (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), uncited-claim scan, venue meta, blind-review anonymization (double-blind venues only), open wiki gaps PASS/WARN)
+- Per-item results, grouped under 5 categories (language / citations / formatting-metadata / tables-figures / declarations) with a worst-severity roll-up per category (compilation, numbers, references, terminology, placeholder, citation each PASS/FAIL + evidence; abstract discipline, claim-faithfulness (quote anchor stance), uncited-claim scan, venue meta, blind-review anonymization (double-blind venues only), open post-store gaps PASS/WARN)
 - FAIL item details: evidence (log line, grep result, file:line) + fixable_by_llm classification
 - List of unverified citations (no auto-fix — human confirmation only)
 - Final verdict: **PASS** (all items pass) or **FAIL** (N items failed)

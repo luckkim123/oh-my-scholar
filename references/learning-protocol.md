@@ -4,8 +4,8 @@ This card is the single source of truth for **how oms gets smarter about *how th
 writes papers* the more it is used**. It is the oms-domain backport of omp's identity card:
 shipped generic, specialized in place. Every skill or agent that reads, writes, or promotes
 paper-writing knowledge MUST obey this card — `scholar-learn`, the `scholar-inspector`
-agent (read-only judgment reuse), `scholar-pilot`'s wiki-capture step, and the `wiki/`
-accumulation behavior.
+agent (read-only judgment reuse), `scholar-pilot`'s post-capture step, and the
+`.hq/community/posts/` accumulation behavior.
 
 > **Identity in one line.** oms ships as a *generic* paper harness (same logic for everyone)
 > and becomes *specialized* purely through accumulated knowledge about this user's venues and
@@ -40,7 +40,7 @@ it pays a human gate; patterns and decisions are cheap memory, so they accumulat
                 │                                                             │
         ── HEAVY CHANNEL (gated) ──                              ── LIGHT CHANNEL (no gate) ──
                 │                                                             │
-   learned.md  ──> scholar-learn ──> scholar-inspector          wiki/<cat>/*.md  (auto-append)
+   learned.md  ──> scholar-learn ──> scholar-inspector          posts/  (hq post, auto)
    (observation     (promotion       (read-only judgment)               │
     accrues)         skill)               │                      next session: deterministic
                 │                          ▼                      grep recall (no model search)
@@ -71,44 +71,44 @@ the human gate plus `scholar-learn`'s write step perform the write. (Design §8 
 approval ≠ enforcement — the three-way separation that forbids self-approval.)
 
 > **Third lane — reference-card anchoring.** A separate, human-gated verb promotes a mature
-> *global*-wiki cluster into a `references/` card (not a `venues.md` default) — distinct from
-> both venue-default promotion above and the local→global wiki elevation (§1.4). Trigger, verb,
+> *global*-post cluster into a `references/` card (not a `venues.md` default) — distinct from
+> both venue-default promotion above and the local→global post elevation (§1.4). Trigger, verb,
 > and dev-mode guard live in `scholar-learn`'s Step 6 (`skill-bodies/scholar-learn/SKILL.md`) —
 > not restated here.
 
-### Light channel — PATTERNS / DECISIONS (`wiki/*.md` auto-append, grep recall, no gate)
+### Light channel — PATTERNS / DECISIONS (`hq post` auto-post, `hq query` recall, no gate)
 
 A **pattern or decision** is a note about how this user works that is useful to *remember* but
 is not an enforceable default: "the user reviews the conclusion first", "prefers terse prose",
-"this framing of the contribution landed well". These are cheap. They auto-append to
-`.hq/community/wiki/<category>/*.md` during any stage, with **no approval gate**, and are recalled next
-session by **deterministic grep** over `wiki/` (§5). A wiki note is *context*, never an
-enforced default — it can inform a future default proposal, but it cannot itself change what a
-stage assumes. That promotion (wiki insight → candidate default) only happens by re-entering
-the heavy channel through `learned.md`.
+"this framing of the contribution landed well". These are cheap. They are auto-posted via
+`hq post --topic <category>` into `.hq/community/posts/` during any stage, with **no approval
+gate**, and are recalled next session by **deterministic `hq query --ascend`** (§5). A post is
+*context*, never an enforced default — it can inform a future default proposal, but it cannot
+itself change what a stage assumes. That promotion (post insight → candidate default) only
+happens by re-entering the heavy channel through `learned.md`.
 
-### ⭐ Light-channel categories (4: the `pattern/` category is the oms/omd addition)
+### ⭐ Light-channel topics (4 local: the `pattern` topic is the oms/omd addition)
 
-omp's light channel had `convention/decision/reference`. oms adds **`pattern/`** — notes about
-the *user as a person* (how they work), distinct from `convention/` (how the *output* looks):
+omp's light channel had `convention/decision/reference`. oms adds **`pattern`** — notes about
+the *user as a person* (how they work), distinct from `convention` (how the *output* looks):
 
-| category | holds | heavy-promotion candidate? |
+| `topic:` | holds | heavy-promotion candidate? |
 |:---|:---|:---|
-| `convention/` | how the output looks (section order, caption style) | **yes** — the source of heavy candidates |
-| `pattern/` | how the user works (`work-profile.md`, `working-style.md`, `preferences.md`) | **no** — disposition is not enforceable; light only |
-| `decision/` | decisions made + rationale, what worked well | no |
-| `reference/` | pointers to external material | no |
+| `convention` | how the output looks (section order, caption style) | **yes** — the source of heavy candidates |
+| `pattern` | how the user works (`work-profile`, `working-style`, `preferences` subjects) | **no** — disposition is not enforceable; light only |
+| `decision` | decisions made + rationale, what worked well | no |
+| `reference` | pointers to external material | no |
 
-`pattern/` is light-only on purpose: a *disposition* ("prefers terse", "reviews conclusion
+`pattern` is light-only on purpose: a *disposition* ("prefers terse", "reviews conclusion
 first") is advice every stage reads to tune tone/depth, not a default to enforce. Only
-`convention/` observations escalate to `learned.md`.
+`convention` observations escalate to `learned.md`.
 
 ### Channel routing rule (which channel does an observation take?)
 
 | The observation… | Channel | Why |
 |:---|:---|:---|
 | could be auto-applied by a future stage (venue required sections, ordering, self-cite ceiling) | **Heavy** (`learned.md`) | silently shapes future papers → needs the gate |
-| is a fact, rationale, disposition, or decision worth remembering but not enforcing | **Light** (`wiki/`) | cheap memory → no gate |
+| is a fact, rationale, disposition, or decision worth remembering but not enforcing | **Light** (`hq post`) | cheap memory → no gate |
 | is ambiguous | **default to Light**, and let a human or a later `scholar-learn` pass escalate it into `learned.md` | safer to remember-without-enforcing than to enforce-without-asking |
 
 ### Capturing USER feedback (the most important, most-missed trigger)
@@ -131,8 +131,9 @@ running skill — capture it the same turn, before moving on:
    ordering, a self-cite ceiling) → **Heavy**: append an `OBS-NNNN` block to `learned.md`
    (§2 format) with `source_stage: feedback` and `user_stated: true`. A working
    habit / disposition / decision that no stage can mechanically enforce ("reviews conclusion
-   first", "prefers terse") → **Light**: append to the relevant `wiki/pattern/*.md` or
-   `wiki/decision/*.md` (dated section, append-only). Ambiguous → default Light.
+   first", "prefers terse") → **Light**: `hq post --topic pattern ...` or
+   `hq post --topic decision ...` (a fresh post; a follow-up sighting supersedes rather than
+   overwrites). Ambiguous → default Light.
 2. **⭐ user_stated bypasses the confidence gate, NOT the human gate (resolves review #1).** A
    `user_stated: true` candidate is promoted to the **human gate with `evidence_count: 1`** —
    it does NOT need the §3.1 three-repetition bar, because the user *directly stated* the rule,
@@ -146,35 +147,37 @@ running skill — capture it the same turn, before moving on:
 4. **Do it without being asked.** Writing the note is part of honoring the correction. Paper
    knowledge goes to *this harness's* `.hq/`, never to a distributed/user-scope config.
 
-### 1.4 Two wiki levels — local (this paper) vs global (parent `.hq/`)
+### 1.4 Two post-store levels — local (this paper) vs global (ancestor `.hq/`)
 
-The light channel `wiki/` exists at **two levels**, both `.hq/`-relative (no absolute path,
-no env var, no XDG — preserves "never to a distributed/user-scope config" above):
+The light channel `.hq/community/posts/` exists at **two levels**, reached by `hq query --ascend`
+(no absolute path, no env var, no XDG — preserves "never to a distributed/user-scope config"
+above):
 
-- **Local** = `<cwd>/.hq/community/wiki/` — knowledge specific to *this paper* (its reject patterns,
-  its decisions). Stays with the paper.
-- **Global** = the nearest **ancestor `.hq/community/wiki/`** found by ascent (cwd → parent, first
-  `.hq/` excluding self; git's `.git`-lookup pattern) — assets this *user* reuses across
-  **every** paper. Discovered, not configured: when the user runs from a papers-parent folder
-  (e.g. their workspace), that folder's `.hq/` is the global level.
+- **Local** = `<cwd>/.hq/community/posts/` — knowledge specific to *this paper* (its reject
+  patterns, its decisions). Stays with the paper.
+- **Global** = every **ancestor `.hq/community/posts/`** the ascent reaches (cwd → parent,
+  every `.hq/` above, nearest first; git's `.git`-lookup pattern, but walking every anchor
+  rather than stopping at the first) — assets this *user* reuses across **every** paper.
+  Discovered, not configured: when the user runs from a papers-parent folder (e.g. their
+  workspace), that folder's `.hq/` is a global level.
 
 **What may rise to global** (the only things that leak upward — this is how the anti-pattern is
 honored, not violated): reusable assets only —
 
-| category | global-eligible | why |
+| `topic:` | global-eligible | why |
 |:---|:---:|:---|
-| `pattern/` (disposition: phrasing, structure, working style, preferences) | ✅ light-only, never enforced | identity, doesn't change per paper |
-| `convention/` (venue format, section structure) | ✅ via human gate (§6.B) | reused per venue |
-| **writing-craft split** (writing rules) | universal proposition → `venue.prose_defaults` ✅ via human gate (§6.B); user/venue-specific *phrasing preference* → `pattern/` light-only | a universal proposition (old→new, em-dash cap, etc.) is promoted to a venue-enforced default / specific phrasing is advisory. Rule body SSOT = `writing-craft.md` (do not re-list here) |
-| `decision/` (reusable decision: "always ablation first") | ✅ | meta-decisions across papers |
-| `history/` (my paper history) | ✅ (global-only category) | init uses it to relate/dedup new papers |
+| `pattern` (disposition: phrasing, structure, working style, preferences) | ✅ light-only, never enforced | identity, doesn't change per paper |
+| `convention` (venue format, section structure) | ✅ via human gate (§6.B) | reused per venue |
+| **writing-craft split** (writing rules) | universal proposition → `venue.prose_defaults` ✅ via human gate (§6.B); user/venue-specific *phrasing preference* → `pattern` light-only | a universal proposition (old→new, em-dash cap, etc.) is promoted to a venue-enforced default / specific phrasing is advisory. Rule body SSOT = `writing-craft.md` (do not re-list here) |
+| `decision` (reusable decision: "always ablation first") | ✅ | meta-decisions across papers |
+| `history` (my paper history) | ✅ (global-only topic) | init uses it to relate/dedup new papers |
 | this paper's topic/gap | ❌ stays local | paper-specific, not reusable |
 | **citation / `.bib`** | ❌ **permanently forbidden** | hallucination risk — §6.F invariant, never promoted to global |
 
 The global level is *the parent folder's `.hq/`* (still work-root-relative), **not** a
 distributed config — and only reusable assets cross up. Paper-specific knowledge and citations
-stay local/forbidden. `wiki_query` merges both levels (`references/wiki/README.md`), tagging
-`[wiki:local]`/`[wiki:global]`; the call site never changes.
+stay local/forbidden. `hq query --ascend` merges every level (`references/knowledge/README.md`),
+tagging each result with its `anchor`; the call site never changes.
 
 ---
 
@@ -188,7 +191,7 @@ Each observation is one block:
 ```
 ## OBS-<NNNN>  <one-line summary>
 - id: OBS-<NNNN>
-- channel: default                   # always 'default' in learned.md (light notes go to wiki/)
+- channel: default                   # always 'default' in learned.md (light notes go to posts/)
 - status: candidate | promoted | rejected | superseded
 - scope: global | <venue-key>        # ⭐ global = this user's universal habit; <venue-key> = per-venue
 - pattern: <precise, testable statement of the regularity>
@@ -261,8 +264,9 @@ observation against **all** of the following. A candidate is promotable to the h
    human gate at `evidence_count: 1`. No other path skips repetition.
 2. **No counter-examples.** `counter_examples == 0`. A single paper that breaks the pattern
    means it is not yet a default — it is a tendency. Counter-examples block promotion outright;
-   they are not outweighed by a high evidence count. (Computed from `wiki/convention/` scan,
-   the oms equivalent of omp's wiki_lint contradiction check.)
+   they are not outweighed by a high evidence count. (Computed from a
+   `hq query --topic convention --ascend` scan, the oms equivalent of omp's wiki-lint
+   contradiction check.)
 3. **Not user-overridden.** `user_overridden == false`. If the user ever rejected this, oms
    does not keep re-proposing it. The user's "no" is durable.
 4. **Stability over time.** `first_seen`/`last_seen` should span more than a single session
@@ -331,43 +335,50 @@ specificity number that changed with no recorded cause is a §6.C violation.
 
 ---
 
-## 5. The obsidian / second-brain analogy (wiki = grep-recalled notes)
+## 5. The obsidian / second-brain analogy (posts = `hq query`-recalled notes)
 
 oms's light channel is a second brain modeled on Obsidian — same as omp §5:
 
-- **`wiki/<category>/*.md` = a note.** Stages auto-append observations/decisions/dispositions.
-- **`[[backlinks]]` = cross-references**, plain text — no database, no index to corrupt.
-- **grep = recall.** Next session oms runs **deterministic grep** (CJK bi-gram included) over
-  `wiki/` for terms relevant to the current paper, injecting matches as context. Reproducible,
-  inspectable, no embedding drift. The second brain remembers *only what was written*, recalls
-  *only by literal match*.
+- **A `hq post` = a note.** Stages auto-post observations/decisions/dispositions; a follow-up
+  sighting of the same subject supersedes rather than appends into an existing file.
+- **`subject:` chains = cross-references**, resolved by `hq` — no database, no index to corrupt.
+- **`hq query --ascend` = recall.** Next session oms runs **deterministic keyword matching**
+  (CJK bi-gram included) over the post store for terms relevant to the current paper, injecting
+  matches as context. Reproducible, inspectable, no embedding drift. The second brain remembers
+  *only what was written*, recalls *only by literal match*.
 
-### ⭐ confidence on wiki notes (OMC backport — H6)
+### ⭐ confidence on posts (OMC backport — H6)
 
-Wiki notes carry a frontmatter `confidence: high | med | low`. When a stage re-observes the
-same pattern, the note's confidence rises (`low → med → high`) and on merge oms **keeps the
-higher** confidence (never downgrades on a weaker re-sighting). This repeated-sighting climb is
-the light-channel echo of omp's `evidence_count`, and it is what feeds the heavy gate: a
-`convention/` note reaching **`confidence: high`** is the signal that an `OBS` for it has likely
-hit `evidence_count ≥ 3` and is worth a `scholar-learn` look. confidence is qualitative (3
-levels + sighting count) — **no numeric weighted sum, no threshold magic** (omp §exclude).
+Every post carries `confidence: high | medium | low | none`. When a stage re-observes the same
+pattern, it posts a follow-up (`hq post --subject <key> --supersedes <prior-id>`) whose
+confidence has climbed (`low → medium → high`); the poster **never lowers confidence from the
+current chain head** on a weaker re-sighting (there is no automatic "keep the higher" merge —
+`hq` always makes the newest post canonical, so carrying the higher confidence forward is the
+poster's discipline, not the store's). This repeated-sighting climb is the light-channel echo
+of omp's `evidence_count`, and it is what feeds the heavy gate: a `convention` post reaching
+**`confidence: high`** is the signal that an `OBS` for it has likely hit `evidence_count ≥ 3`
+and is worth a `scholar-learn` look. confidence is qualitative (3 levels + chain length) —
+**no numeric weighted sum, no threshold magic** (omp §exclude).
 
-> **Syntax SSOT**: the frontmatter's exact shape (flat `key: value`, required `confidence`+`sightings` for new notes, optional one-line `keywords`) is specified in `references/wiki/README.md` § Frontmatter standard — this section covers only what `confidence` means and how it climbs.
+> **Syntax SSOT**: `hq` owns the post frontmatter shape (store-spec §4) — there is no separate
+> syntax card in this plugin to keep in sync. This section covers only what `confidence` means
+> and how it climbs.
 
-**Wiki notes are append-only.** A revisited topic deepens (old note + new dated `## <ISO> —
-<one-line>` section coexist); whole-file overwrite is reserved for paired SSOT docs, never a
-wiki note. The light channel accrues, never replaces — same discipline as `learned.md` (§2).
+**Posts are immutable, and the light channel is append-only at the store level.** A revisited
+topic gets a new post (`--supersedes` the prior head) rather than an in-place rewrite; the chain
+IS the deepening, in place of the old wiki form's "old note + new dated section coexist" idiom.
+The light channel accrues, never replaces — same discipline as `learned.md` (§2).
 
-**A wiki note pairs its conclusion with the load-bearing evidence that produced it** — the
+**A post pairs its conclusion with the load-bearing evidence that produced it** — the
 concrete instance, the contrast case, or an *internal* pointer to where in the user's own work
 to re-look (a paper-slug / section), so a later session need not re-read the original to recover
-the rationale. A label-only note ("X uses a stage axis") forces a costly re-read next session;
+the rationale. A label-only post ("X uses a stage axis") forces a costly re-read next session;
 the reusable knowledge is the evidence behind the label ("X groups two independent contributions
 across stage chapters — see `<slug>` ToC"). This is a **recommendation**, not the §6.E
 hard-evidence gate of the heavy channel: the light channel's value is being cheap and
-frictionless (§1), so missing evidence does not reject the note — it just makes it weaker. The
+frictionless (§1), so missing evidence does not reject the post — it just makes it weaker. The
 "internal pointer" is navigation within the user's work (which slug/section to revisit), **never a
-`.bib` citation** (§6.F invariant holds — citations never enter the wiki).
+`.bib` citation** (§6.F invariant holds — citations never enter the post store).
 
 ---
 
@@ -376,7 +387,8 @@ frictionless (§1), so missing evidence does not reject the note — it just mak
 Hard prohibitions. oms's value collapses if any is violated.
 
 ### A. No embedding / semantic search for recall
-Recall over `wiki/` and `learned.md` is **deterministic grep only** (CJK bi-gram). No vector
+Recall over `.hq/community/posts/` and `learned.md` is **deterministic keyword matching only**
+(CJK bi-gram, `hq query`). No vector
 search, embeddings, or similarity-ranked retrieval. Embedding recall can surface a note that
 does not literally support a claim — the same hallucination/citation-unsafe failure mode oms
 exists to prevent. oms recalls *exactly and only* what was written.
@@ -395,7 +407,7 @@ with no provenance, or a specificity that moved with no recorded cause, is a vio
 `scholar-verify` should flag it (H10).
 
 ### D. (Corollary) No enforcement from the light channel
-A `wiki/` note MUST NOT be treated as an enforceable default. To enforce, escalate to
+A post MUST NOT be treated as an enforceable default. To enforce, escalate to
 `learned.md` and pass the gate (§B).
 
 ### E. (Corollary) No fabricated evidence
@@ -407,7 +419,7 @@ papers to reach `≥3`, and does not "round up" a count.
 candidates**. A `candidate_default.target` naming `citation`/`bib`/a specific reference is
 **rejected at the schema level** (not in the allowed target enum). Citations live only in the
 `.tex`/`.bib` SSOT of a paper-slug; they never become a learned default and never enter the
-wiki. This is the load-bearing oms invariant — violating it makes oms citation-unsafe.
+post store. This is the load-bearing oms invariant — violating it makes oms citation-unsafe.
 
 > **External justification (why this invariant is not overkill)**: a citation being merely
 > "real (correctness)" is not enough — if the model did not actually rely on that document but
@@ -417,20 +429,21 @@ wiki. This is the load-bearing oms invariant — violating it makes oms citation
 > Even a state-of-the-art autonomous paper system (Zochi) deliberately keeps citation formatting
 > human-in-the-loop ([intology.ai/blog/zochi-acl](https://www.intology.ai/blog/zochi-acl)).
 > oms's refusal to auto-promote or auto-fix citations is in line with the field. (Full external
-> landscape: global wiki `reference/llm-paper-writing-landscape.md`.)
+> landscape: the global post store's `topic: reference`, `subject: llm-paper-writing-landscape` post.)
 
 ---
 
 ## 7. End-to-end trace (how one learned default happens)
 
 1. **operation** — the user writes 3 IROS papers. Each time `scholar-inspect` flags "no
-   ablation section" and the user adds one. `scholar-pilot`'s wiki-capture appends to
-   `.hq/community/wiki/convention/iros-*.md`; by the 3rd, the note's `confidence` reaches `high`. In
-   parallel, the disposition "reviews conclusion first" lands in `wiki/pattern/working-style.md`
-   (light, no gate).
+   ablation section" and the user adds one. `scholar-pilot`'s post-capture posts
+   `hq post --topic convention --subject iros-reject-patterns` each time (a fresh post
+   superseding the last), raising `--confidence` on each; by the 3rd it reaches `high`. In
+   parallel, the disposition "reviews conclusion first" lands as a `topic: pattern`,
+   `subject: working-style` post (light, no gate).
 2. **observation** — the same pattern is staged in `learned.md` as `OBS-0003`, `scope: iros`,
    `candidate_default: {target: venue.required_sections, value: +Ablation}`, evidence_count 3,
-   counter_examples 0 (no IROS paper omitted it — `wiki/convention/` scan).
+   counter_examples 0 (no IROS paper omitted it — `hq query --topic convention --ascend` scan).
 3. **learn** — `scholar-learn` runs. `scholar-inspector` (read-only) checks §3: count ≥ 3 ✓,
    counter-examples 0 ✓, not user-overridden ✓, stable across sessions ✓, no contradiction ✓.
    It drafts the `venues.md` edit + specificity bump + provenance, **stops at the gate**.
@@ -446,7 +459,7 @@ wiki. This is the load-bearing oms invariant — violating it makes oms citation
 
 ## 8. SSOT reading order (read before you write or critique)
 
-This card is about *learned* knowledge (the wiki/venues channels). But the same trust model
+This card is about *learned* knowledge (the posts/venues channels). But the same trust model
 applies to a paper's **own SSOT** — the per-project authority files that say what this paper
 *currently* is. Skills that write (`scholar-draft`, `scholar-revise`) or critique
 (`scholar-inspect`, `scholar-verify`) MUST read the SSOT *first*, in this priority order,
@@ -480,15 +493,15 @@ outline contradicts.
 - **The outline is the chapter-axis authority.** When a 2nd-tier note's section number
   disagrees with the outline, the outline wins; the note is stale.
 
-(This is the per-project mirror of the wiki/venues trust model: 1st-tier SSOT is to a single
+(This is the per-project mirror of the posts/venues trust model: 1st-tier SSOT is to a single
 paper what `venues.md` defaults are to the user's whole corpus.)
 
 ---
 
 ## See also
 
-- `references/output-layout.md` — where `.hq/` files live; the paper-slug / wiki layout.
+- `references/output-layout.md` — where `.hq/` files live; the paper-slug / post-store layout.
 - `references/venues.md` — the human venue catalog (heavy-channel promotion target).
-- `references/wiki/README.md` — light-channel categories + append/confidence discipline.
+- `references/knowledge/README.md` — light-channel topics + post/confidence discipline.
 - omp `references/learning-protocol.md` — the upstream this is backported from (same two-channel
   design, human gate, grep recall; omp promotes file-rules, oms promotes venue-defaults).

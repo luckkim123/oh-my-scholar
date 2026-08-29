@@ -76,10 +76,6 @@ def _write_scaffold(root, slug, venue):
     (slug_dir / "preamble.tex").write_text("", encoding="utf-8")
     (slug_dir / f"{slug}.tex").write_text("", encoding="utf-8")
 
-    wiki_dir = root / ".oms" / "wiki"
-    for cat in ("convention", "pattern", "decision", "reference"):
-        (wiki_dir / cat).mkdir(parents=True)
-
     venues_dir = root / ".oms" / "venues"
     venues_dir.mkdir(parents=True)
     (venues_dir / f"{venue}.yaml").write_text("key: generic\n", encoding="utf-8")
@@ -103,13 +99,12 @@ def test_check_scaffold_missing_file_fails(tmp_path):
     assert "refs/paper.bib" in fails[0]["message"]
 
 
-def test_check_scaffold_history_dir_present_fails(tmp_path):
-    _write_scaffold(tmp_path, "oms-smoke-test", "generic")
-    (tmp_path / ".oms" / "wiki" / "history").mkdir(parents=True)
-
-    rows = ism.check_scaffold(tmp_path, "oms-smoke-test", "generic")
-    fails = [r for r in rows if r["status"] == "FAIL"]
-    assert any("history" in r["message"] for r in fails)
+# test_check_scaffold_history_dir_present_fails removed (r7, 2026-08-30): it asserted
+# check_scaffold() FAILs when a post-store `history/` category directory was created
+# locally. scholar-init no longer scaffolds ANY `.hq/community/posts/` shape — `hq post`
+# creates the store lazily on first write — so check_scaffold() dropped the whole
+# wiki_dir/REQUIRED_WIKI_CATEGORIES check block it depended on (integration_smoke.py).
+# There is no longer a "wrong directory was created" failure mode to test for.
 
 
 # ------------------------------------------------------------------ run_preflight

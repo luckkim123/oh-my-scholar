@@ -38,9 +38,6 @@ import oms_doctor  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooks"))
 from oms_paths import GITIGNORE_ENTRY, HQ_GITIGNORE_ENTRY, venue_yaml  # noqa: E402
-from oms_paths import wiki_dir as oms_wiki_dir
-
-REQUIRED_WIKI_CATEGORIES = ("convention", "pattern", "decision", "reference")
 
 
 # ------------------------------------------------------------ transcript parsing
@@ -89,13 +86,9 @@ def check_scaffold(workspace_root, slug, venue) -> list:
             rel = path.relative_to(root)
             rows.append(oms_doctor._row("FAIL", f"missing required path: {rel}"))
 
-    wiki_dir = oms_wiki_dir(root)
-    for cat in REQUIRED_WIKI_CATEGORIES:
-        if not (wiki_dir / cat).is_dir():
-            rows.append(oms_doctor._row("FAIL", f"missing required path: {(wiki_dir / cat).relative_to(root)}"))
-    if (wiki_dir / "history").exists():
-        rows.append(oms_doctor._row(
-            "FAIL", f"{(wiki_dir / 'history').relative_to(root)} must not be created locally (Step 6)"))
+    # r7 (2026-08-30): scholar-init no longer scaffolds a post-store directory at all —
+    # `.hq/community/posts/` needs no pre-created shape, `hq post` creates it lazily on
+    # the paper's first write. There is nothing left here to assert exists or doesn't.
 
     venue_file = venue_yaml(root, venue)
     if not venue_file.is_file():

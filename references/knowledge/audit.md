@@ -1,25 +1,26 @@
-# Wiki Audit — health-check procedure (mechanical script + judgment lenses)
-> Consumer: any session asked to "audit the wiki." Two halves: `scripts/oms_wiki_audit.py` does the mechanical half (§1); an LLM auditor does the judgment half (§2-§3) by following this procedure. Detection only — §5 is binding on both halves.
+# Knowledge Store Audit — health-check procedure (mechanical verbs + judgment lenses)
+> Consumer: any session asked to "audit the post store." Two halves: `hq lint`/`hq query` do the mechanical half (§1); an LLM auditor does the judgment half (§2-§3) by following this procedure. Detection only — §5 is binding on both halves.
 
-Ported from the workspace source workflow (`.oms/workflows/wiki-audit.js`) that originated this audit as five LLM-run dimensions. Three of those five are now pure code (dangling refs, duplicate section tokens, empty/orphan — plus frontmatter validity and INDEX drift, added when the script was written); this card covers only the two that remain judgment-bound.
+Ported from the workspace source workflow (`.oms/workflows/wiki-audit.js`) that originated this audit as five LLM-run dimensions. Three of those five (dangling refs, duplicate section tokens, empty/orphan — plus frontmatter validity and INDEX drift) described the retired wiki page-tree's *shape* and had no equivalent once the form changed (r7, 2026-08-30 — see `references/knowledge/README.md`); this card covers only the two dimensions that were never about page-tree shape and remain judgment-bound.
 
 ---
 
-## §1. Run the script (mechanical half)
+## §1. Run the mechanical verbs
 
 ```
-python3 <plugin>/scripts/oms_wiki_audit.py --root <wiki-tree>
+hq lint
+hq query --ascend --json          # spot-check the two-level merge actually answers
 ```
 
-- `.hq/community/wiki/` exists at two levels (`references/wiki/README.md`'s local + global model) and the script takes exactly one `--root` per invocation — no ascent built in. Run it **once per level**: once against the local `.hq/community/wiki/`, once against the parent global `.hq/community/wiki/` (found by ascent, same discovery method as `wiki_query`).
-- `--write-index` regenerates `<root>/INDEX.md` — a derived artifact, never hand-edited. Run it only *after* the findings from a plain run have been reviewed, not blind.
-- Exit codes: `0` clean, `1` a FAIL-severity mechanical finding exists, `2` `--root` does not exist or another usage error.
-- The script's `--help` and module docstring are the SSOT for what the mechanical dimensions check and how each is defined — this card does not re-list them.
-- **Ambiguous-stem token grammar (boundary note, T8 #3)**: a section token is the first whitespace-delimited word of a `^##+ ` heading, one trailing `.`/`:` stripped, then required to `re.fullmatch(§?[A-Z][0-9]*[a-z]?)` against the *whole* remainder. `H.` and `H-contrast.` never collide — `H-contrast` fails the fullmatch (hyphen + multi-char suffix isn't a token at all), so it is simply not extracted. `F1` and `F1b` never collide either — the optional trailing lowercase letter is part of the token string itself, not stripped, so the two strings are already distinct before comparison. Only an exact string match after this normalization counts as a duplicate-token finding.
+- `hq lint` reports the store invariants a page-tree audit used to check by hand: post ids, supersede-chain integrity, `topic`/`confidence`/`status` enum membership, and uncounted review comments. It walks every anchor from the resolved root, so there is no "once per level" step to remember — unlike the retired script's `--root`, `hq` itself owns ascent.
+- `hq query --ascend --json` (optionally `--topic <category>`) is the retrieval sanity check — confirm a term you expect to be findable actually comes back, tagged with the right `anchor`.
+- `.hq/community/INDEX.md` is generated automatically on every `hq post`/`hq edit` — there is no `--write-index` step to run by hand any more.
+- Exit codes (`hq lint`): `0` clean, `1` an error-severity finding exists.
+- `hq lint`'s own source (`skills/harness/hq/verbs.py::lint`) is the SSOT for what each mechanical check does — this card does not re-list them.
 
 ## §2. Judgment dimension A — SSOT-delegation integrity
 
-This wiki's design is directed SSOT delegation: a file says "X is the SSOT for topic T, I only add Y" and links to X. Two defects only a reader can find:
+This documentation corpus's design is directed SSOT delegation: a file says "X is the SSOT for topic T, I only add Y" and links to X. Two defects only a reader can find:
 
 - **Broken delegation** — file A delegates topic T to file B, but B no longer covers T (B was trimmed or refocused since the delegation was written).
 - **Cyclic delegation** — A says "B is SSOT for T" and B says "A is SSOT for T" (no real owner).
@@ -30,7 +31,7 @@ This is the subtle dimension — be rigorous, cite evidence, and **do not flag a
 
 ## §3. Judgment dimension B — strength-tag discipline
 
-⚠️ **CALIBRATION — read this before auditing (the rule's exact wording governs, established 2026-06-02).** The wiki's own quality rule (`convention/writing-guide/README.md` "강도 표기 규율") reads:
+⚠️ **CALIBRATION — read this before auditing (the rule's exact wording governs, established 2026-06-02).** The store's own quality rule (a `convention` post, historically at `wiki/convention/writing-guide/README.md` before the r7 form change — "강도 표기 규율") reads:
 
 > `[N편공통]` — N편에서 반복 관찰 (2편 이상이라야 진짜 패턴).
 > ⚠️ 1편에서만 본 걸 "공통"이라 쓰지 않는다 (품질 검수 통과 기준).
@@ -54,6 +55,6 @@ Generalize this: when a dimension's findings diverge from what you expected goin
 
 ## §5. Detection-only discipline
 
-The audit **never edits the wiki.** Repair is a separate, human-decided lane (same split as `omp-audit` vs `omp-organize`). The one write path anywhere in this procedure is `--write-index` (§1) — that is generated-artifact regeneration, not repair, and it stays opt-in and post-review.
+The audit **never edits the post store.** Repair is a separate, human-decided lane (same split as `omp-audit` vs `omp-organize`). `.hq/community/INDEX.md` regeneration (§1) is the one write path anywhere near this procedure — it happens automatically inside `hq post`/`hq edit`, not as a step this audit performs.
 
 Findings are ranked **high / medium / low** and each carries `file:line` evidence quoting the offending text — never a paraphrase. If a dimension turns up nothing, report an empty findings list; do not invent defects to look productive.

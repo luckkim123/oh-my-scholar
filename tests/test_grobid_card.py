@@ -1,6 +1,6 @@
 """Tests for the GROBID intake reference card (R6 U2 #36) — references/grobid-intake.md.
 
-Same genre as `references/wiki/audit.md` (E2): a standalone reference card
+Same genre as `references/knowledge/audit.md` (E2): a standalone reference card
 documenting an optional accelerator's contract. House convention (see
 test_wiki_audit_card.py): plain asserts on file text, content-token locks.
 

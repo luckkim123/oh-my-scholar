@@ -291,8 +291,11 @@ def test_layout_checklist_has_mock_review_row():
     assert "calling session" in sec6
 
 
-def test_layout_wiki_block_untouched_by_this_task():
-    """Task 3's territory — this task must not touch the .hq/community/wiki/ tree block."""
-    idx = LAYOUT.index(".hq/community/wiki/")
-    wiki_block = LAYOUT[idx: idx + 400]
-    assert "reviews-log.md" not in wiki_block
+def test_layout_posts_block_untouched_by_this_task():
+    """Task 3's territory — this task must not touch the .hq/community/posts/ tree block
+    (rewired r7 2026-08-30: the block used to read `.hq/community/wiki/` before the
+    page-tree form retired; the boundary this test locks — reviews-log.md is not part
+    of that block — is unchanged)."""
+    idx = LAYOUT.index(".hq/community/posts/")
+    posts_block = LAYOUT[idx: idx + 400]
+    assert "reviews-log.md" not in posts_block

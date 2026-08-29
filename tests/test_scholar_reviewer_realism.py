@@ -11,9 +11,10 @@ synthesis), and (3) an optional, off-by-default ensemble-variance move (AC may r
 one extra independent sample of a single borderline lens and report agreement/divergence
 instead of silently averaging). `references/rubrics/venue-review-forms.md` gains a
 per-form "Score bands" slot (empty band/meaning/source template — never prefilled
-numbers), with a one-line pointer from `references/venues.md`. `references/wiki/README.md`
-documents a `reference/venue-review-examples-<venue>.md` few-shot convention that lens
-mode reads via the existing 2-tier `wiki_query` contract (no new mechanism).
+numbers), with a one-line pointer from `references/venues.md`. `references/knowledge/README.md`
+documents a `topic: reference`, `subject: venue-review-examples-<venue>` few-shot convention that lens
+mode reads via the existing `hq query --ascend` contract (no new mechanism; rewired r7
+2026-08-30 from the retired wiki page-tree form's 2-tier `wiki_query`).
 
 ⚠️ Deliberate phrasing constraint (plan acceptance criterion): `git grep -i "score band"`
 must hit only the rubrics card, venues.md's pointer, and tests — NOT
@@ -31,7 +32,7 @@ ROOT = Path(__file__).parent.parent
 REVIEWER_AGENT = (ROOT / "agents" / "scholar-reviewer.md").read_text(encoding="utf-8")
 RUBRICS = (ROOT / "references" / "rubrics" / "venue-review-forms.md").read_text(encoding="utf-8")
 VENUES = (ROOT / "references" / "venues.md").read_text(encoding="utf-8")
-WIKI_README = (ROOT / "references" / "wiki" / "README.md").read_text(encoding="utf-8")
+WIKI_README = (ROOT / "references" / "knowledge" / "README.md").read_text(encoding="utf-8")
 
 UNCALIBRATED_DISCLAIMER = "no calibration data — uncalibrated venue-scale estimate"
 # Matches the disclaimer even when line-wrapped (a literal newline instead of a space
@@ -115,19 +116,19 @@ def test_reviewer_agent_never_says_literal_score_band_phrase():
     assert "calibration table" in REVIEWER_AGENT
 
 
-# --------------------------------------------------------- few-shot review examples (wiki reference/)
-def test_reviewer_agent_reads_few_shot_wiki_reference_note():
-    assert 'venue-review-examples-<venue>.md' in REVIEWER_AGENT
-    assert 'wiki_query(category="reference")' in REVIEWER_AGENT
+# --------------------------------------------------------- few-shot review examples (post store topic: reference)
+def test_reviewer_agent_reads_few_shot_reference_post():
+    assert 'venue-review-examples-<venue>' in REVIEWER_AGENT
+    assert 'hq query --ascend --topic reference' in REVIEWER_AGENT
 
 
-def test_wiki_readme_documents_few_shot_review_examples_slot():
-    assert "venue-review-examples-<venue>.md" in WIKI_README
+def test_knowledge_readme_documents_few_shot_review_examples_slot():
+    assert "venue-review-examples-<venue>" in WIKI_README
     assert "private" in WIKI_README
-    idx = WIKI_README.index("venue-review-examples-<venue>.md")
+    idx = WIKI_README.index("venue-review-examples-<venue>")
     window = WIKI_README[idx: idx + 400]
     assert "never shipped" in window
-    assert "wiki_query" in window
+    assert "hq query --ascend" in window
 
 
 # --------------------------------------------------------- rubrics doc: Score bands template

@@ -46,13 +46,13 @@ llm_policy:       # this venue's LLM-use policy (drafter proposes disclosure, ve
                  #   {author_responsible: true, llm_authorship: forbidden, citation_verification: required, prompt_injection: forbidden, disclosure: required|optional}
                  #   ⚠️ self-verified grade — venue policies are updated yearly, so *cross-check against the policy source text before submission*.
                  #   Basis (2026-06 survey): NeurIPS 2025/ICML 2026/ICLR — LLM authorship forbidden + authors responsible for verifying every citation's existence and accuracy,
-                 #   ICML explicitly forbids prompt injection. Source: neurips.cc/Conferences/2025/LLM. Landscape in the global wiki reference.
+                 #   ICML explicitly forbids prompt injection. Source: neurips.cc/Conferences/2025/LLM. Landscape in the global post store's `reference` topic.
                  #   oms use: draft proposes an LLM-use acknowledgment in the produced paper (CLASSICA 3 criteria: verification, substantive contribution, transparency); verify reminds of "author responsibility to verify every citation."
 review_weights:  # {logic: 1.0, prose: 0.8, ...} inspect weights
 voice:           # active | passive | mixed — voice preference (STEM default mixed: passive for method, active for contributions). Rule SSOT = writing-craft.md §5
 prose_defaults:  # list of *universal writing propositions* enforced for this venue (scholar-learn promotions). e.g. [old_new_flow, em_dash_cap]
                  #   Values are only the *keys* of writing-craft.md rules — the rule bodies are owned by writing-craft.md as SSOT (do not re-list here).
-                 #   user/venue-specific *expression preferences* go to wiki pattern/ (light, advisory), not here (learning-protocol dual-track).
+                 #   user/venue-specific *expression preferences* go to a `topic: pattern` post (light, advisory), not here (learning-protocol dual-track).
                  #   exemplars: paths to ~5 randomly chosen representative paragraphs for style imitation (no similarity-curated/embedding selection — writing-craft.md §6).
 
 # ── ⭐ self-specialization meta (H5 — heavy-channel backport, 2026-05-31) ──

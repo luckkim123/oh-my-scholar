@@ -29,7 +29,7 @@ Turn "let's argue this out" into a structured pressure-test of an idea — a dev
 - ⚠️ **No subagent dispatch** — the whole discussion runs interactively in the calling session. There is no `Task(...)` call anywhere in this skill; invariant 1 (single careful generation, parallel reading only) is untouched because discuss generates no content to parallelize in the first place.
 - ⚠️ **Personas are self-contained restatements, not shared code** (D3) — the Contrarian / Simplifier / Ontologist prompts below are restated here, adapted for standing on-demand debate. Provenance: the original ambiguity-gated version of these three stances lives in `scholar-deepen` Round 4/6/8. This skill does **not** import, extract, or edit that file (`scholar-deepen/SKILL.md` is on the do-not-touch list) — deepen's gate semantics (triggered only on an ambiguous dimension) differ from discuss's on-demand semantics, so a shared personas card would blur two different lanes.
 - ⚠️ **Outline deltas: proposed, never applied** (D9) — if the discussion surfaces a structural change worth folding into the outline, it is presented as an explicit numbered list at a human gate. It is **never auto-applied** to a GATE1-approved outline. This is deliberately more conservative than "appends to the living outline" would be — auto-mutating a GATE1-approved artifact from a discussion session would breach invariant 5 (human gates never automated away).
-- ⚠️ **Wiki write is light-channel, append-only** — the exit summary goes to `.hq/community/wiki/decision/<slug>.md` (create-if-absent, never overwritten) with the standard R4 frontmatter (`confidence: high|med|low`, `sightings: <int>`). A summary with no source pointer and no verbatim quote anchor is still appended, but at `confidence: low` with an `(evidence: none — add a pointer before confidence can rise)` marker — the same append-time rule scholar-pilot Step 10 applies (#24, `references/wiki/README.md` § confidence frontmatter). No embeddings anywhere (invariant 3): both writing and any later recall of this note stay deterministic grep.
+- ⚠️ **Post write is light-channel, append-only** — the exit summary is posted via `hq post --topic decision --subject <slug>` (a fresh post; a genuine update goes through `--supersedes`) with the standard R4 frontmatter (`confidence: high|med|low`, `sightings: <int>`). A summary with no source pointer and no verbatim quote anchor is still posted, but at `--confidence low` with an `(evidence: none — add a pointer before confidence can rise)` marker — the same append-time rule scholar-pilot Step 10 applies (#24, `references/knowledge/README.md` § confidence). No embeddings anywhere (invariant 3): both writing and any later recall of this post stay deterministic grep.
 </Execution_Policy>
 
 <Steps>
@@ -44,14 +44,14 @@ Turn "let's argue this out" into a structured pressure-test of an idea — a dev
 3. **Moderator move (Co-STORM)**: maintain an in-session gap list — evidence rows that are present in `.hq/work/scholar/<slug>/research/*.md` or `.hq/community/reading/*.md` but absent from both the discussion transcript so far and the outline. When a round closes, or the discussion stalls, inject the single highest-information-gain unasked question drawn from that gap list before starting the next round. This list is transient (in-conversation only) — it is not written to disk as a separate artifact.
 
 4. **Exit**: summarize what was explored (stances taken, positions that moved, positions that held) and (both appends below are skipped when there is no active paper slug to attach them to — a bare-idea discussion ends with the in-session summary only):
-   - append a dated entry to `.hq/community/wiki/decision/<slug>.md` (create-if-absent) — light channel, `confidence`/`sightings` frontmatter per Execution_Policy above
+   - `hq post --topic decision --subject <slug>` (a fresh post) — light channel, `confidence`/`sightings` frontmatter per Execution_Policy above
    - append one dated entry to `.hq/work/scholar/<slug>/research-log.md` (`## YYYY-MM-DD — discuss`, create-if-absent, append-only, `references/output-layout.md` §2.4) covering what was tried/decided/dropped in this discussion and why
    - if a structural change to the outline was surfaced, present it as a proposed numbered delta list at a human gate — never auto-applied (D9)
 </Steps>
 
 <Output>
 - An in-session discussion transcript (stances explored, questions raised, positions that moved or held)
-- One dated `.hq/community/wiki/decision/<slug>.md` entry (`confidence`/`sightings` frontmatter; `confidence: low` when the summary carries no pointer or quote — #24)
+- One `topic: decision` post for `<slug>` (`confidence`/`sightings` frontmatter; `confidence: low` when the summary carries no pointer or quote — #24)
 - One dated `.hq/work/scholar/<slug>/research-log.md` entry (context `discuss`)
 - (optional) a proposed outline-delta list, presented at a human gate — never auto-applied to the outline
 - ⚠️ No `.tex`, no `.bib`, no citations, and no subagent dispatch anywhere in this skill.

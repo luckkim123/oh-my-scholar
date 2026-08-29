@@ -4,7 +4,7 @@ directory-ascent helper `nearest_ancestor` (R2/R-debt unification; om*
 store-unification P2/P4, store-spec.md §9.5).
 
 Every derived path hooks/scripts compute (learned.md, notepad.md, state/,
-wiki/, venues/*.yaml, ...) is named here once. Callers never join a root
+posts/, venues/*.yaml, ...) is named here once. Callers never join a root
 literal themselves; a re-entry lint (tests/test_oms_paths_lint.py) fails the
 build if either literal appears anywhere outside this file.
 
@@ -257,8 +257,20 @@ def state_dir_write(base: Path) -> Path:
 
 # --- community/ layer ---------------------------------------------------------
 
-def wiki_dir(base: Path) -> Path:
-    return _resolve(base, community_dir(base) / "wiki", legacy_root(base) / "wiki")
+def posts_dir(base: Path) -> Path:
+    """The community post store — what `wiki_dir()` used to point at.
+
+    The wiki form is retired (r7, 2026-08-30, user decision: "wiki 는 아예
+    없애는 걸로. Wiki 폴더 안만들게"). This is not a rename: the old getter
+    resolved a directory that, measured across every anchor on this machine,
+    held zero pages while `posts/` next to it held 127/33/17 — and the
+    routing checkpoint this module feeds named that empty directory as the
+    knowledge SSOT on every turn.
+
+    There is no legacy fallback. `legacy_root(base)/"wiki"` was the pre-`.hq`
+    location of the retired form, and a store still holding it converts with
+    `convert-wiki-form.py` (omo) rather than being read in place."""
+    return community_dir(base) / "posts"
 
 
 def reading_dir(base: Path) -> Path:

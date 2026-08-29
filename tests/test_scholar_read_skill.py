@@ -2,7 +2,8 @@
 
 Background: a 13th skill turning "read this paper for me" into a structured, citation-safe
 reading note at `.oms/reading/<citekey>.md` (D1) — a personal reading corpus that outlives any
-one paper project, sibling of `.oms/wiki/`, strictly separate from this project's own citation
+one paper project, sibling of `.hq/community/posts/` (formerly `.oms/wiki/` — the wiki
+page-tree form retired r7, 2026-08-30), strictly separate from this project's own citation
 pipeline (invariant 2: reading notes are NEVER a `.bib` source; the only door into the
 bibliography stays scholar-research → human-confirmed `.bib`). Single dispatch only (invariant 1)
 to `scholar-researcher` `mode="deep-read"` — a new mode alongside the existing default
@@ -139,7 +140,7 @@ def test_layout_tree_has_reading_entry():
     assert "<citekey>.md" in sec2
 
 
-def test_layout_invariance_mentions_reading_sibling_of_wiki():
+def test_layout_invariance_mentions_reading_sibling_of_posts():
     sec2 = layout_section(LAYOUT, r"^## 2\. Fixed directory structure", r"^## 3\.")
     inv = layout_section(sec2, r"### 2\.1 Invariance rules", r"### 2\.2")
     assert ".hq/community/reading/" in inv

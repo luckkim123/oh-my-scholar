@@ -1,22 +1,24 @@
-"""Tests for the wiki-audit procedure card (R4 #23) — references/wiki/audit.md.
+"""Tests for the knowledge-store audit procedure card (R4 #23, rewired r7 2026-08-30)
+— references/knowledge/audit.md.
 
-The card is the companion to `scripts/oms_wiki_audit.py` (Task 1, mechanical
-dimensions). It carries the PROCEDURE: how to run the script, plus the two
-JUDGMENT dimensions (SSOT-delegation integrity, strength-tag discipline)
-that require reading meaning and cannot be scripted, ported faithfully from
-the source workflow (`workspace/.oms/workflows/wiki-audit.js`), including
-the strength-tag calibration block and the generalized calibration lesson.
+Background: the wiki page-tree form was retired (r7, user decision: "wiki 는 아예
+없애는 걸로. Wiki 폴더 안만들게"), and `scripts/oms_wiki_audit.py` (the script this
+card's old §1 pointed at) was deleted with it — verified by running it: from any live
+anchor it exits non-zero with `--root '.../community/wiki' does not exist`. The card's
+§1 (mechanical half) is rewritten to point at `hq lint`/`hq query --ascend` instead of
+the retired script's `--root`/`--write-index` flags. §2-§4 (SSOT-delegation integrity,
+strength-tag discipline, the calibration lesson) are judgment dimensions that never
+described page-tree shape — they survive close to verbatim, just with `references/wiki/`
+path pointers updated to `references/knowledge/`.
 
-House convention (see test_writing_craft_card.py): plain asserts on file
-text, content-token locks. No duplicate-embedding check — the card must
-point to the script's docstring/--help and references/wiki/README.md for
-the mechanical dimension definitions rather than re-listing them.
+House convention (see test_writing_craft_card.py): plain asserts on file text,
+content-token locks.
 """
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-CARD = ROOT / "references" / "wiki" / "audit.md"
+CARD = ROOT / "references" / "knowledge" / "audit.md"
 
 
 def _body():
@@ -24,13 +26,18 @@ def _body():
 
 
 def test_card_exists():
-    assert CARD.exists(), "references/wiki/audit.md missing — wiki-audit procedure card"
+    assert CARD.exists(), "references/knowledge/audit.md missing — knowledge-store audit procedure card"
+
+
+def test_old_card_location_gone():
+    assert not (ROOT / "references" / "wiki").exists(), \
+        "references/wiki/ must be gone — the store retired the page-tree form (git mv to references/knowledge/)"
 
 
 def test_title_line():
     """Line 1 matches house card title convention: `# <Title> — <subtitle>`."""
     lines = _body().splitlines()
-    assert lines[0].startswith("# Wiki Audit — "), f"line 1 must match '^# Wiki Audit — ', got: {lines[0]!r}"
+    assert lines[0].startswith("# Knowledge Store Audit — "), f"line 1 must match '^# Knowledge Store Audit — ', got: {lines[0]!r}"
 
 
 def test_consumer_blockquote():
@@ -39,16 +46,36 @@ def test_consumer_blockquote():
     assert lines[1].startswith("> "), f"line 2 must be a '> ' consumer blockquote, got: {lines[1]!r}"
 
 
-def test_section1_points_to_the_script_not_a_restatement():
-    """§1 gives real run instructions (--root, --write-index, once per level)
-    and points to the script rather than re-listing its mechanical dimensions."""
+# --------------------------------------------------------- §1: mechanical half rewired to hq verbs
+def test_section1_no_longer_names_the_retired_script():
+    """The retired script must not be named as a live instruction — it's `git rm`'d.
+    `--root` may still appear in prose explaining the change (e.g. "unlike the retired
+    script's --root, hq owns ascent"), so this only locks the *command fence* — the
+    actual run instructions — never invokes the retired script or its flags."""
     body = _body()
-    assert "oms_wiki_audit.py" in body
-    assert "--root" in body
-    assert "--write-index" in body
-    assert "once per level" in body
+    assert "oms_wiki_audit.py" not in body, \
+        "scripts/oms_wiki_audit.py was git rm'd (r7) — the card must not instruct running it"
+    fence = re.search(r"```\n(.*?)```", body, re.S).group(1)
+    assert "--root" not in fence, "the command fence must not instruct the retired --root flag"
+    assert "--write-index" not in fence, \
+        "the command fence must not instruct the retired --write-index flag"
 
 
+def test_section1_points_to_hq_lint_and_query():
+    """§1 gives real run instructions for the mechanical verbs that replaced the script."""
+    body = _body()
+    assert "hq lint" in body
+    assert "hq query" in body
+    assert "--ascend" in body
+
+
+def test_section1_index_is_automatic():
+    body = _body()
+    assert re.search(r"INDEX\.md.{0,60}automatic", body, re.I | re.S) or \
+        re.search(r"automatic.{0,60}INDEX\.md", body, re.I | re.S)
+
+
+# --------------------------------------------------------- §2: SSOT-delegation (survives)
 def test_section2_ssot_delegation_dimension():
     """§2 — SSOT-delegation integrity: broken + cyclic delegation, ported
     from the source workflow prompt (quote the delegating sentence, verify
@@ -61,6 +88,7 @@ def test_section2_ssot_delegation_dimension():
         "must preserve 'do not flag a healthy one-directional delegation' guidance"
 
 
+# --------------------------------------------------------- §3: strength-tag discipline (survives)
 def test_section3_strength_tag_calibration_exact_wording_governs():
     """§3 — strength-tag discipline WITH the calibration block ported
     verbatim in substance: the rule's exact wording governs."""
@@ -68,7 +96,7 @@ def test_section3_strength_tag_calibration_exact_wording_governs():
     assert "strength-tag" in body
     assert re.search(r"exact wording governs", body, re.I), \
         "calibration rule 'the rule's exact wording governs' must be preserved"
-    assert "[N편공통]" in body, "quoted Korean rule text must stay verbatim (quotes the live wiki's own rule)"
+    assert "[N편공통]" in body, "quoted Korean rule text must stay verbatim (quotes the rule's own wording)"
     assert "1편에서만 본 걸 공통이라 쓰지 않는다" in body or "1편에서만 본 걸 \"공통\"이라 쓰지 않는다" in body
 
 
@@ -96,6 +124,7 @@ def test_section3_one_reminder_per_file_not_per_tag():
     assert re.search(r"not (one )?per tag", body, re.I)
 
 
+# --------------------------------------------------------- §4: calibration lesson (survives)
 def test_section4_calibration_lesson_generalized():
     """§4 — the generalized calibration lesson: when a dimension's findings
     diverge from expectation, audit the criteria first, then the corpus."""
@@ -104,22 +133,21 @@ def test_section4_calibration_lesson_generalized():
     assert "2026-06-02" in body, "must cite the 2026-06-02 incident as the worked example"
 
 
+# --------------------------------------------------------- §5: detection-only (rewired: "wiki" -> "post store")
 def test_section5_detection_only_discipline():
-    """§5 — the audit NEVER edits the wiki; findings ranked high/medium/low
+    """§5 — the audit NEVER edits the post store; findings ranked high/medium/low
     with file:line evidence."""
     body = _body()
-    assert re.search(r"never edits the wiki", body, re.I)
+    assert re.search(r"never edits the post store", body, re.I)
     assert re.search(r"high\s*/\s*medium\s*/\s*low|high/medium/low", body, re.I)
     assert "file:line" in body
 
 
-def test_no_duplicate_embedding_of_mechanical_dimension_definitions():
-    """House discipline: point to the script's docstring/--help and
-    references/wiki/README.md instead of re-listing mechanical dimension
-    definitions (dangling refs, duplicate section tokens, frontmatter, etc.)."""
+def test_no_duplicate_embedding_of_retirement_explanation():
+    """House discipline: point to references/knowledge/README.md for the form-change
+    explanation instead of re-narrating it here."""
     body = _body()
-    assert "references/wiki/README.md" in body
-    assert re.search(r"--help|docstring", body, re.I)
+    assert "references/knowledge/README.md" in body
 
 
 def test_section_numbers_present_in_order():

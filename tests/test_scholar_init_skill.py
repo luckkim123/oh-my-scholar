@@ -61,17 +61,18 @@ def test_scaffold_matches_design_3_3():
     for item in ("sections/", "figures/", "refs/", "data/",
                  "preamble.tex", "meta.md"):
         assert item in body, f"scaffold 항목 '{item}' 누락"
-    # .hq 작업장 + 논문별 wiki 4-카테고리
+    # .hq 작업장 — r7(2026-08-30): 논문별 wiki 4-카테고리 scaffold 는 없앴다. 포스트 스토어는
+    # `hq post` 가 첫 쓰기 때 lazy 하게 만들며, init 은 아무 디렉토리도 미리 만들지 않는다.
     assert ".hq/work/scholar/<slug>/" in body
-    assert "convention/" in body and "pattern/" in body
+    assert "convention/" not in body and "pattern/" not in body
 
 
 def test_global_wiki_is_ascent_not_absolute():
-    """⑦ 전역 wiki = 상위 폴더 .oms/ ascent (절대경로·환경변수 아님)."""
+    """⑦ 전역 post store = 상위 폴더 .hq/ ascent (절대경로·환경변수 아님)."""
     body = read()
     assert "ascent" in body
     assert "상위 폴더" in body or "상위 `.oms/`" in body or "부모" in body or "parent folder" in body or "parent `.oms/`" in body
-    assert "wiki_query" in body  # 추상 함수로 조회
+    assert "hq query --ascend" in body  # r7: hq query --ascend 로 조회 (wiki_query 추상함수는 폐기)
 
 
 def test_no_absolute_path_hardcode():

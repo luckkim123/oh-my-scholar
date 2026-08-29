@@ -4,6 +4,62 @@ All notable changes to oh-my-scholar (oms).
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-08-30 - the wiki page tree retires onto the post store
+
+`references/wiki/` is now `references/knowledge/`, and the store it documents is
+`.hq/community/posts/` read through `hq query --ascend`.
+
+The form went because it had stopped being read. `.hq/community/wiki/` held zero
+pages on every live anchor on this machine while `.hq/community/posts/` beside
+it held 127 / 33 / 17. oms was the honest one of the three siblings about it —
+`oms_wiki_audit.py` exited non-zero with `--root '.../community/wiki' does not
+exist`, where omd returned an affirmative "fresh project - not an error" and omp
+returned `[]`. Honest and useless: nothing routed anywhere else, and no oms
+skill called `hq` at all.
+
+### Removed
+- **`scripts/oms_wiki_audit.py` (437) and `tests/test_oms_wiki_audit.py` (363).**
+  All six of the script's mechanical dimensions — duplicate section tokens,
+  dangling cross-refs, empty/orphan categories, frontmatter validity, INDEX
+  drift, open gaps — describe a page-tree shape. `hq lint` covers the store
+  invariants that survive; the rest have no subject.
+- **`oms_paths.wiki_dir()`**, replaced by `posts_dir()` with no legacy fallback.
+- `scholar-init` no longer pre-creates any store directory. `hq` creates
+  `.hq/community/posts/` on the first `hq post`.
+- Four frontmatter-syntax tests in `test_wiki_spec_docs.py` (hq owns that schema
+  now, there is no local card to check), two `--root`-default-drift tests in
+  `test_oms_store_cutover.py` (nothing left owns a `--root`-style flag that
+  could diverge), and one scaffold-check test in
+  `test_integration_smoke_script.py` (init creates no shape to check).
+
+### Changed
+- The routing checkpoint names `.hq/community/posts/` and `hq query --ascend`.
+- `references/knowledge/audit.md` keeps its judgment dimensions near-verbatim —
+  SSOT-delegation integrity and strength-tag discipline are read by a card, not
+  by a script, and they survive the form change. Only its mechanical §1 was
+  rewritten onto `hq lint` / `hq query --ascend`.
+- **`history` stays a first-class topic here.** It is oms's global-only category
+  for relating and de-duping new papers at `init`, omd deliberately lacks it,
+  and omo 0.18.0 added it to `TOPICS` so this conversion is lossless rather than
+  merged into `reference`.
+- **No `knowledge_query()` wrapper.** The sibling omd keeps one because it
+  declared a swap point ("a future standalone MCP swaps the implementation, not
+  the call"); oms never did, so `hq` is already the boundary and a second name
+  would only be a name. Literal `hq query --ascend --topic X` at all 8 call
+  sites.
+- 657 passing / 1 skipped, from 684/1. Every one of the 27 traces to a named
+  retired capability.
+
+### Fixed
+- `topic:` was briefly documented here as the six-value hq enum copied wholesale.
+  oms's taxonomy is five — four local plus the global-only `history`;
+  `technique` was never an oms category. Corrected in `output-layout.md` and the
+  routing hook.
+- `hq query --keyword "" --ascend` was written for a keyword-less topic filter
+  and would have raised: an empty `--keyword` is refused by `verbs.query`
+  because `"" in hay` is always true and would return every post, longest first,
+  while looking like a search. The topic-only form omits the flag.
+
 ## [0.20.0] - 2026-08-28 - stage 2: the read fallback is gone
 
 store-spec.md §7 stage 2. P4 gave reads a per-file existence fallback
